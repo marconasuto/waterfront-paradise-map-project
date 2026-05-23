@@ -69,20 +69,30 @@ Phase 2 is unblocked.
 ## Phase 3 — Acquisition (in flight)
 
 - See `plans/01_data_acquisition.md`.
-- [x] **Coastline** — `mfd-map acquire coastline` via OSM Overpass
-      (`natural=coastline`). 4 LineString features, ~88 KB raw, ODbL.
-      Provenance sidecar recorded.
+- [x] **OSM layer registry** — `osm.LAYERS` + `mfd-map acquire osm <layer>`
+      + `mfd-map acquire osm all`. 6 layers covered.
+- [x] **Coastline** — OSM `natural=coastline` (4 LineStrings, ~88 KB, ODbL).
+- [x] **Roads** — OSM `highway=*` (2,770 features, ~5.8 MB, ODbL).
+- [x] **Cycle paths** — OSM `highway=cycleway` / `bicycle=designated`
+      (2 features — sparse in the AOI, will augment with MIT Ciclovia
+      Adriatica later).
+- [x] **Harbours** — OSM `harbour=*` / `landuse=harbour` /
+      `man_made=pier|breakwater` (52 features).
+- [x] **Beaches** — OSM `natural=beach` (19 features).
+- [x] **Wetlands** — OSM `natural=wetland` (27 polygons; includes
+      *Lago Salso* — 3 features — and *Palude Frattarolo*).
 - [x] **Mandatory points loader** — `config/mandatory_locations.yaml`
-      drives buffered-point inclusions for the AOI builder. Replaces the
-      ad-hoc "wait for Phase 3 perimeters" fallback. The proper perimeters
-      (SIN, wetlands, archeology) will REPLACE these buffers as they land.
-- [ ] **Wetlands** — MASE Natura 2000 SIC/ZPS perimeters (filter to
-      Lago Salso IT9110005, IT9110038, Oasi Laguna del Re).
+      drives buffered-point inclusions for the AOI builder until
+      authoritative perimeters arrive.
+- [ ] **Promote OSM wetlands → mandatory features** for the AOI builder
+      (Phase 4 — filter Lago Salso polygons and write them under
+      `data/processed/mandatory_for_aoi/`).
+- [ ] **MASE Natura 2000 SIC/ZPS** perimeters (filter to IT9110005 /
+      IT9110038 / Oasi Laguna del Re).
 - [ ] **SIN Manfredonia** perimeter — MASE / ISPRA.
 - [ ] **Archeology** — MiC Vincoli in Rete (Grotta Scaloria + Siponto).
 - [ ] **DTM** — TINITALY tile(s) covering the AOI.
 - [ ] **Bathymetry** — EMODnet 2024 tile(s) covering the AOI.
-- [ ] **Roads + cycle paths + harbours + beaches** — OSM Overpass.
 - [ ] **Admin boundaries** — ISTAT 2024.
 
 ## Phase 4 — Processing

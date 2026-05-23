@@ -15,6 +15,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-24 — Phase 3b: OSM bulk acquisition.
+  - Refactored `osm.py` around an `OsmLayerSpec` registry; 6 layers
+    declared (coastline, roads, cycle_paths, harbours, beaches, wetlands).
+  - CLI moved under `acquire osm <layer>` and `acquire osm all`;
+    pixi tasks `acquire-osm-coastline`, `acquire-osm-all`.
+  - `_persist_osm_layer` is a single shared helper that writes the
+    GeoJSON + provenance sidecar for any layer in the registry. pyogrio
+    handles nested-type columns (osmnx returns list/dict cells)
+    natively — no manual coercion needed.
+  - Real bulk fetch produced: 19 beaches, 4 coastline lines, 2 cycle
+    paths, 52 harbour features, 2,770 roads, 27 wetlands (incl.
+    *Lago Salso* x3 and *Palude Frattarolo*) — total ≈ 6 MB raw.
+    Every artifact gets a `*.provenance.json` sidecar.
+  - **47 tests passing, 97.81 % coverage**, ruff clean.
 - 2026-05-23 — Phase 3a (acquisition foundation, SPECIFICATIONS.md **v0.5**):
   - `src/manfredonia_map/acquisition/{__init__, base, osm, cli}.py` —
     Provenance dataclass + atomic sidecar JSON writer; OSM downloader via

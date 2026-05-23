@@ -1,14 +1,18 @@
 """OpenStreetMap acquisition via ``osmnx``.
 
-The actual HTTP / Overpass call is performed by a small ``fetcher``
-callable that is injected — tests pass a fake fetcher so no real network
-call ever happens in the unit suite (the ``_block_network`` fixture in
-``tests/conftest.py`` would otherwise raise).
+Every supported layer is described by an :class:`OsmLayerSpec` entry in
+:data:`LAYERS`. The CLI command ``mfd-map acquire osm <layer>`` looks up
+the spec and runs a single generic pipeline (fetch → filter geometry
+types → re-project to EPSG:4326). The actual HTTP / Overpass call is
+performed by a small ``fetcher`` callable that tests override — no real
+network call ever happens in the unit suite (``tests/conftest.py``
+blocks ``socket.socket`` outside the ``@pytest.mark.network`` opt-in).
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Any
 
 import geopandas as gpd
@@ -17,6 +21,64 @@ import geopandas as gpd
 Bbox = tuple[float, float, float, float]
 Tags = dict[str, Any]
 Fetcher = Callable[[Bbox, Tags], gpd.GeoDataFrame]
+
+
+@dataclass(frozen=True)
+class OsmLayerSpec:
+    """Static description of one OSM layer the pipeline knows about."""
+
+    source_id: str
+    dataset: str
+    tags: Tags
+    allowed_geom_types: frozenset[str]
+
+
+LAYERS: dict[str, OsmLayerSpec] = {
+    "coastline": OsmLayerSpec(
+        source_id="osm_coastline",
+        dataset="OSM natural=coastline",
+        tags={"natural": "coastline"},
+        allowed_geom_types=frozenset({"LineString", "MultiLineString"}),
+    ),
+    "roads": OsmLayerSpec(
+        source_id="osm_roads",
+        dataset="OSM highway=*",
+        tags={"highway": True},
+        allowed_geom_types=frozenset({"LineString", "MultiLineString"}),
+    ),
+    "cycle_paths": OsmLayerSpec(
+        source_id="osm_cycle_paths",
+        dataset="OSM highway=cycleway / bicycle=designated",
+        tags={"highway": "cycleway", "bicycle": "designated"},
+        allowed_geom_types=frozenset({"LineString", "MultiLineString"}),
+    ),
+    "harbours": OsmLayerSpec(
+        source_id="osm_harbours",
+        dataset="OSM harbour / landuse=harbour / man_made=pier|breakwater",
+        tags={
+            "harbour": True,
+            "landuse": "harbour",
+            "man_made": ["pier", "breakwater"],
+        },
+        allowed_geom_types=frozenset(
+            {"LineString", "MultiLineString", "Polygon", "MultiPolygon", "Point"}
+        ),
+    ),
+    "beaches": OsmLayerSpec(
+        source_id="osm_beaches",
+        dataset="OSM natural=beach",
+        tags={"natural": "beach"},
+        allowed_geom_types=frozenset(
+            {"Polygon", "MultiPolygon", "LineString", "MultiLineString", "Point"}
+        ),
+    ),
+    "wetlands": OsmLayerSpec(
+        source_id="osm_wetlands",
+        dataset="OSM natural=wetland",
+        tags={"natural": "wetland"},
+        allowed_geom_types=frozenset({"Polygon", "MultiPolygon"}),
+    ),
+}
 
 
 def _default_osmnx_fetcher(bbox: Bbox, tags: Tags) -> gpd.GeoDataFrame:  # pragma: no cover
@@ -36,27 +98,27 @@ def fetch_features(
     return fn(bbox, tags)
 
 
-def fetch_coastline(
-    bbox: Bbox,
-    fetcher: Fetcher | None = None,
-) -> gpd.GeoDataFrame:
-    """Return OSM ``natural=coastline`` features inside ``bbox``.
-
-    Args:
-        bbox: ``(west, south, east, north)`` in EPSG:4326.
-        fetcher: Optional injection point for tests.
-
-    Returns:
-        A GeoDataFrame (EPSG:4326) containing only LineString /
-        MultiLineString features tagged ``natural=coastline``.
-    """
-    gdf = fetch_features(bbox, {"natural": "coastline"}, fetcher=fetcher)
+def _filter_to_layer(gdf: gpd.GeoDataFrame, spec: OsmLayerSpec) -> gpd.GeoDataFrame:
+    """Filter ``gdf`` to ``spec.allowed_geom_types`` and force EPSG:4326."""
     if gdf.empty:
         return gdf
-    # Defensive: osmnx may include closed-way Polygons (islands tagged as
-    # coastline). Keep only line-like geometries for the AOI builder.
-    line_types = {"LineString", "MultiLineString"}
-    out = gdf[gdf.geometry.geom_type.isin(line_types)].copy()
+    out = gdf[gdf.geometry.geom_type.isin(spec.allowed_geom_types)].copy()
     if out.crs is None:
         out = out.set_crs("EPSG:4326")
     return out.to_crs("EPSG:4326")
+
+
+def fetch_layer(
+    layer_id: str,
+    bbox: Bbox,
+    fetcher: Fetcher | None = None,
+) -> gpd.GeoDataFrame:
+    """Fetch one configured layer (e.g. ``"coastline"``, ``"roads"``)."""
+    spec = LAYERS[layer_id]
+    gdf = fetch_features(bbox, spec.tags, fetcher=fetcher)
+    return _filter_to_layer(gdf, spec)
+
+
+def fetch_coastline(bbox: Bbox, fetcher: Fetcher | None = None) -> gpd.GeoDataFrame:
+    """Fetch OSM ``natural=coastline`` (alias for ``fetch_layer("coastline", ...)``)."""
+    return fetch_layer("coastline", bbox, fetcher=fetcher)
