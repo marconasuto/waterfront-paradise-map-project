@@ -54,6 +54,9 @@ coverage.xml
 # pixi
 .pixi/
 
+# osmnx default cache (set OSMNX_CACHE_FOLDER to relocate)
+cache/
+
 # notebooks
 .ipynb_checkpoints/
 

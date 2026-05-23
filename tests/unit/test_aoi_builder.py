@@ -65,12 +65,27 @@ def test_near_coast_unions_mandatory_with_band_inside_buffered():
     assert not out.contains(Point(5, 5))
 
 
-def test_near_coast_mandatory_only_is_clipped_to_buffered():
+def test_near_coast_mandatory_extends_beyond_buffered():
+    # Mandatory features sit (partly) outside the buffered AOI; the new
+    # semantics is that they extend it rather than being clipped away —
+    # the user explicitly wants those features on the map.
     src = Polygon([(0, 0), (5, 0), (5, 5), (0, 5), (0, 0)])
     mandatory = [Polygon([(3, 3), (10, 3), (10, 10), (3, 10), (3, 3)])]
     out = builder.build_near_coast_aoi(src, coastal_band=None, mandatory_features=mandatory)
-    assert out.contains(Point(4, 4))
-    assert not out.contains(Point(8, 8))
+    assert out.contains(Point(4, 4))   # inside src
+    assert out.contains(Point(8, 8))   # outside src but inside mandatory → included
+    assert out.contains(Point(0.5, 0.5))  # original src corner still included
+
+
+def test_near_coast_mandatory_included_even_when_band_intersects_to_empty():
+    # Band intersects to nothing inside src, but mandatory still wins.
+    src = Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])
+    band = Polygon([(10, 10), (11, 10), (11, 11), (10, 11), (10, 10)])
+    mandatory = [Polygon([(20, 20), (21, 20), (21, 21), (20, 21), (20, 20)])]
+    out = builder.build_near_coast_aoi(src, coastal_band=band, mandatory_features=mandatory)
+    assert out.contains(Point(20.5, 20.5))
+    assert not out.contains(Point(10.5, 10.5))   # band missed → not included
+    assert not out.contains(Point(0.5, 0.5))     # src not in band → dropped
 
 
 def test_near_coast_ignores_empty_geometries():

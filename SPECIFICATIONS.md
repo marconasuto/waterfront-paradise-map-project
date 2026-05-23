@@ -22,9 +22,9 @@ that contradicts this file is wrong and must be reconciled here first.
 
 | Field           | Value                                |
 |-----------------|--------------------------------------|
-| Version         | 0.4                                  |
+| Version         | 0.5                                  |
 | Created         | 2026-05-23                           |
-| Last updated    | 2026-05-23 (two AOI shapes + mandatory features) |
+| Last updated    | 2026-05-23 (Phase 3a: OSM coastline + mandatory points loader; near-coast extends AOI on mandatory inclusion) |
 | Owner           | Marco Nasuto                         |
 | Change log      | See `CHANGELOG.md` (root)            |
 | Related plans   | `plans/00_overview.md` and subplans  |
@@ -76,11 +76,12 @@ The project is designed so the same data + content layer can later power:
 | File                              | Definition                                                                                                                                                                                                                                | Default use                                              |
 |-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------|
 | `config/aoi_buffered.geojson`     | Source polygon **buffered by 1 km in both directions** (seaward + landward). Buffer computed in EPSG:32633 for true metres; output in EPSG:4326. Closes OPEN-AOI-2.                                                                       | Maximum extent. Used for "free-roam" map view and for layers we want at full reach (admin boundaries, road network, etc.). |
-| `config/aoi_near_coast.geojson`   | `aoi_buffered ∩ ( coastal_band ∪ mandatory_features )`. The coastal band is a **2 km landward + 2 km seaward** buffer of the coastline (ISTAT comunale sea side ∪ OSM `natural=coastline`). Mandatory features are guaranteed inclusions. | "Near-coast" focused view. Used for narrative slides and storymap-default layer set. |
+| `config/aoi_near_coast.geojson`   | `(aoi_buffered ∩ coastal_band) ∪ mandatory_features`. The coastal band is a **2 km landward + 2 km seaward** buffer of the coastline (ISTAT comunale sea side ∪ OSM `natural=coastline`). Mandatory features are guaranteed inclusions and may extend the AOI beyond `aoi_buffered` when the source polygon is concave; the builder logs a `WARN` in that case so the user can decide whether to revise the polygon. | "Near-coast" focused view. Used for narrative slides and storymap-default layer set. |
 
-**Mandatory features for the near-coast shape** (union them in before
-intersecting back with `aoi_buffered`, so they are always included even if
-they fall outside the 2 km coastal band):
+**Mandatory features for the near-coast shape** (unioned on top of
+`aoi_buffered ∩ coastal_band`, so they are always included even if they
+fall outside the 2 km coastal band *or* outside `aoi_buffered` itself —
+the latter triggers a logged warning):
 - **SIN Manfredonia** perimeter (MASE polygon).
 - **Lago Salso** (SIC IT9110005 / ZPS IT9110038) full perimeter.
 - **Oasi Laguna del Re** full perimeter (resolved from MASE Natura 2000 dump

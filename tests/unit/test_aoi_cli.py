@@ -47,6 +47,7 @@ def test_build_aoi_without_coastline_writes_all_three_files(tmp_path: Path):
             "--source", str(src),
             "--coastline", str(tmp_path / "missing.geojson"),
             "--mandatory-dir", str(tmp_path / "missing_dir"),
+            "--mandatory-points", str(tmp_path / "missing.yaml"),
             "--out-dir", str(out_dir),
         ],
     )
@@ -64,6 +65,7 @@ def test_build_aoi_alias_buffered_writes_buffered_under_alias(tmp_path: Path):
             "--source", str(src),
             "--coastline", str(tmp_path / "missing.geojson"),
             "--mandatory-dir", str(tmp_path / "missing_dir"),
+            "--mandatory-points", str(tmp_path / "missing.yaml"),
             "--out-dir", str(out_dir),
             "--alias", "buffered",
         ],
@@ -115,6 +117,56 @@ def test_build_aoi_with_coastline_includes_band(tmp_path: Path):
         assert near["features"][0]["properties"]["coastal_band_present"] is True
 
 
+def test_build_aoi_loads_mandatory_points_from_yaml(tmp_path: Path):
+    src = _write_source(tmp_path)
+    out_dir = tmp_path / "out"
+    points_yaml = tmp_path / "mandatory.yaml"
+    points_yaml.write_text(
+        "version: 1\n"
+        "locations:\n"
+        "  - id: a\n"
+        "    lon: 15.92\n"
+        "    lat: 41.62\n"
+        "    buffer_m: 500\n"
+        "  - id: b\n"
+        "    lon: 15.94\n"
+        "    lat: 41.61\n"
+        "    buffer_m: 800\n",
+        encoding="utf-8",
+    )
+    result = CliRunner().invoke(
+        build_aoi,
+        [
+            "--source", str(src),
+            "--coastline", str(tmp_path / "missing.geojson"),
+            "--mandatory-dir", str(tmp_path / "missing_dir"),
+            "--mandatory-points", str(points_yaml),
+            "--out-dir", str(out_dir),
+        ],
+    )
+    if result.exit_code != 0:
+        assert "sanity checks failed" in result.output.lower()
+    else:
+        near = json.loads((out_dir / "aoi_near_coast.geojson").read_text())
+        assert near["features"][0]["properties"]["mandatory_feature_count"] == 2
+
+
+def test_build_aoi_handles_missing_mandatory_points_gracefully(tmp_path: Path):
+    src = _write_source(tmp_path)
+    out_dir = tmp_path / "out"
+    result = CliRunner().invoke(
+        build_aoi,
+        [
+            "--source", str(src),
+            "--coastline", str(tmp_path / "missing.geojson"),
+            "--mandatory-dir", str(tmp_path / "missing_dir"),
+            "--mandatory-points", str(tmp_path / "no_such_file.yaml"),
+            "--out-dir", str(out_dir),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+
+
 def test_build_aoi_loads_mandatory_features_from_dir(tmp_path: Path):
     src = _write_source(tmp_path)
     mandatory_dir = tmp_path / "mandatory"
@@ -153,6 +205,7 @@ def test_build_aoi_loads_mandatory_features_from_dir(tmp_path: Path):
             "--source", str(src),
             "--coastline", str(tmp_path / "missing.geojson"),
             "--mandatory-dir", str(mandatory_dir),
+            "--mandatory-points", str(tmp_path / "missing.yaml"),
             "--out-dir", str(out_dir),
         ],
     )

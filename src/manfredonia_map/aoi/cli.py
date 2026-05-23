@@ -12,6 +12,8 @@ import logging
 from pathlib import Path
 
 import click
+import yaml
+from shapely.geometry import Point
 from shapely.geometry.base import BaseGeometry
 
 from manfredonia_map.aoi import builder, io, sanity
@@ -21,14 +23,37 @@ logger = logging.getLogger(__name__)
 
 
 def _load_mandatory_features(directory: Path) -> list[BaseGeometry]:
-    """Load every ``*.geojson`` file under ``directory`` as a single union."""
+    """Load every ``*.geojson`` file under ``directory`` as a list of geoms."""
     if not directory.exists():
         return []
     geoms: list[BaseGeometry] = []
     for fp in sorted(directory.glob("*.geojson")):
         geom, _ = io.read_geometry_geojson(fp)
         geoms.append(geom)
-        logger.info("Loaded mandatory feature: %s", fp.name)
+        logger.info("Loaded mandatory feature from %s", fp.name)
+    return geoms
+
+
+def _load_mandatory_points(points_yaml: Path) -> list[BaseGeometry]:
+    """Load buffered points from ``mandatory_locations.yaml``.
+
+    Each entry ``{lon, lat, buffer_m}`` becomes a single buffered polygon in
+    EPSG:4326 (buffer computed in EPSG:32633). Returns an empty list if the
+    file does not exist or has no entries.
+    """
+    if not points_yaml.exists():
+        return []
+    data = yaml.safe_load(points_yaml.read_text(encoding="utf-8")) or {}
+    geoms: list[BaseGeometry] = []
+    for entry in data.get("locations") or []:
+        point = Point(entry["lon"], entry["lat"])
+        buffered = builder.build_coastal_band(point, "EPSG:4326", band_m=entry["buffer_m"])
+        if buffered is not None and not buffered.is_empty:
+            geoms.append(buffered)
+            logger.info(
+                "Loaded mandatory point: %s (buffer %s m)",
+                entry["id"], entry["buffer_m"],
+            )
     return geoms
 
 
@@ -58,6 +83,15 @@ def _load_mandatory_features(directory: Path) -> list[BaseGeometry]:
     help="Directory whose ``*.geojson`` files are unioned into the "
     "mandatory-features inclusion set (SIN, Lago Salso, ...).",
 )
+@click.option(
+    "--mandatory-points",
+    "mandatory_points_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=CONFIG_DIR / "mandatory_locations.yaml",
+    show_default=True,
+    help="YAML of {lon, lat, buffer_m} entries; each is buffered and "
+    "added to the mandatory-features set. Falls back gracefully if missing.",
+)
 @click.option("--buffer-m", type=float, default=1000.0, show_default=True)
 @click.option("--coastal-band-m", type=float, default=2000.0, show_default=True)
 @click.option(
@@ -78,6 +112,7 @@ def build_aoi(
     source_path: Path,
     coastline_path: Path,
     mandatory_dir: Path,
+    mandatory_points_path: Path,
     buffer_m: float,
     coastal_band_m: float,
     out_dir: Path,
@@ -101,15 +136,28 @@ def build_aoi(
         )
 
     coastal_band = builder.build_coastal_band(coastline_geom, coastline_crs, band_m=coastal_band_m)
-    mandatory = _load_mandatory_features(mandatory_dir)
+    mandatory = _load_mandatory_features(mandatory_dir) + _load_mandatory_points(
+        mandatory_points_path
+    )
     if not mandatory:
         logger.warning(
-            "No mandatory features in %s — SIN / wetlands / Grotta Scaloria "
-            "guarantees not yet enforced. Will be filled in Phase 3.",
+            "No mandatory features in %s and no points in %s — SIN / wetlands / "
+            "Grotta Scaloria guarantees not enforced. Add some, or wait for "
+            "Phase 3 acquisition.",
             mandatory_dir,
+            mandatory_points_path,
         )
 
     near_coast = builder.build_near_coast_aoi(aoi_buffered, coastal_band, mandatory)
+
+    if not aoi_buffered.contains(near_coast):
+        extension_area = near_coast.difference(aoi_buffered).area
+        logger.warning(
+            "Near-coast AOI extends beyond aoi_buffered by ~%.6f deg^2 — some "
+            "mandatory features sit outside the source polygon's 1 km buffer. "
+            "Consider revising config/aoi_source.geojson to encompass them.",
+            extension_area,
+        )
 
     sanity_results = sanity.run_checks(near_coast)
     failed = sorted(k for k, v in sanity_results.items() if not v)

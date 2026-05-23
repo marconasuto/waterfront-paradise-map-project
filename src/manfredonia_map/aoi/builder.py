@@ -73,28 +73,36 @@ def build_near_coast_aoi(
     coastal_band: BaseGeometry | None,
     mandatory_features: Iterable[BaseGeometry],
 ) -> BaseGeometry:
-    """Intersect ``aoi_buffered`` with the union of band and mandatory features.
+    """Compute the near-coast AOI.
 
-    When neither the coastal band nor any mandatory feature is available
-    (e.g., acquisition has not run yet), the function falls back to
-    returning ``aoi_buffered`` unchanged. The caller is expected to log
-    a warning in that case so the downstream pipeline is aware that
-    near-coast guarantees are not yet enforced.
+    Semantics:
+    - The buffered source polygon ``aoi_buffered`` constrains the *coastal
+      band* selection (``aoi_buffered ∩ coastal_band``).
+    - Mandatory features are then **unioned on top**, so they are
+      guaranteed to be inside the result even when they fall *outside*
+      ``aoi_buffered``. That can legitimately happen when the user's
+      source polygon is concave and the feature sits in the concavity
+      (Grotta Scaloria, Oasi Laguna del Re, SIN Manfredonia in this
+      project — see ``SPECIFICATIONS.md`` §3). The CLI surfaces a
+      warning when extension occurs so the user can decide whether to
+      revise the source polygon.
+    - If neither coastal band nor mandatory features are available the
+      result falls back to ``aoi_buffered`` unchanged.
 
     Args:
         aoi_buffered: The buffered AOI (EPSG:4326).
         coastal_band: Coastal band geometry (EPSG:4326) or ``None``.
         mandatory_features: Geometries (EPSG:4326) that must be included
-            regardless of the coastal band — e.g., the SIN perimeter,
-            Lago Salso, Oasi Laguna del Re, wetlands, Grotta Scaloria
-            buffer.
+            (SIN, wetlands, Grotta Scaloria buffer, …).
 
     Returns:
         A geometry in EPSG:4326.
     """
-    inclusions = [
-        g for g in (coastal_band, *list(mandatory_features)) if g is not None and not g.is_empty
-    ]
-    if not inclusions:
-        return aoi_buffered
-    return aoi_buffered.intersection(unary_union(inclusions))
+    band_present = coastal_band is not None and not coastal_band.is_empty
+    mandatory_clean = [g for g in mandatory_features if g is not None and not g.is_empty]
+
+    base: BaseGeometry = aoi_buffered.intersection(coastal_band) if band_present else aoi_buffered
+
+    if not mandatory_clean:
+        return base
+    return unary_union([base, *mandatory_clean])

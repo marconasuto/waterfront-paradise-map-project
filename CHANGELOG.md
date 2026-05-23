@@ -15,6 +15,29 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-23 — Phase 3a (acquisition foundation, SPECIFICATIONS.md **v0.5**):
+  - `src/manfredonia_map/acquisition/{__init__, base, osm, cli}.py` —
+    Provenance dataclass + atomic sidecar JSON writer; OSM downloader via
+    `osmnx` with injectable fetcher (so unit tests never touch the
+    network).
+  - New CLI: `mfd-map acquire coastline` (pixi task
+    `pixi run acquire-coastline`). First real network call lands
+    `data/raw/coastline/coastline.geojson` (4 features, ODbL) and a
+    sidecar `coastline.provenance.json` with SHA-256, byte count,
+    accessed-at timestamp, bbox, query.
+  - `config/mandatory_locations.yaml` — interim mandatory-features list
+    (Grotta Scaloria, Lago Salso, Oasi Laguna del Re, SIN Manfredonia,
+    Acqua di Cristo) with per-point buffer radii. Replaced once Phase 3
+    acquires authoritative perimeters.
+  - **Builder semantics change**: `aoi_near_coast` is now
+    `(aoi_buffered ∩ coastal_band) ∪ mandatory_features`, i.e.,
+    mandatory features extend the AOI rather than being clipped by it.
+    The CLI logs a `WARN` when extension actually happens so the user
+    can decide whether to revise the source polygon.
+  - All 5 sanity points now inside; near-coast = 0.0127 deg² (66% of
+    buffered = 0.0192 deg²). Deterministic — identical SHA on two
+    consecutive builds.
+  - **40 tests passing, 97.79% coverage**, `ruff check` clean.
 - 2026-05-23 — Phase 2 scaffolded:
   - Package skeleton: `src/manfredonia_map/{__init__, paths, cli}.py`.
   - AOI module: `aoi/{builder, io, sanity, cli}.py` + CLI shim

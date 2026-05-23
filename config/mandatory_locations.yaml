@@ -1,0 +1,44 @@
+# Points that MUST sit inside aoi_near_coast.geojson.
+# Each entry becomes a buffered point in the AOI builder's
+# mandatory-features set, guaranteeing inclusion even when the point lies
+# outside the 2 km coastal band.
+#
+# When Phase 3 acquires authoritative perimeters (SIN polygon from MASE,
+# wetland boundaries from MASE Natura 2000, archaeological vincoli from
+# MiC Vincoli in Rete), each acquired GeoJSON in
+# data/processed/mandatory_for_aoi/ takes priority over the matching entry
+# below and the buffer can be removed.
+
+version: 1
+
+locations:
+
+  - id: grotta_scaloria
+    lon: 15.907
+    lat: 41.648
+    buffer_m: 500
+    rationale: "Archeological site, ~3 km inland from coast."
+
+  - id: lago_salso
+    lon: 15.920
+    lat: 41.610
+    buffer_m: 1800
+    rationale: "Lake roughly 3 km across; covers the basin."
+
+  - id: oasi_laguna_del_re
+    lon: 15.960
+    lat: 41.590
+    buffer_m: 1500
+    rationale: "Wetland perimeter; coord approximate, refine after acquisition."
+
+  - id: sin_manfredonia
+    lon: 15.940
+    lat: 41.590
+    buffer_m: 2000
+    rationale: "Ex-Enichem SIN — broad industrial perimeter."
+
+  - id: acqua_di_cristo
+    lon: 15.9238
+    lat: 41.6307
+    buffer_m: 300
+    rationale: "Beach with karst springs; already on coast, small buffer suffices."
