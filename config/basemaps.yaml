@@ -1,0 +1,23 @@
+# Basemap options surfaced in the web app's basemap switcher.
+# See SPECIFICATIONS.md §14.
+
+version: 1
+
+basemaps:
+
+  - id: light
+    name_it: "Chiaro"
+    style_url: "mapbox://styles/mapbox/light-v11"
+    default: true
+
+  - id: outdoors
+    name_it: "Outdoor (rilievo)"
+    style_url: "mapbox://styles/mapbox/outdoors-v12"
+
+  - id: satellite
+    name_it: "Satellite"
+    style_url: "mapbox://styles/mapbox/satellite-v9"
+
+  - id: streets
+    name_it: "Strade"
+    style_url: "mapbox://styles/mapbox/streets-v12"

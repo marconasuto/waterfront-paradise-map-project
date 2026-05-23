@@ -1,0 +1,261 @@
+# Layer registry — one entry per project layer.
+# Read by the pipeline (acquisition / processing / publishing) and by the web
+# app. Sources, years and licenses come from `docs/research/data_sources.md`.
+# `aoi:` selects which AOI shape the layer is clipped against
+# (buffered | near_coast). `style_token` references `config/color_scheme.yaml`.
+
+version: 1
+
+layers:
+
+  - id: hydrography_surface
+    title_it: "Idrografia di superficie"
+    geometry_type: vector            # vector | raster
+    aoi: buffered
+    style_token: water
+    source:
+      publisher: ISPRA
+      dataset: "Reticolo Idrografico Nazionale 1:250.000"
+      url: "https://geodati.gov.it/resource/id/ispra_rm:01Idro250N_DT"
+      access_method: WFS
+      license: "CC-BY-4.0"
+      year_data: 2020
+    crs:
+      source: "EPSG:4326"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: hydrography_underground
+    title_it: "Idrografia sotterranea (acquiferi)"
+    geometry_type: vector
+    aoi: buffered
+    style_token: groundwater
+    source:
+      publisher: ISPRA
+      dataset: "Carta Idrogeologica d'Italia 1:500.000 (CII500K)"
+      url: "https://www.isprambiente.gov.it/it/attivita/suolo-e-territorio/idrogeologia/carta-idrogeologica-ditalia-alla-scala-1-500.000"
+      access_method: HTTPS
+      license: "CC-BY-4.0"
+      year_data: 2025
+    crs:
+      source: "EPSG:32633"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: dtm
+    title_it: "Topografia (DTM 10 m)"
+    geometry_type: raster
+    aoi: buffered
+    style_token: walkable    # hillshade tinted in this palette family
+    source:
+      publisher: INGV
+      dataset: "TINITALY 1.1"
+      url: "https://tinitaly.pi.ingv.it/Download_Area1_1.html"
+      access_method: HTTPS
+      license: "CC-BY-4.0"
+      year_data: 2023
+    crs:
+      source: "EPSG:32633"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: bathymetry
+    title_it: "Batimetria (fondali marini)"
+    geometry_type: raster
+    aoi: near_coast
+    style_token: sea
+    source:
+      publisher: EMODnet
+      dataset: "Digital Bathymetry DTM 2024"
+      url: "https://emodnet.ec.europa.eu/en/emodnet-bathymetry-dtm-2024-release"
+      access_method: HTTPS
+      license: "CC-BY-4.0"
+      year_data: 2024
+    crs:
+      source: "EPSG:4326"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: sin_manfredonia
+    title_it: "SIN Manfredonia (ex Enichem)"
+    geometry_type: vector
+    aoi: near_coast
+    style_token: sin
+    source:
+      publisher: "MASE / ISPRA"
+      dataset: "Bonifiche Siti Contaminati — SIN-5 Manfredonia"
+      url: "https://bonifichesiticontaminati.mite.gov.it/sin-5/"
+      access_method: HTTPS
+      license: "CC-BY-4.0-IT"
+      year_data: 2024
+    crs:
+      source: "EPSG:32633"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: wetlands
+    title_it: "Zone umide (SIC/ZSC/ZPS)"
+    geometry_type: vector
+    aoi: near_coast
+    style_token: wetland
+    source:
+      publisher: MASE
+      dataset: "Rete Natura 2000 (trasmissione CE dicembre 2025)"
+      url: "https://www.mase.gov.it/portale/cartografie-rete-natura-2000-e-aree-protette-progetto-natura-"
+      access_method: HTTPS
+      license: "non-commercial, cite source"
+      year_data: 2025
+    crs:
+      source: "EPSG:32632"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: roads
+    title_it: "Rete stradale"
+    geometry_type: vector
+    aoi: buffered
+    style_token: road_primary
+    source:
+      publisher: OpenStreetMap
+      dataset: "Overpass — highway=*"
+      url: "https://overpass-api.de/api/interpreter"
+      access_method: Overpass
+      license: ODbL
+      year_data: 2026
+    crs:
+      source: "EPSG:4326"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: cycle_paths
+    title_it: "Ciclovie"
+    geometry_type: vector
+    aoi: buffered
+    style_token: cycle
+    source:
+      publisher: "MIT + OSM"
+      dataset: "Sistema Nazionale Ciclovie Turistiche (Ciclovia Adriatica) + OSM highway=cycleway / route=bicycle"
+      url: "https://dati.mit.gov.it/catalog/dataset/ciclovie-turistiche-nazionali"
+      access_method: HTTPS
+      license: "per MIT terms; ODbL for OSM portion"
+      year_data: 2024
+    crs:
+      source: "EPSG:4326"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: harbours
+    title_it: "Porti"
+    geometry_type: vector
+    aoi: near_coast
+    style_token: harbour
+    source:
+      publisher: "AdSP Mar Adriatico Meridionale + OSM"
+      dataset: "Porto di Manfredonia (digitized from AdSP PDFs) + OSM harbour=*"
+      url: "https://www.adspmam.it/i-porti/porto-di-manfredonia/cartografia/"
+      access_method: "manual + Overpass"
+      license: "per AdSP terms; ODbL for OSM portion"
+      year_data: 2024
+    crs:
+      source: "EPSG:4326"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: industrial_areas
+    title_it: "Aree industriali"
+    geometry_type: vector
+    aoi: near_coast
+    style_token: industrial
+    source:
+      publisher: "ARPA Puglia + OSM"
+      dataset: "Anagrafe siti contaminati + Comune di Manfredonia PRG + OSM landuse=industrial"
+      url: "https://www.arpa.puglia.it/pagina3239_siti-potenzialmente-contaminati.html"
+      access_method: HTTPS
+      license: "per ARPA terms; ODbL for OSM portion"
+      year_data: 2024
+    crs:
+      source: "EPSG:32633"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: archeological_areas
+    title_it: "Aree archeologiche"
+    geometry_type: vector
+    aoi: near_coast
+    style_token: archeological
+    source:
+      publisher: "MiC — Vincoli in Rete + GNA"
+      dataset: "Vincoli archeologici (export WFS / KML) — incl. Grotta Scaloria, Siponto"
+      url: "https://vincoliinrete.beniculturali.it/vir/vir/vir.html"
+      access_method: WFS
+      license: "CC-BY-4.0 (verify per asset)"
+      year_data: 2024
+    crs:
+      source: "EPSG:4326"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: beaches
+    title_it: "Spiagge"
+    geometry_type: vector
+    aoi: near_coast
+    style_token: beach
+    source:
+      publisher: "OSM + ARPA Puglia"
+      dataset: "OSM natural=beach + ARPA Puglia balneazione (perimetri annuali)"
+      url: "https://overpass-api.de/api/interpreter"
+      access_method: "Overpass + HTTPS"
+      license: "ODbL (OSM); per ARPA terms"
+      year_data: 2024
+    crs:
+      source: "EPSG:4326"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: coastline
+    title_it: "Linea di costa"
+    geometry_type: vector
+    aoi: buffered
+    style_token: coastline
+    source:
+      publisher: "ISTAT + OSM"
+      dataset: "Confini comunali ISTAT (lato mare) ∪ OSM natural=coastline"
+      url: "https://www.istat.it/it/archivio/222527"
+      access_method: HTTPS
+      license: "CC-BY-3.0 (ISTAT); ODbL (OSM)"
+      year_data: 2024
+    crs:
+      source: "EPSG:4326"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []
+
+  - id: admin_boundaries
+    title_it: "Confini amministrativi"
+    geometry_type: vector
+    aoi: buffered
+    style_token: admin
+    source:
+      publisher: ISTAT
+      dataset: "Confini delle unità amministrative a fini statistici al 1 gennaio 2024"
+      url: "https://www.istat.it/it/archivio/222527"
+      access_method: HTTPS
+      license: "CC-BY-3.0"
+      year_data: 2024
+    crs:
+      source: "EPSG:4326"
+    mapbox:
+      tileset_id: null
+      style_layer_ids: []

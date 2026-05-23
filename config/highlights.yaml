@@ -1,0 +1,49 @@
+# Editable list of highlighted locations.
+# Coordinates are EPSG:4326 [lon, lat]. Refined as Phase 3 acquisition
+# resolves authoritative perimeters. See SPECIFICATIONS.md §11 + §13.
+
+version: 1
+
+highlights:
+
+  - id: grotta_scaloria
+    name_it: "Grotta Scaloria"
+    category: archeological
+    coord: [15.907, 41.648]   # near Palazzetto dello Sport (Contrada Scaloria)
+    style_token: archeological
+    content_ref: locations/grotta_scaloria.md
+
+  - id: acqua_di_cristo
+    name_it: "Acqua di Cristo"
+    category: beach
+    coord: [15.9238, 41.6307]
+    style_token: beach
+    content_ref: locations/acqua_di_cristo.md
+
+  - id: lago_salso
+    name_it: "Lago Salso"
+    category: wetland
+    coord: [15.920, 41.610]
+    style_token: wetland
+    content_ref: locations/lago_salso.md
+
+  - id: oasi_laguna_del_re
+    name_it: "Oasi Laguna del Re"
+    category: wetland
+    coord: [15.960, 41.590]   # approximate; refine after Phase 3
+    style_token: wetland
+    content_ref: locations/oasi_laguna_del_re.md
+
+  - id: sin_manfredonia
+    name_it: "SIN Manfredonia (ex Enichem)"
+    category: industrial
+    coord: [15.940, 41.590]
+    style_token: sin
+    content_ref: locations/sin_manfredonia.md
+
+  - id: porto_manfredonia
+    name_it: "Porto di Manfredonia"
+    category: harbour
+    coord: [15.920, 41.628]
+    style_token: harbour
+    content_ref: locations/porto_manfredonia.md

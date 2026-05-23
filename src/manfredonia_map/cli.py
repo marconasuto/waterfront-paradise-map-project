@@ -1,0 +1,37 @@
+"""Top-level Click CLI for the Manfredonia coastal map pipeline.
+
+Subcommands are imported lazily so the CLI starts fast even when heavy
+dependencies (``geopandas``, ``rasterio``) are present.
+"""
+
+from __future__ import annotations
+
+import logging
+
+import click
+
+from manfredonia_map import __version__
+
+
+@click.group(name="mfd-map", help="Manfredonia coastal map pipeline.")
+@click.version_option(__version__)
+@click.option(
+    "--verbose",
+    "-v",
+    count=True,
+    help="Increase logging verbosity (-v INFO, -vv DEBUG).",
+)
+def main(verbose: int) -> None:
+    """Configure root logging and dispatch to a subcommand."""
+    level = logging.WARNING - 10 * verbose
+    logging.basicConfig(
+        level=max(level, logging.DEBUG),
+        format="%(levelname)s %(name)s: %(message)s",
+    )
+
+
+# --- subcommand wiring (kept light so importing this module is cheap) ---
+
+from manfredonia_map.aoi.cli import build_aoi as _build_aoi  # noqa: E402
+
+main.add_command(_build_aoi, name="build-aoi")

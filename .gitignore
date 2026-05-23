@@ -1,0 +1,102 @@
+# --- secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# venv
+.venv/
+venv/
+env/
+ENV/
+
+# testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# linting / typing
+.ruff_cache/
+.mypy_cache/
+.pyre/
+.pytype/
+
+# pixi
+.pixi/
+
+# notebooks
+.ipynb_checkpoints/
+
+# --- data ---
+# Raw and intermediate data are produced by acquisition/processing pipelines.
+# Large binaries should not be committed; the data catalog (config/layers.yaml,
+# data/catalog.yaml) is authoritative about what files exist and where.
+data/raw/**
+data/interim/**
+data/processed/**
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+!data/catalog.yaml
+
+# common geo binaries
+*.tif
+*.tiff
+*.cog
+*.mbtiles
+*.pmtiles
+*.gpkg-journal
+*.gpkg-wal
+*.gpkg-shm
+
+# --- node / webapp ---
+node_modules/
+webapp/dist/
+webapp/.next/
+webapp/.nuxt/
+webapp/.cache/
+webapp/.parcel-cache/
+.npm/
+.pnpm-store/
+
+# --- os / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- claude ---
+.claude/

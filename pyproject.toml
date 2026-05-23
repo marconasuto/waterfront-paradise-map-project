@@ -1,0 +1,245 @@
+[project]
+name = "manfredonia-map"
+version = "0.0.1"
+description = "Multi-layer geospatial map and Mapbox storymap for the Manfredonia coast (Puglia, IT)."
+requires-python = ">=3.11,<3.13"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Marco Nasuto" }]
+keywords = ["geospatial", "mapbox", "manfredonia", "puglia", "storymap"]
+
+# Dependency choices are tentative and pinned during research phase
+# (see plans/01_data_acquisition.md and SPECIFICATIONS.md §Stack).
+dependencies = [
+    # Vector + tabular geo
+    "geopandas>=0.14",
+    "pyogrio>=0.7",          # fast GDAL-free vector I/O
+    "shapely>=2.0",
+    "pyproj>=3.6",
+    "fiona>=1.9",            # fallback for formats pyogrio doesn't cover
+    # Raster — xarray + zarr stack
+    "xarray>=2024.10",
+    "zarr>=2.18",            # chunked, cloud-friendly raster storage
+    "dask>=2024.5",          # lazy parallel raster ops
+    "rioxarray>=0.15",       # rasterio-backed xarray accessor (.rio)
+    "rasterio>=1.3",         # transitive but pinned for stability
+    "netCDF4>=1.6",          # EMODnet bathymetry ships NetCDF
+    "rio-cogeo>=5.3",        # COG validation + generation
+    # OSM
+    "osmnx>=1.9",
+    # HTTP / download
+    "httpx>=0.27",
+    "tenacity>=8.2",         # retries
+    # Config / content
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "pyyaml>=6.0",
+    "click>=8.1",            # CLI
+    # Catalog / metadata
+    "pystac>=1.10",
+    "jsonschema>=4.21",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.4",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pytest-xdist>=3.5",
+    "pytest-randomly>=3.15",
+    "pytest-mock>=3.12",
+    "respx>=0.20",           # mock httpx
+    "hypothesis>=6.100",
+    "pre-commit>=3.6",
+    "mypy>=1.10",
+    "types-PyYAML",
+    "types-requests",
+]
+
+[project.scripts]
+mfd-map = "manfredonia_map.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/manfredonia_map"]
+
+# --- Ruff ---
+# Senior-engineer default: aggressive but pragmatic ruleset, opt-out for known noise.
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests", "scripts"]
+extend-exclude = ["data", "webapp", ".venv"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",        # pycodestyle
+    "F",             # pyflakes
+    "I",             # isort
+    "N",             # naming
+    "D",             # pydocstyle (forces docstrings on public methods/functions)
+    "UP",            # pyupgrade
+    "B",             # bugbear
+    "C4",            # comprehensions
+    "SIM",           # simplifications
+    "RET",           # return statements
+    "PT",            # pytest style
+    "TID",           # tidy imports
+    "ERA",           # eradicate (commented-out code)
+    "PL",            # pylint subset
+    "RUF",           # ruff-specific
+]
+ignore = [
+    "D203",   # 1 blank line before class docstring (conflicts with D211)
+    "D213",   # multi-line docstring summary on second line (conflicts with D212)
+    "PLR0913", # too many arguments (will tighten case-by-case)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "PLR2004"]   # tests don't need docstrings; allow magic numbers
+"scripts/**" = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# --- pytest ---
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=manfredonia_map",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--cov-fail-under=95",
+]
+markers = [
+    "unit: pure-Python unit test, no I/O, no network",
+    "integration: hits local FS or a sandboxed external service",
+    "network: requires internet; skipped by default in CI",
+    "slow: tests > 1s; deselected by default in fast loops",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:fiona.*",
+    "ignore::DeprecationWarning:pyproj.*",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src/manfredonia_map"]
+omit = [
+    "src/manfredonia_map/cli.py",         # thin Click group; subcommand tests cover behaviour
+    "src/manfredonia_map/paths.py",       # constants only
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]
+show_missing = true
+skip_covered = false
+
+# --- mypy ---
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+warn_unused_ignores = true
+show_error_codes = true
+mypy_path = "src"
+
+# --- pixi (environment manager) ---
+# `pixi install` creates .pixi/envs/default with the locked stack.
+# `pixi run <task>` runs project tasks. Conda-forge handles native binaries
+# (GDAL, tippecanoe, ...) that pip cannot install reliably; the Python
+# packages declared in [project] above are installed from PyPI on top.
+
+[tool.pixi.project]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "osx-64", "linux-64"]
+
+[tool.pixi.dependencies]
+# Resolved from conda-forge so we get prebuilt binaries for native packages
+# (avoids source builds that fail when the repo path contains spaces).
+# These deliberately mirror [project.dependencies] above; pixi will satisfy
+# the package's requirements from conda-forge instead of building from PyPI.
+python = ">=3.11,<3.13"
+# Native libraries
+gdal = ">=3.8"
+proj = ">=9.3"
+geos = ">=3.12"
+libnetcdf = ">=4.9"
+tippecanoe = ">=2.50"
+# Vector geo
+geopandas = ">=0.14"
+pyogrio = ">=0.7"
+shapely = ">=2.0"
+pyproj = ">=3.6"
+fiona = ">=1.9"
+# Raster geo
+xarray = ">=2024.10"
+zarr = ">=2.18"
+dask = ">=2024.5"
+rioxarray = ">=0.15"
+rasterio = ">=1.3"
+netcdf4 = ">=1.6"
+rio-cogeo = ">=5.3"
+# OSM
+osmnx = ">=1.9"
+# HTTP / config / CLI / catalog
+httpx = ">=0.27"
+tenacity = ">=8.2"
+pydantic = ">=2.6"
+pydantic-settings = ">=2.2"
+pyyaml = ">=6.0"
+click = ">=8.1"
+pystac = ">=1.10"
+jsonschema = ">=4.21"
+
+[tool.pixi.pypi-dependencies]
+# Editable install of *this* package only. Runtime deps come from conda
+# above; PyPI is reserved for the package itself.
+manfredonia-map = { path = ".", editable = true }
+
+[tool.pixi.feature.dev.dependencies]
+# Dev tools from conda-forge — same reason as above.
+ruff = ">=0.4"
+pytest = ">=8.0"
+pytest-cov = ">=5.0"
+pytest-xdist = ">=3.5"
+pytest-randomly = ">=3.15"
+pytest-mock = ">=3.12"
+respx = ">=0.20"
+hypothesis = ">=6.100"
+mypy = ">=1.10"
+pre-commit = ">=3.6"
+
+[tool.pixi.environments]
+default = { solve-group = "default" }
+dev = { features = ["dev"], solve-group = "default" }
+
+[tool.pixi.tasks]
+lint = "ruff check ."
+format = "ruff format ."
+typecheck = "mypy src tests"
+test = "pytest -q"
+test-cov = "pytest --cov=manfredonia_map --cov-report=term-missing --cov-fail-under=95"
+build-aoi = "python scripts/build_aoi.py"
+acquire = "mfd-map acquire all"
+process = "mfd-map process all"
+publish = "mfd-map publish all"
+catalog-validate = "mfd-map catalog validate"
+all = { depends-on = ["lint", "typecheck", "test-cov"] }

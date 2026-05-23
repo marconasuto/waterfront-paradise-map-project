@@ -1,0 +1,34 @@
+{
+  "type": "FeatureCollection",
+  "name": "aoi_source_polygon",
+  "crs": { "type": "name", "properties": { "name": "EPSG:4326" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "aoi_source",
+        "description": "Source polygon (10 vertices) provided by user. The working AOI is this polygon buffered by 1 km, then restricted to its coastal part. See SPECIFICATIONS.md §AOI.",
+        "vertices": 10,
+        "buffer_km": 1.0,
+        "needs_coastal_clip": true,
+        "source": "user input 2026-05-23"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [15.9073454379649,    41.52624588014976],
+          [15.845688948194725,  41.49423199911212],
+          [15.80594077948155,   41.55388078209658],
+          [15.869473086468059,  41.602288632137686],
+          [15.92062817561739,   41.64514779628329],
+          [15.946892366726727,  41.66130882310614],
+          [16.03323803756223,   41.68400436829687],
+          [16.04302273580519,   41.67926076343453],
+          [15.921486483253622,  41.61384031274166],
+          [15.92131482172723,   41.53049354597992],
+          [15.9073454379649,    41.52624588014976]
+        ]]
+      }
+    }
+  ]
+}

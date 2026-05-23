@@ -1,0 +1,10 @@
+# Build-time parameters for the AOI builder.
+# Edited by humans. Read by scripts/build_aoi.py via CLI flags (when wired)
+# and by future orchestrator code. See SPECIFICATIONS.md §3.
+
+version: 1
+
+aoi:
+  buffer_m: 1000          # 1 km buffer in both directions
+  coastal_band_m: 2000    # 2 km landward + 2 km seaward
+  alias: near_coast       # OPEN-AOI-3 — flip to "buffered" if downstream prefers
