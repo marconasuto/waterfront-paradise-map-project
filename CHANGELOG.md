@@ -15,6 +15,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-24 — Phase 3c: generic HTTPS downloader + ISTAT admin boundaries.
+  - `src/manfredonia_map/acquisition/http.py`: streaming downloader
+    (httpx + tenacity exponential-backoff retries), atomic
+    tempfile+rename write, SHA-256 streamed during download, optional
+    expected-SHA verification, custom headers, mode 0644 on success.
+  - `src/manfredonia_map/acquisition/istat.py`: `IstatBoundariesSpec`
+    knows the URL template for both generalizzato (~12 MB) and
+    non-generalizzato (~70 MB) bundles per year.
+  - CLI: `mfd-map acquire istat boundaries [--year 2024]
+    [--generalized/--detailed]` + pixi task `acquire-istat-boundaries`.
+  - Real download: `Limiti01012024_g.zip` (11.88 MB, CC-BY-3.0, EPSG:32632).
+    Contains Comuni/Province/Regioni/Ripartizioni shapefiles for all of
+    Italy (7,899 comuni). Manfredonia (PRO_COM_T=071029) and Monte
+    Sant'Angelo (071033) confirmed present.
+  - **58 tests passing, 98.21 % coverage**, ruff clean. respx is now
+    used to mock httpx in unit tests.
 - 2026-05-24 — Phase 3b: OSM bulk acquisition.
   - Refactored `osm.py` around an `OsmLayerSpec` registry; 6 layers
     declared (coastline, roads, cycle_paths, harbours, beaches, wetlands).

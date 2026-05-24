@@ -93,7 +93,10 @@ Phase 2 is unblocked.
 - [ ] **Archeology** — MiC Vincoli in Rete (Grotta Scaloria + Siponto).
 - [ ] **DTM** — TINITALY tile(s) covering the AOI.
 - [ ] **Bathymetry** — EMODnet 2024 tile(s) covering the AOI.
-- [ ] **Admin boundaries** — ISTAT 2024.
+- [x] **Admin boundaries** — ISTAT 2024 (generalizzato), 11.88 MB zip
+      containing comuni / province / regioni / ripartizioni shapefiles
+      in EPSG:32632. Manfredonia (PRO_COM_T=071029) and Monte
+      Sant'Angelo (071033) confirmed present.
 
 ## Phase 4 — Processing
 

@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 import geopandas as gpd
 
-from manfredonia_map.acquisition import base, osm
+from manfredonia_map.acquisition import base, http, istat, osm
 from manfredonia_map.paths import CONFIG_DIR, DATA_RAW
 
 logger = logging.getLogger(__name__)
@@ -138,3 +138,52 @@ def acquire_osm_all(aoi_path: Path, skip_layers: tuple[str, ...]) -> None:
             failures.append(layer)
     if failures:
         raise click.ClickException(f"acquisitions failed: {', '.join(failures)}")
+
+
+# --- ISTAT --------------------------------------------------------------
+
+@acquire.group(name="istat")
+def acquire_istat() -> None:
+    """Download ISTAT national datasets."""
+
+
+@acquire_istat.command(name="boundaries")
+@click.option("--year", type=int, default=2024, show_default=True)
+@click.option(
+    "--generalized/--detailed",
+    default=True,
+    show_default=True,
+    help="Use the generalized (small, ~3 MB) or detailed (~70 MB) bundle.",
+)
+@click.option(
+    "--out",
+    "out_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help="Destination zip path. Defaults to data/raw/istat_admin/<filename>.",
+)
+def acquire_istat_boundaries(year: int, generalized: bool, out_path: Path | None) -> None:
+    """Download ISTAT administrative boundaries (regioni/province/comuni)."""
+    spec = istat.IstatBoundariesSpec(year=year, generalized=generalized)
+    out = out_path if out_path is not None else DATA_RAW / "istat_admin" / spec.out_filename
+    logger.info("Downloading %s -> %s", spec.url, out)
+    sha = http.download_file(
+        spec.url,
+        out,
+        headers={"User-Agent": "manfredonia-map/0.0.1 (acquisition pipeline)"},
+    )
+    prov = base.Provenance(
+        source_id=spec.source_id,
+        publisher="ISTAT",
+        dataset=spec.dataset,
+        url=spec.url,
+        access_method="HTTPS",
+        license="CC-BY-3.0",
+        accessed_at=base.now_iso_utc(),
+        year_data=year,
+        sha256=sha,
+    )
+    stamped = base.stamp_provenance(prov, out)
+    base.write_provenance(stamped, out.with_suffix(out.suffix + ".provenance.json"))
+    click.echo(f"Wrote {out} ({stamped.byte_count} bytes)")
+    click.echo(f"Wrote {out.with_suffix(out.suffix + '.provenance.json')}")

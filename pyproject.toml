@@ -240,6 +240,7 @@ test-cov = "pytest --cov=manfredonia_map --cov-report=term-missing --cov-fail-un
 build-aoi = "python scripts/build_aoi.py"
 acquire-osm-coastline = "mfd-map acquire osm layer coastline"
 acquire-osm-all = "mfd-map acquire osm all"
+acquire-istat-boundaries = "mfd-map acquire istat boundaries"
 acquire = "mfd-map acquire all"
 process = "mfd-map process all"
 publish = "mfd-map publish all"
