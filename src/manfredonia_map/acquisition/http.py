@@ -47,6 +47,7 @@ def download_file(
     timeout_s: float = 120.0,
     chunk_size: int = 65536,
     headers: dict[str, str] | None = None,
+    verify_ssl: bool = True,
 ) -> str:
     """Download ``url`` to ``out_path`` atomically; return the SHA-256.
 
@@ -62,6 +63,11 @@ def download_file(
         timeout_s: Per-request timeout in seconds.
         chunk_size: Stream chunk size in bytes.
         headers: Optional request headers (e.g. a ``User-Agent``).
+        verify_ssl: Set to ``False`` to skip TLS certificate
+            verification. Required for a handful of academic infra
+            (e.g. ``tinitaly.pi.ingv.it`` ships a self-signed cert
+            chain Python's default CA bundle does not trust). Always
+            pair with an ``expected_sha256`` when used in CI.
 
     Returns:
         The hex SHA-256 of the downloaded bytes.
@@ -79,6 +85,7 @@ def download_file(
             timeout=timeout_s,
             follow_redirects=True,
             headers=headers,
+            verify=verify_ssl,
         ) as resp:
             if resp.status_code >= _HTTP_ERROR_THRESHOLD:
                 # Drain the body so connections can be re-used.

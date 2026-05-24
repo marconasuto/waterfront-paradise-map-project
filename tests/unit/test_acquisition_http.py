@@ -76,3 +76,16 @@ def test_download_file_passes_custom_headers(
     )
     request = route.calls.last.request
     assert request.headers["user-agent"] == "mfd-map-tests/0.0"
+
+
+def test_download_file_succeeds_with_verify_ssl_false(
+    tmp_path: Path, respx_mock: respx.Router
+) -> None:
+    # respx intercepts before the SSL layer, so we cannot directly assert
+    # that verify=False was passed to httpx; this test exercises the code
+    # path (kwarg parsing + happy-path return) at minimum.
+    url = "https://example.test/nv.zip"
+    respx_mock.get(url).mock(return_value=httpx.Response(200, content=b"ok"))
+    sha = acq_http.download_file(url, tmp_path / "nv.zip", verify_ssl=False)
+    assert (tmp_path / "nv.zip").read_bytes() == b"ok"
+    assert sha == hashlib.sha256(b"ok").hexdigest()

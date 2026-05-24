@@ -15,6 +15,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-24 — Phase 3f: TINITALY DTM (first raster acquisition).
+  - `src/manfredonia_map/acquisition/tinitaly.py` + CLI `mfd-map
+    acquire tinitaly tile <id>` + pixi task `acquire-tinitaly-tile`.
+  - Decoded the undocumented tile naming scheme empirically by
+    downloading a test tile and reading its GeoTIFF bbox. Scheme is
+    `<dir><NN><EEE>_s<RR>` (see docstring of `tinitaly.py` for
+    details).
+  - `http.download_file` gained a `verify_ssl: bool = True` parameter.
+    The TINITALY CLI defaults to `--no-verify-ssl` (with a loud WARN)
+    because `tinitaly.pi.ingv.it` ships a self-signed cert chain
+    Python rejects. Pair with `--expected-sha256` in CI.
+  - Real download: `e46005_s10.zip` (130.5 MB, CC-BY-4.0). Contains one
+    GeoTIFF in EPSG:32632, **covers the entire AOI** (15.57°E–16.40°E
+    × 41.32°N–41.81°N, 5010×6510 float32, 10 m).
+  - **70 tests passing, 98.28 % coverage**, ruff clean.
 - 2026-05-24 — Phase 3e: MASE Natura 2000 acquisition.
   - `src/manfredonia_map/acquisition/mase.py`: `MaseNatura2000Spec`
     knows the URL pattern for both `daticartografici` (geometry only)

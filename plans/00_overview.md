@@ -103,7 +103,10 @@ Phase 2 is unblocked.
 - [~] **Archeology** — MiC Vincoli in Rete still pending; OSM
       `historic=archaeological_site` already gives us Grotta Scaloria
       (Point), Siponto + Parco archeologico (Polygons), Coppa Nevigata.
-- [ ] **DTM** — TINITALY tile(s) covering the AOI.
+- [x] **DTM** — INGV TINITALY/1.1, tile **`e46005_s10`** (~130 MB,
+      CC-BY-4.0). Single tile covers the entire AOI: bbox
+      15.57°E–16.40°E × 41.32°N–41.81°N in EPSG:32632, 5010×6510
+      float32 cells (10 m resolution).
 - [ ] **Bathymetry** — EMODnet 2024 tile(s) covering the AOI.
 - [x] **Admin boundaries** — ISTAT 2024 (generalizzato), 11.88 MB zip
       containing comuni / province / regioni / ripartizioni shapefiles

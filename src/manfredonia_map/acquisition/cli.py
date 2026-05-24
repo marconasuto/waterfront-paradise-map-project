@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 import geopandas as gpd
 
-from manfredonia_map.acquisition import base, http, istat, mase, osm
+from manfredonia_map.acquisition import base, http, istat, mase, osm, tinitaly
 from manfredonia_map.paths import CONFIG_DIR, DATA_RAW
 
 logger = logging.getLogger(__name__)
@@ -235,6 +235,79 @@ def acquire_mase_natura2000(year: int, variant: str, out_path: Path | None) -> N
         license="non-commercial, cite source",
         accessed_at=base.now_iso_utc(),
         year_data=year,
+        sha256=sha,
+    )
+    stamped = base.stamp_provenance(prov, out)
+    base.write_provenance(stamped, out.with_suffix(out.suffix + ".provenance.json"))
+    click.echo(f"Wrote {out} ({stamped.byte_count} bytes)")
+    click.echo(f"Wrote {out.with_suffix(out.suffix + '.provenance.json')}")
+
+
+# --- TINITALY -----------------------------------------------------------
+
+@acquire.group(name="tinitaly")
+def acquire_tinitaly() -> None:
+    """Download INGV TINITALY DEM tiles."""
+
+
+@acquire_tinitaly.command(name="tile")
+@click.argument("tile_id", type=str)
+@click.option(
+    "--out",
+    "out_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help="Destination zip path. Defaults to data/raw/tinitaly/<tile_id>.zip.",
+)
+@click.option(
+    "--verify-ssl/--no-verify-ssl",
+    "verify_ssl",
+    default=False,
+    show_default=True,
+    help="TINITALY ships a self-signed cert chain; default skips "
+    "verification. Pair with --expected-sha256 in CI.",
+)
+@click.option(
+    "--expected-sha256",
+    "expected_sha256",
+    type=str,
+    default=None,
+    help="Optional SHA-256 of the expected download (verified after stream).",
+)
+def acquire_tinitaly_tile(
+    tile_id: str,
+    out_path: Path | None,
+    verify_ssl: bool,
+    expected_sha256: str | None,
+) -> None:
+    """Download one TINITALY/1.1 tile (e.g. ``e41005_s10``)."""
+    spec = tinitaly.TinitalyTileSpec(tile_id=tile_id)
+    out = (
+        out_path
+        if out_path is not None
+        else DATA_RAW / "tinitaly" / spec.out_filename
+    )
+    if not verify_ssl:
+        logger.warning(
+            "SSL verification disabled for %s (TINITALY uses a self-signed cert).",
+            spec.url,
+        )
+    logger.info("Downloading %s -> %s", spec.url, out)
+    sha = http.download_file(
+        spec.url,
+        out,
+        headers={"User-Agent": "manfredonia-map/0.0.1 (acquisition pipeline)"},
+        verify_ssl=verify_ssl,
+        expected_sha256=expected_sha256,
+    )
+    prov = base.Provenance(
+        source_id=spec.source_id,
+        publisher="INGV",
+        dataset=spec.dataset,
+        url=spec.url,
+        access_method="HTTPS",
+        license="CC-BY-4.0",
+        accessed_at=base.now_iso_utc(),
         sha256=sha,
     )
     stamped = base.stamp_provenance(prov, out)
