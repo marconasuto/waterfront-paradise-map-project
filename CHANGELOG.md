@@ -15,6 +15,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-24 — Phase 3e: MASE Natura 2000 acquisition.
+  - `src/manfredonia_map/acquisition/mase.py`: `MaseNatura2000Spec`
+    knows the URL pattern for both `daticartografici` (geometry only)
+    and `tuttiicampi` (all standard-data-form fields) bundles per year.
+  - CLI: `mfd-map acquire mase natura2000 [--year 2025]
+    [--variant tuttiicampi|daticartografici]` + pixi task
+    `acquire-mase-natura2000`. Uses the existing httpx streaming
+    downloader; UTF-encoded `Trasmissione%20CE_<month><year>/` path
+    handled in the spec URL.
+  - Real download: `sic_zps_ita_32_tuttiicampi_2025.zip` (33.9 MB,
+    non-commercial license, EPSG:32632). 2,649 SIC/ZSC/ZPS sites
+    nationwide.
+  - **7 sites intersect the AOI**: IT9110005 *Zone umide della
+    Capitanata* (SIC+ZPS, ~14k ha, **contains Lago Salso**), IT9110008
+    *Valloni e Steppe Pedegarganiche*, IT9110009 *Valloni di Mattinata
+    - Monte Sacro*, IT9110014 *Monte Saraceno*, IT9110038 *Paludi
+    presso il Golfo di Manfredonia* (ZPS, ~14k ha), IT9110039
+    *Promontorio del Gargano* (70k ha), IT9110041 *Aloisa - Carapelle*.
+  - Note: "Oasi Laguna del Re" (user's informal name) does not match a
+    formal Natura 2000 site; it corresponds to IT9110005 or IT9110038
+    depending on exact location.
+  - **65 tests passing, 98.35 % coverage**, ruff clean.
 - 2026-05-24 — Phase 3d: SIN proxy + archeology via OSM
   (SPECIFICATIONS.md **v0.6**).
   - **MASE SIN-5 Manfredonia authoritative perimeter is blocked** —

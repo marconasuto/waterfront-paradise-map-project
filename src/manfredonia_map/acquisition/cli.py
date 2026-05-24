@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 import geopandas as gpd
 
-from manfredonia_map.acquisition import base, http, istat, osm
+from manfredonia_map.acquisition import base, http, istat, mase, osm
 from manfredonia_map.paths import CONFIG_DIR, DATA_RAW
 
 logger = logging.getLogger(__name__)
@@ -179,6 +179,60 @@ def acquire_istat_boundaries(year: int, generalized: bool, out_path: Path | None
         url=spec.url,
         access_method="HTTPS",
         license="CC-BY-3.0",
+        accessed_at=base.now_iso_utc(),
+        year_data=year,
+        sha256=sha,
+    )
+    stamped = base.stamp_provenance(prov, out)
+    base.write_provenance(stamped, out.with_suffix(out.suffix + ".provenance.json"))
+    click.echo(f"Wrote {out} ({stamped.byte_count} bytes)")
+    click.echo(f"Wrote {out.with_suffix(out.suffix + '.provenance.json')}")
+
+
+# --- MASE ---------------------------------------------------------------
+
+@acquire.group(name="mase")
+def acquire_mase() -> None:
+    """Download MASE datasets (Ministero dell'Ambiente e della Sicurezza Energetica)."""
+
+
+@acquire_mase.command(name="natura2000")
+@click.option("--year", type=int, default=2025, show_default=True)
+@click.option(
+    "--variant",
+    type=click.Choice(["daticartografici", "tuttiicampi"]),
+    default="tuttiicampi",
+    show_default=True,
+    help="`tuttiicampi` is the full standard-data-form fields version.",
+)
+@click.option(
+    "--out",
+    "out_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help="Destination zip path. Defaults to data/raw/mase_natura2000/<filename>.",
+)
+def acquire_mase_natura2000(year: int, variant: str, out_path: Path | None) -> None:
+    """Download MASE Rete Natura 2000 (SIC/ZSC/ZPS) national bundle."""
+    spec = mase.MaseNatura2000Spec(year=year, variant=variant)  # type: ignore[arg-type]
+    out = (
+        out_path
+        if out_path is not None
+        else DATA_RAW / "mase_natura2000" / spec.out_filename
+    )
+    logger.info("Downloading %s -> %s", spec.url, out)
+    sha = http.download_file(
+        spec.url,
+        out,
+        headers={"User-Agent": "manfredonia-map/0.0.1 (acquisition pipeline)"},
+    )
+    prov = base.Provenance(
+        source_id=spec.source_id,
+        publisher="MASE",
+        dataset=spec.dataset,
+        url=spec.url,
+        access_method="HTTPS",
+        license="non-commercial, cite source",
         accessed_at=base.now_iso_utc(),
         year_data=year,
         sha256=sha,

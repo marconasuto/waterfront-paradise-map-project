@@ -87,8 +87,15 @@ Phase 2 is unblocked.
 - [ ] **Promote OSM wetlands → mandatory features** for the AOI builder
       (Phase 4 — filter Lago Salso polygons and write them under
       `data/processed/mandatory_for_aoi/`).
-- [ ] **MASE Natura 2000 SIC/ZPS** perimeters (filter to IT9110005 /
-      IT9110038 / Oasi Laguna del Re).
+- [x] **MASE Natura 2000 SIC/ZPS** national bundle (transmissione CE
+      dicembre 2025), 32 MB zip, EPSG:32632. 2,649 sites total. **7 sites
+      intersect the AOI**: IT9110005 *Zone umide della Capitanata* (SIC+ZPS,
+      contains Lago Salso), IT9110008 *Valloni e Steppe Pedegarganiche*,
+      IT9110009 *Valloni di Mattinata - Monte Sacro*, IT9110014
+      *Monte Saraceno*, IT9110038 *Paludi presso il Golfo di Manfredonia*
+      (ZPS), IT9110039 *Promontorio del Gargano* (70k ha), IT9110041
+      *Aloisa - Carapelle*. Note: "Oasi Laguna del Re" is an informal
+      name; the formal Natura 2000 site is IT9110005 or IT9110038.
 - [~] **SIN Manfredonia** perimeter — MASE / ISPRA authoritative perimeter
       is **not exposed via a public URL** (see SPECIFICATIONS.md OPEN-SIN-1).
       v1 ships with the OSM `landuse=industrial` proxy ("Zona Industriale
