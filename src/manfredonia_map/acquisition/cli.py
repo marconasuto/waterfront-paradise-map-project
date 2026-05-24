@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 import geopandas as gpd
 
-from manfredonia_map.acquisition import base, http, istat, mase, osm, tinitaly
+from manfredonia_map.acquisition import base, emodnet, http, istat, mase, osm, tinitaly
 from manfredonia_map.paths import CONFIG_DIR, DATA_RAW
 
 logger = logging.getLogger(__name__)
@@ -308,6 +308,75 @@ def acquire_tinitaly_tile(
         access_method="HTTPS",
         license="CC-BY-4.0",
         accessed_at=base.now_iso_utc(),
+        sha256=sha,
+    )
+    stamped = base.stamp_provenance(prov, out)
+    base.write_provenance(stamped, out.with_suffix(out.suffix + ".provenance.json"))
+    click.echo(f"Wrote {out} ({stamped.byte_count} bytes)")
+    click.echo(f"Wrote {out.with_suffix(out.suffix + '.provenance.json')}")
+
+
+# --- EMODnet -----------------------------------------------------------
+
+@acquire.group(name="emodnet")
+def acquire_emodnet() -> None:
+    """Download EMODnet datasets."""
+
+
+@acquire_emodnet.command(name="bathymetry")
+@click.option(
+    "--aoi",
+    "aoi_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=CONFIG_DIR / "aoi_buffered.geojson",
+    show_default=True,
+    help="GeoJSON whose bounding box defines the WCS GetCoverage bbox.",
+)
+@click.option(
+    "--res-deg",
+    type=float,
+    default=emodnet.NATIVE_RES_DEG,
+    show_default=True,
+    help="Output resolution in degrees (default = 1/16 arc-minute = native).",
+)
+@click.option(
+    "--out",
+    "out_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help="Destination GeoTIFF. Defaults to data/raw/emodnet_bathymetry/<filename>.",
+)
+def acquire_emodnet_bathymetry(
+    aoi_path: Path,
+    res_deg: float,
+    out_path: Path | None,
+) -> None:
+    """Download EMODnet Bathymetry DTM 2024 clipped to AOI bbox via WCS."""
+    bbox = _bbox_from_aoi(aoi_path)
+    spec = emodnet.EmodnetBathymetrySpec(bbox=bbox, res_deg=res_deg)
+    out = (
+        out_path
+        if out_path is not None
+        else DATA_RAW / "emodnet_bathymetry" / spec.out_filename
+    )
+    logger.info("Downloading %s -> %s", spec.url, out)
+    sha = http.download_file(
+        spec.url,
+        out,
+        headers={"User-Agent": "manfredonia-map/0.0.1 (acquisition pipeline)"},
+        timeout_s=300.0,
+    )
+    prov = base.Provenance(
+        source_id=spec.source_id,
+        publisher="EMODnet Bathymetry Consortium",
+        dataset=spec.dataset,
+        url=spec.url,
+        access_method="WCS GetCoverage",
+        license="CC-BY-4.0",
+        accessed_at=base.now_iso_utc(),
+        bbox=bbox,
+        query={"res_deg": res_deg, "coverage": spec.coverage},
+        year_data=2024,
         sha256=sha,
     )
     stamped = base.stamp_provenance(prov, out)

@@ -15,6 +15,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-24 — Phase 3g: EMODnet bathymetry (WCS, AOI-clipped).
+  - `src/manfredonia_map/acquisition/emodnet.py`:
+    `EmodnetBathymetrySpec` builds a WCS 1.0.0 GetCoverage URL against
+    `ows.emodnet-bathymetry.eu/wcs` for the `emodnet:mean` coverage.
+    Server-side AOI clip + resolution control means we download only
+    what we need (390 KB instead of a multi-GB Mediterranean tile).
+  - CLI: `mfd-map acquire emodnet bathymetry [--aoi PATH]
+    [--res-deg <deg>]` + pixi task `acquire-emodnet-bathymetry`.
+  - Real download: 393.6 KB GeoTIFF in EPSG:4326, 199×251 float32 at
+    1/16 arc-minute (~115 m, the native EMODnet 2024 resolution).
+    Bounds match AOI bbox exactly. CC-BY-4.0.
+  - **Note**: EMODnet 2024 `mean` is a unified land+sea DEM, not pure
+    bathymetry — values in our AOI range −16.76 m (shallow seabed near
+    coast) to +667 m (Gargano hills). Phase 4 processing will mask /
+    re-style accordingly.
+  - **75 tests passing, 98.41 % coverage**, ruff clean.
 - 2026-05-24 — Phase 3f: TINITALY DTM (first raster acquisition).
   - `src/manfredonia_map/acquisition/tinitaly.py` + CLI `mfd-map
     acquire tinitaly tile <id>` + pixi task `acquire-tinitaly-tile`.

@@ -107,7 +107,12 @@ Phase 2 is unblocked.
       CC-BY-4.0). Single tile covers the entire AOI: bbox
       15.57°E–16.40°E × 41.32°N–41.81°N in EPSG:32632, 5010×6510
       float32 cells (10 m resolution).
-- [ ] **Bathymetry** — EMODnet 2024 tile(s) covering the AOI.
+- [x] **Bathymetry** — EMODnet Bathymetry DTM 2024 via the WCS endpoint
+      (`ows.emodnet-bathymetry.eu/wcs`, coverage `emodnet:mean`), clipped
+      to the AOI bbox server-side. 393 KB GeoTIFF, EPSG:4326, 199×251
+      float32 at 1/16 arc-minute (~115 m). Values are unified land+sea
+      elevation (min −16.76 m near coast, max +667 m on Gargano,
+      mean +63.93 m). CC-BY-4.0.
 - [x] **Admin boundaries** — ISTAT 2024 (generalizzato), 11.88 MB zip
       containing comuni / province / regioni / ripartizioni shapefiles
       in EPSG:32632. Manfredonia (PRO_COM_T=071029) and Monte

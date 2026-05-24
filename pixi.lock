@@ -7190,7 +7190,7 @@ packages:
 - pypi: .
   name: manfredonia-map
   version: 0.0.1
-  sha256: aead63d8bacdfccfd440b779b311303576326ff40d3ef79c10fcaca34bd6e9f7
+  sha256: ce0763dd6673b23b654f890ac2c1dff70f1ec2743a41e0c3eecec13dd60b1797
   requires_dist:
   - geopandas>=0.14
   - pyogrio>=0.7
