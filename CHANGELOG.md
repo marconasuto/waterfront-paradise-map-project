@@ -15,6 +15,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-24 — Phase 3h: MiC Vincoli in Rete — manual-ingest CLI
+  (SPECIFICATIONS.md **v0.7**, OPEN-VIR-1 recorded).
+  - Authoritative VIR archaeological vincoli are not exposed via any
+    public WFS / WMS. Internal WFS is institution-gated; the public
+    portal only allows per-site KML / CSV / PDF export through manual
+    UI navigation. Same gap on GNA and SITAP. Documented as
+    OPEN-VIR-1; the OSM `historic=archaeological_site` proxy
+    (Grotta Scaloria + Siponto + Parco archeologico + Coppa Nevigata)
+    remains the v1 default.
+  - `src/manfredonia_map/acquisition/vir.py`: `VirManualExportSpec` +
+    `stage_manual_export()` — validates that input looks like KML,
+    copies to `data/raw/mic_vincoli_in_rete/` with a deterministic
+    filename derived from a kebab-case label, raises clear errors on
+    missing / empty / non-KML input.
+  - CLI: `mfd-map acquire vir ingest --kml PATH --label LABEL`
+    [`--out-dir`]. Pixi task `acquire-vir-ingest`. Writes the standard
+    provenance sidecar with `access_method` set to
+    "manual KML export from VIR portal UI" so the catalog stays
+    honest about how the data was obtained.
+  - **84 tests passing, 98.53 % coverage**, ruff clean.
 - 2026-05-24 — Phase 3g: EMODnet bathymetry (WCS, AOI-clipped).
   - `src/manfredonia_map/acquisition/emodnet.py`:
     `EmodnetBathymetrySpec` builds a WCS 1.0.0 GetCoverage URL against

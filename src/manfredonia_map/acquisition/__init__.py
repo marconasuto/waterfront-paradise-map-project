@@ -10,6 +10,24 @@ Output convention:
 - Sidecar provenance → ``data/raw/<source>/<layer>.provenance.json``.
 """
 
-from manfredonia_map.acquisition import base, emodnet, http, istat, mase, osm, tinitaly
+from manfredonia_map.acquisition import (
+    base,
+    emodnet,
+    http,
+    istat,
+    mase,
+    osm,
+    tinitaly,
+    vir,
+)
 
-__all__ = ["base", "emodnet", "http", "istat", "mase", "osm", "tinitaly"]
+__all__ = [
+    "base",
+    "emodnet",
+    "http",
+    "istat",
+    "mase",
+    "osm",
+    "tinitaly",
+    "vir",
+]

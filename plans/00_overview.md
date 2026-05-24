@@ -100,9 +100,12 @@ Phase 2 is unblocked.
       is **not exposed via a public URL** (see SPECIFICATIONS.md OPEN-SIN-1).
       v1 ships with the OSM `landuse=industrial` proxy ("Zona Industriale
       di Manfredonia-Monte Sant'Angelo" + 4 unnamed polygons).
-- [~] **Archeology** — MiC Vincoli in Rete still pending; OSM
-      `historic=archaeological_site` already gives us Grotta Scaloria
-      (Point), Siponto + Parco archeologico (Polygons), Coppa Nevigata.
+- [~] **Archeology** — MiC Vincoli in Rete authoritative WFS is also
+      not publicly exposed (see OPEN-VIR-1). v1 ships with:
+      - the OSM `historic=archaeological_site` proxy already in place
+        (Grotta Scaloria + Siponto + Parco archeologico + Coppa Nevigata)
+      - `mfd-map acquire vir ingest --kml PATH --label LABEL` for the
+        user to drop in manually-exported KMLs from the VIR portal UI.
 - [x] **DTM** — INGV TINITALY/1.1, tile **`e46005_s10`** (~130 MB,
       CC-BY-4.0). Single tile covers the entire AOI: bbox
       15.57°E–16.40°E × 41.32°N–41.81°N in EPSG:32632, 5010×6510

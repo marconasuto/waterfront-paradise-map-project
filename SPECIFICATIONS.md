@@ -22,9 +22,9 @@ that contradicts this file is wrong and must be reconciled here first.
 
 | Field           | Value                                |
 |-----------------|--------------------------------------|
-| Version         | 0.6                                  |
+| Version         | 0.7                                  |
 | Created         | 2026-05-23                           |
-| Last updated    | 2026-05-24 (Phase 3d: ISTAT + OSM industrial/archaeology; SIN authoritative perimeter blocked → OSM proxy) |
+| Last updated    | 2026-05-24 (Phase 3g + 3h: EMODnet bathymetry via WCS; VIR manual-ingest CLI documented; OPEN-VIR-1 recorded) |
 | Owner           | Marco Nasuto                         |
 | Change log      | See `CHANGELOG.md` (root)            |
 | Related plans   | `plans/00_overview.md` and subplans  |
@@ -502,6 +502,7 @@ Use cases (for design pressure today, ship target post-v1):
 | OPEN-LICENSE-1 | MASE Natura 2000 is "non-commercial" — confirm museum/urban-planning use is OK | user | closed — **confirmed** by user 2026-05-23; cite source on every layer use |
 | OPEN-OSM-1    | Confirm we accept ODbL attribution for OSM-derived layers in the storymap | user  | closed — **confirmed** by user 2026-05-23; ODbL attribution shown in legend + footer |
 | OPEN-STACK-1  | Raster library choice (added v0.3)                                        | user  | closed — **xarray + zarr + rioxarray + dask**; pixi for environment management |
+| OPEN-VIR-1    | Authoritative MiC *Vincoli in Rete* archaeological vincoli are not exposed via a public, programmatic WFS / WMS URL. The portal at `vincoliinrete.beniculturali.it` only allows per-site KML / CSV / PDF export through manual UI navigation; the internal WFS layer is gated by institutional auth. Same gap on GNA (`gna.cultura.gov.it`) and SITAP (`sitap.cultura.gov.it`). Options: (a) formal MiC data request, (b) per-site manual KML export via `mfd-map acquire vir ingest --kml`, (c) keep OSM `historic=archaeological_site` (Grotta Scaloria + Siponto + Parco archeologico + Coppa Nevigata) as the v1 proxy. | user | **open — v1 ships with OSM proxy + manual-ingest CLI** |
 | OPEN-SIN-1    | Authoritative MASE SIN-5 Manfredonia perimeter is not exposed via a public, programmatic URL. The SIN page on `bonifichesiticontaminati.mite.gov.it/sin-5/` shows a map image but no shapefile/GeoJSON/WFS link; MOSAICO/ReNDiS expose WFS only behind the ISPRA metadata catalog UI; `sgi2.isprambiente.it/geoserver` does not host SIN. Options: (a) formal data request to MASE/ISPRA, (b) manual digitization from the SIN-5 decree maps, (c) keep OSM `landuse=industrial` ("Zona Industriale di Manfredonia-Monte Sant'Angelo") as the v1 proxy. | user | **open — v1 ships with the OSM proxy** |
 
 ## 19. Glossary (short)

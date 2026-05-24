@@ -8,7 +8,16 @@ from pathlib import Path
 import click
 import geopandas as gpd
 
-from manfredonia_map.acquisition import base, emodnet, http, istat, mase, osm, tinitaly
+from manfredonia_map.acquisition import (
+    base,
+    emodnet,
+    http,
+    istat,
+    mase,
+    osm,
+    tinitaly,
+    vir,
+)
 from manfredonia_map.paths import CONFIG_DIR, DATA_RAW
 
 logger = logging.getLogger(__name__)
@@ -383,3 +392,52 @@ def acquire_emodnet_bathymetry(
     base.write_provenance(stamped, out.with_suffix(out.suffix + ".provenance.json"))
     click.echo(f"Wrote {out} ({stamped.byte_count} bytes)")
     click.echo(f"Wrote {out.with_suffix(out.suffix + '.provenance.json')}")
+
+
+# --- MiC Vincoli in Rete ------------------------------------------------
+
+@acquire.group(name="vir")
+def acquire_vir() -> None:
+    """MiC Vincoli in Rete (manual KML ingestion — see OPEN-VIR-1)."""
+
+
+@acquire_vir.command(name="ingest")
+@click.option(
+    "--kml",
+    "kml_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+    help="Local KML file exported from the VIR portal UI.",
+)
+@click.option(
+    "--label",
+    "label",
+    type=str,
+    required=True,
+    help="Short kebab-case label, e.g. ``grotta-scaloria`` or ``puglia-foggia``.",
+)
+@click.option(
+    "--out-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=None,
+    help="Destination dir. Defaults to data/raw/mic_vincoli_in_rete/.",
+)
+def acquire_vir_ingest(kml_path: Path, label: str, out_dir: Path | None) -> None:
+    """Ingest a manually-exported KML from the VIR portal."""
+    spec = vir.VirManualExportSpec(kml_path=kml_path, label=label)
+    out = out_dir if out_dir is not None else DATA_RAW / "mic_vincoli_in_rete"
+    dst = vir.stage_manual_export(spec, out)
+    prov = base.Provenance(
+        source_id=spec.source_id,
+        publisher="Ministero della Cultura",
+        dataset=spec.dataset,
+        url="https://vincoliinrete.beniculturali.it/VincoliInRete/",
+        access_method="manual KML export from VIR portal UI",
+        license="MiC terms — verify per asset (typically CC-BY-4.0 metadata, "
+        "with restrictions on imagery)",
+        accessed_at=base.now_iso_utc(),
+    )
+    stamped = base.stamp_provenance(prov, dst)
+    base.write_provenance(stamped, dst.with_suffix(dst.suffix + ".provenance.json"))
+    click.echo(f"Staged {dst} ({stamped.byte_count} bytes)")
+    click.echo(f"Wrote {dst.with_suffix(dst.suffix + '.provenance.json')}")
