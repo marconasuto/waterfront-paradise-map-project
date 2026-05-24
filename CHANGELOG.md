@@ -15,6 +15,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-24 — Phase 3d: SIN proxy + archeology via OSM
+  (SPECIFICATIONS.md **v0.6**).
+  - **MASE SIN-5 Manfredonia authoritative perimeter is blocked** —
+    not exposed via any public URL (bonifichesiticontaminati.mite.gov.it
+    has only a map image; MOSAICO + ReNDiS sit behind catalog UIs;
+    `sgi2.isprambiente.it/geoserver` does not host SIN). Documented as
+    OPEN-SIN-1 in the spec. Three resolution options recorded for
+    later: formal request to MASE/ISPRA, manual digitization from the
+    SIN-5 decree maps, or accept the OSM proxy for v1.
+  - **OSM proxy added** — new layers in `osm.LAYERS`:
+    - `industrial` (`landuse=industrial|brownfield`) → 6 polygons,
+      including *Zona Industriale di Manfredonia-Monte Sant'Angelo*
+      (covers the ex-Enichem area) and *Idrovora Sette Poste*.
+    - `archaeology` (`historic=archaeological_site`) → 5 features:
+      *Grotta Scaloria* (Point), *Siponto* + *Parco archeologico di
+      Siponto* (Polygons), *Coppa Nevigata*.
+  - SPECIFICATIONS.md §4 row 5 updated to point at the OSM proxy with
+    a forward reference to OPEN-SIN-1.
+  - **60 tests passing, 98.21 % coverage**, ruff clean.
 - 2026-05-24 — Phase 3c: generic HTTPS downloader + ISTAT admin boundaries.
   - `src/manfredonia_map/acquisition/http.py`: streaming downloader
     (httpx + tenacity exponential-backoff retries), atomic

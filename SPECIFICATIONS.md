@@ -22,9 +22,9 @@ that contradicts this file is wrong and must be reconciled here first.
 
 | Field           | Value                                |
 |-----------------|--------------------------------------|
-| Version         | 0.5                                  |
+| Version         | 0.6                                  |
 | Created         | 2026-05-23                           |
-| Last updated    | 2026-05-23 (Phase 3a: OSM coastline + mandatory points loader; near-coast extends AOI on mandatory inclusion) |
+| Last updated    | 2026-05-24 (Phase 3d: ISTAT + OSM industrial/archaeology; SIN authoritative perimeter blocked → OSM proxy) |
 | Owner           | Marco Nasuto                         |
 | Change log      | See `CHANGELOG.md` (root)            |
 | Related plans   | `plans/00_overview.md` and subplans  |
@@ -127,7 +127,7 @@ Sources resolved during the Phase 1 research; details in
 | 2 | Hydrography — underground   | vector | ISPRA *Carta Idrogeologica d'Italia 1:500.000* (CII500K) + Regione Puglia PTA   | 2025 (CII500K) | CC BY 4.0 (ISPRA)           |
 | 3 | Topography (DTM)            | raster | **INGV TINITALY 1.1** (10 m)                                                    | 2023         | CC BY 4.0                   |
 | 4 | Bathymetry / seabed         | raster | **EMODnet Digital Bathymetry DTM 2024** (≈115 m)                                | 2024         | CC BY 4.0 (EMODnet terms)   |
-| 5 | SIN Manfredonia (ex-Enichem)| vector | MASE Bonifiche Siti Contaminati + ISPRA ReNDiS-web                              | 2000 / mod. 2024 | CC BY 4.0 IT (ISPRA)     |
+| 5 | SIN Manfredonia (ex-Enichem)| vector | **v1 proxy**: OSM `landuse=industrial` ("Zona Industriale di Manfredonia-Monte Sant'Angelo") — see OPEN-SIN-1. Authoritative MASE perimeter blocked (see §18). | 2024+ (OSM) | ODbL (OSM proxy); MASE perimeter pending |
 | 6 | Wetlands (Zone Umide)       | vector | MASE *Rete Natura 2000* (SIC/ZSC/ZPS Dec 2025 transmission); Lago Salso = SIC IT9110005 / ZPS IT9110038 | 2025 | non-commercial, cite source |
 | 7 | Road network                | vector | OpenStreetMap (Overpass, pinned by date) — primary; ANAS + SIT Puglia validation | rolling     | ODbL (OSM)                  |
 | 8 | Cycle paths (ciclovie)      | vector | MIT *Sistema Nazionale Ciclovie Turistiche* (Ciclovia Adriatica); OSM detail    | 2024+        | open per MIT terms; ODbL (OSM) |
@@ -502,6 +502,7 @@ Use cases (for design pressure today, ship target post-v1):
 | OPEN-LICENSE-1 | MASE Natura 2000 is "non-commercial" — confirm museum/urban-planning use is OK | user | closed — **confirmed** by user 2026-05-23; cite source on every layer use |
 | OPEN-OSM-1    | Confirm we accept ODbL attribution for OSM-derived layers in the storymap | user  | closed — **confirmed** by user 2026-05-23; ODbL attribution shown in legend + footer |
 | OPEN-STACK-1  | Raster library choice (added v0.3)                                        | user  | closed — **xarray + zarr + rioxarray + dask**; pixi for environment management |
+| OPEN-SIN-1    | Authoritative MASE SIN-5 Manfredonia perimeter is not exposed via a public, programmatic URL. The SIN page on `bonifichesiticontaminati.mite.gov.it/sin-5/` shows a map image but no shapefile/GeoJSON/WFS link; MOSAICO/ReNDiS expose WFS only behind the ISPRA metadata catalog UI; `sgi2.isprambiente.it/geoserver` does not host SIN. Options: (a) formal data request to MASE/ISPRA, (b) manual digitization from the SIN-5 decree maps, (c) keep OSM `landuse=industrial` ("Zona Industriale di Manfredonia-Monte Sant'Angelo") as the v1 proxy. | user | **open — v1 ships with the OSM proxy** |
 
 ## 19. Glossary (short)
 

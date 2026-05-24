@@ -89,8 +89,13 @@ Phase 2 is unblocked.
       `data/processed/mandatory_for_aoi/`).
 - [ ] **MASE Natura 2000 SIC/ZPS** perimeters (filter to IT9110005 /
       IT9110038 / Oasi Laguna del Re).
-- [ ] **SIN Manfredonia** perimeter — MASE / ISPRA.
-- [ ] **Archeology** — MiC Vincoli in Rete (Grotta Scaloria + Siponto).
+- [~] **SIN Manfredonia** perimeter — MASE / ISPRA authoritative perimeter
+      is **not exposed via a public URL** (see SPECIFICATIONS.md OPEN-SIN-1).
+      v1 ships with the OSM `landuse=industrial` proxy ("Zona Industriale
+      di Manfredonia-Monte Sant'Angelo" + 4 unnamed polygons).
+- [~] **Archeology** — MiC Vincoli in Rete still pending; OSM
+      `historic=archaeological_site` already gives us Grotta Scaloria
+      (Point), Siponto + Parco archeologico (Polygons), Coppa Nevigata.
 - [ ] **DTM** — TINITALY tile(s) covering the AOI.
 - [ ] **Bathymetry** — EMODnet 2024 tile(s) covering the AOI.
 - [x] **Admin boundaries** — ISTAT 2024 (generalizzato), 11.88 MB zip

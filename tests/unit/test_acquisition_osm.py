@@ -20,8 +20,34 @@ def _fake_fetcher(rows: list[tuple[str, object]]) -> Callable:
 
 
 def test_layers_registry_has_expected_ids():
-    expected = {"coastline", "roads", "cycle_paths", "harbours", "beaches", "wetlands"}
+    expected = {
+        "coastline", "roads", "cycle_paths", "harbours", "beaches",
+        "wetlands", "industrial", "archaeology",
+    }
     assert expected <= set(osm.LAYERS)
+
+
+def test_industrial_layer_keeps_polygons_only():
+    fetcher = _fake_fetcher(
+        [
+            ("pt", Point(15.92, 41.62)),
+            ("pg", Polygon([(15.9, 41.6), (15.95, 41.6), (15.95, 41.65), (15.9, 41.65)])),
+        ]
+    )
+    out = osm.fetch_layer("industrial", (15.8, 41.49, 16.05, 41.69), fetcher=fetcher)
+    assert set(out["kind"]) == {"pg"}
+
+
+def test_archaeology_layer_keeps_points_lines_polygons():
+    fetcher = _fake_fetcher(
+        [
+            ("pt", Point(15.92, 41.62)),
+            ("ln", LineString([(15.9, 41.6), (15.95, 41.65)])),
+            ("pg", Polygon([(15.9, 41.6), (15.95, 41.6), (15.95, 41.65), (15.9, 41.65)])),
+        ]
+    )
+    out = osm.fetch_layer("archaeology", (15.8, 41.49, 16.05, 41.69), fetcher=fetcher)
+    assert set(out["kind"]) == {"pt", "ln", "pg"}
 
 
 def test_fetch_features_passes_bbox_and_tags_through():

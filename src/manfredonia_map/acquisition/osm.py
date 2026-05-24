@@ -78,6 +78,25 @@ LAYERS: dict[str, OsmLayerSpec] = {
         tags={"natural": "wetland"},
         allowed_geom_types=frozenset({"Polygon", "MultiPolygon"}),
     ),
+    # Industrial areas — serves as the interim proxy for the SIN Manfredonia
+    # perimeter since the MASE-authoritative shapefile is not programmatically
+    # accessible (see OPEN-SIN-1 in SPECIFICATIONS.md).
+    "industrial": OsmLayerSpec(
+        source_id="osm_industrial",
+        dataset="OSM landuse=industrial / landuse=brownfield",
+        tags={"landuse": ["industrial", "brownfield"]},
+        allowed_geom_types=frozenset({"Polygon", "MultiPolygon"}),
+    ),
+    # Archaeological sites — proxy for MiC Vincoli in Rete (only fills the
+    # gap that VIR cannot fill once we acquire it).
+    "archaeology": OsmLayerSpec(
+        source_id="osm_archaeology",
+        dataset="OSM historic=archaeological_site",
+        tags={"historic": "archaeological_site"},
+        allowed_geom_types=frozenset(
+            {"Polygon", "MultiPolygon", "Point", "LineString", "MultiLineString"}
+        ),
+    ),
 }
 
 
