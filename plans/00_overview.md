@@ -136,9 +136,34 @@ Phase 2 is unblocked.
       in EPSG:32632. Manfredonia (PRO_COM_T=071029) and Monte
       Sant'Angelo (071033) confirmed present.
 
-## Phase 4 — Processing
+## Phase 4 — Processing (in flight)
 
 - See `plans/02_data_processing.md`.
+- [x] **4a — Scaffolding + first 3 vector normalizers.**
+      `src/manfredonia_map/processing/{__init__, base, normalize, cli}.py`
+      + `mfd-map process vector <layer_id>` and
+      `mfd-map process vectors-all`. Generic pipeline is
+      *normalize → to_storage_crs → clip_to_aoi → make_valid → write*;
+      the deterministic GeoJSON writer rounds coordinates to 7 decimal
+      places and serialises with `sort_keys=True` so outputs are
+      byte-stable across runs (matches the AOI writer pattern).
+      Three layers wired end-to-end: `coastline` (OSM, 3 features after
+      clip), `admin_boundaries` (ISTAT zipped shapefile, 2 features —
+      Manfredonia + Monte Sant'Angelo correctly clipped),
+      `hydrography_surface` (ISPRA WFS, 14 features incl. Cervaro).
+      Caught and fixed a `set_crs(..., allow_override=True)` bug that
+      silently relabelled the CRS without reprojecting (would have
+      corrupted any UTM source).
+- [ ] **4b — Remaining vector normalizers** (roads, cycle_paths,
+      cycle_routes, harbours, beaches, wetlands, industrial,
+      archaeology, MASE Natura 2000 filter).
+- [ ] **4c — Raster processing** (TINITALY DTM → reproject + clip +
+      8-bit colormap COG; EMODnet bathymetry same; DTM hillshade).
+- [ ] **4d — Catalog generator** (walk `data/raw/**/*.provenance.json`
+      + processed outputs into `data/catalog.yaml`).
+- [ ] **4e — Mandatory features promotion** (Lago Salso + other
+      wetlands from MASE Natura 2000 IT9110005 → `data/processed/
+      mandatory_for_aoi/`; rebuild AOI with real perimeters).
 
 ## Phase 5 — Mapbox publishing
 

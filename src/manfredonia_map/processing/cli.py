@@ -1,0 +1,101 @@
+"""Click subcommands grouped under ``mfd-map process``."""
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+
+import click
+
+from manfredonia_map.paths import CONFIG_DIR, DATA_PROCESSED
+from manfredonia_map.processing import base, normalize
+
+logger = logging.getLogger(__name__)
+
+
+@click.group(name="process", help="Process raw acquisitions into data/processed/.")
+def process() -> None:
+    """Group of processing subcommands."""
+
+
+def _run_vector(layer_id: str, aoi_path: Path, out_dir: Path) -> Path:
+    """Run the standard vector pipeline for one ``layer_id``."""
+    if layer_id not in normalize.NORMALIZERS:
+        raise click.ClickException(
+            f"unknown layer_id={layer_id!r}; known: {sorted(normalize.NORMALIZERS)}"
+        )
+    spec = normalize.NORMALIZERS[layer_id]
+    aoi = base.read_aoi_polygon(aoi_path)
+    raw = spec.fn()
+    logger.info("normalize(%s): %s", layer_id, base.summarize_json(raw))
+    gdf = base.to_storage_crs(raw)
+    gdf = base.make_valid(gdf)
+    gdf = base.clip_to_aoi(gdf, aoi)
+    gdf = base.make_valid(gdf)
+    out = out_dir / f"{layer_id}.geojson"
+    base.write_layer_geojson(gdf, out)
+    logger.info("processed(%s): %s -> %s", layer_id, base.summarize_json(gdf), out)
+    click.echo(f"Wrote {out}  {base.summarize_json(gdf)}")
+    return out
+
+
+@process.command(name="vector")
+@click.argument("layer_id", type=str)
+@click.option(
+    "--aoi",
+    "aoi_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=CONFIG_DIR / "aoi.geojson",
+    show_default=True,
+    help="AOI polygon to clip against (default = `aoi.geojson` alias).",
+)
+@click.option(
+    "--out-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=DATA_PROCESSED,
+    show_default=True,
+)
+def process_vector(layer_id: str, aoi_path: Path, out_dir: Path) -> None:
+    """Process one vector layer end-to-end."""
+    _run_vector(layer_id, aoi_path, out_dir)
+
+
+@process.command(name="vectors-all")
+@click.option(
+    "--aoi",
+    "aoi_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=CONFIG_DIR / "aoi.geojson",
+    show_default=True,
+)
+@click.option(
+    "--out-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=DATA_PROCESSED,
+    show_default=True,
+)
+@click.option(
+    "--skip",
+    "skip_layers",
+    multiple=True,
+    type=str,
+    help="Layer ids to skip (may be repeated).",
+)
+def process_vectors_all(
+    aoi_path: Path, out_dir: Path, skip_layers: tuple[str, ...]
+) -> None:
+    """Process every registered vector layer."""
+    failures: list[tuple[str, str]] = []
+    for layer_id in sorted(normalize.NORMALIZERS):
+        if layer_id in skip_layers:
+            click.echo(f"--- skip {layer_id}")
+            continue
+        click.echo(f"--- process {layer_id}")
+        try:
+            _run_vector(layer_id, aoi_path, out_dir)
+        except Exception as exc:
+            logger.exception("processing %s failed", layer_id)
+            failures.append((layer_id, str(exc)))
+    if failures:
+        msg = "; ".join(f"{lid}: {err}" for lid, err in failures)
+        raise click.ClickException(f"processing failed for: {msg}")

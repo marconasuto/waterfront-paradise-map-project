@@ -15,6 +15,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-25 — Phase 4a: processing scaffolding + 3 vector normalizers.
+  - `src/manfredonia_map/processing/{__init__, base, normalize, cli}.py`.
+  - Generic vector pipeline: *normalize → to_storage_crs → clip_to_aoi
+    → make_valid → write*. CLI: `mfd-map process vector <layer_id>` +
+    `mfd-map process vectors-all [--skip ...]`. Pixi tasks
+    `process-vector` / `process-vectors-all`.
+  - **Byte-deterministic GeoJSON writer** — coordinates rounded to 7
+    decimal places, `sort_keys=True`, atomic `mkstemp`+rename; two
+    consecutive runs produce identical SHAs (matches the AOI writer
+    pattern).
+  - Three normalizers wired end-to-end against real raw data:
+    - `coastline` (OSM `coastline.geojson`) → **3 LineStrings** after
+      AOI clip.
+    - `admin_boundaries` (ISTAT zipped shapefile, filter to
+      `PRO_COM_T in {071029, 071033}`) → **2 Polygons** (Manfredonia
+      + Monte Sant'Angelo) correctly clipped to the near-coast AOI.
+    - `hydrography_surface` (ISPRA WFS GeoJSON) → **14 LineStrings**
+      including the **CERVARO** torrent (feeds Lago Salso).
+  - **Caught a real bug**: `conform_to_schema` used to end with
+    `set_crs(STORAGE_CRS, allow_override=True)` which *relabelled* the
+    CRS without reprojecting — silently corrupting UTM-coordinate
+    sources (ISTAT `_WGS84.shp` files are actually EPSG:32632 despite
+    the suffix). Fixed; regression test added.
+  - **129 tests passing, 98.12 % coverage**, ruff clean.
 - 2026-05-25 — Phase 3i: ISPRA surface hydrography + OSM cycle_routes
   (SPECIFICATIONS.md **v0.8**).
   - `src/manfredonia_map/acquisition/ispra.py`: `IspraHydrographySpec`

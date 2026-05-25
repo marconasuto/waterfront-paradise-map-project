@@ -132,6 +132,11 @@ filterwarnings = [
     "error",
     "ignore::DeprecationWarning:fiona.*",
     "ignore::DeprecationWarning:pyproj.*",
+    # geopandas migration notice fired when a GeoSeries contains empty
+    # geometries: ``notna()`` semantics changed. Our code already uses
+    # the recommended ``~s.is_empty & s.notna()`` pattern (see
+    # ``processing.base.make_valid``), so this warning is just noise.
+    "ignore:GeoSeries.notna.*:UserWarning",
 ]
 
 [tool.coverage.run]
@@ -247,6 +252,8 @@ acquire-emodnet-bathymetry = "mfd-map acquire emodnet bathymetry"
 acquire-vir-ingest = "mfd-map acquire vir ingest"
 acquire-ispra-hydrography-all = "mfd-map acquire ispra hydrography-all"
 acquire = "mfd-map acquire all"
+process-vector = "mfd-map process vector"
+process-vectors-all = "mfd-map process vectors-all"
 process = "mfd-map process all"
 publish = "mfd-map publish all"
 catalog-validate = "mfd-map catalog validate"
