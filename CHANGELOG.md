@@ -15,6 +15,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-25 — Phase 4b: 9 more vector normalizers (12 total).
+  - `processing/normalize.py` gains a small `_normalize_osm_layer`
+    helper that DRYs the per-layer OSM normalizers to ~5 lines each.
+  - 8 new OSM normalizers: `roads`, `cycle_paths`, `cycle_routes`
+    (graceful empty on missing raw), `harbours`, `beaches`,
+    `wetlands`, `industrial_areas`, `archeological_areas`.
+  - `normalize_natura2000`: reads the MASE Natura 2000 national zip,
+    finds the inner shapefile, reprojects to EPSG:4326, pre-filters to
+    sites intersecting the AOI bbox (cheap geometry test vs the
+    full 2,649-site bundle), then conforms to schema with
+    `denominazi` → `name_it` and `site_code` → `id`.
+  - Real `mfd-map process vectors-all` produces 12 deterministic
+    GeoJSONs under `data/processed/`. Notable counts after AOI clip:
+    archeological_areas=5 (Grotta Scaloria + Siponto + Parco
+    archeologico + Coppa Nevigata), industrial_areas=5 (incl. *Zona
+    Industriale di Manfredonia-Monte Sant'Angelo*, the v1 SIN
+    proxy), wetlands=23 (incl. *Lago Salso* x2 + *Lago Salso - Prati
+    allagati*), natura2000=5 (incl. *Zone umide della Capitanata*),
+    roads=2,047. Two consecutive runs produce identical SHAs.
+  - **138 tests passing, 97.78 % coverage**, ruff clean.
 - 2026-05-25 — Phase 4a: processing scaffolding + 3 vector normalizers.
   - `src/manfredonia_map/processing/{__init__, base, normalize, cli}.py`.
   - Generic vector pipeline: *normalize → to_storage_crs → clip_to_aoi

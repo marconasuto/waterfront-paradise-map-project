@@ -154,9 +154,24 @@ Phase 2 is unblocked.
       Caught and fixed a `set_crs(..., allow_override=True)` bug that
       silently relabelled the CRS without reprojecting (would have
       corrupted any UTM source).
-- [ ] **4b — Remaining vector normalizers** (roads, cycle_paths,
-      cycle_routes, harbours, beaches, wetlands, industrial,
-      archaeology, MASE Natura 2000 filter).
+- [x] **4b — Remaining vector normalizers.** 9 new normalizers wired
+      via a small `_normalize_osm_layer` helper + a richer
+      `normalize_natura2000` that filters the MASE national bundle to
+      the AOI bbox. All 12 layers run deterministically end-to-end via
+      `mfd-map process vectors-all`. Output feature counts after clip
+      to `aoi.geojson` (near-coast):
+      `admin_boundaries=2` (Manfredonia + Monte Sant'Angelo),
+      `archeological_areas=5` (incl. Grotta Scaloria + Siponto +
+      Parco archeologico),
+      `beaches=17`, `coastline=3`, `cycle_paths=0` (both raw paths sit
+      outside near-coast AOI), `cycle_routes=0` (OPEN-CICLOVIA-1),
+      `harbours=52`, `hydrography_surface=14` (incl. CERVARO),
+      `industrial_areas=5` (incl. *Zona Industriale di
+      Manfredonia-Monte Sant'Angelo*),
+      `natura2000=5` (incl. *Zone umide della Capitanata*),
+      `roads=2,047`, `wetlands=23` (incl. *Lago Salso* x2 +
+      *Lago Salso - Prati allagati*). Two consecutive runs produce
+      identical SHAs.
 - [ ] **4c — Raster processing** (TINITALY DTM → reproject + clip +
       8-bit colormap COG; EMODnet bathymetry same; DTM hillshade).
 - [ ] **4d — Catalog generator** (walk `data/raw/**/*.provenance.json`
