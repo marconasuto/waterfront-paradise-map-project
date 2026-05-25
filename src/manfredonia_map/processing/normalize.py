@@ -273,6 +273,39 @@ def normalize_archeological_areas(
     )
 
 
+# --- sin_manfredonia (authoritative MASE/ISPRA SIN perimeter) --------
+
+#: ``SITO`` column value used to filter the multi-SIN Puglia shapefile
+#: down to the Manfredonia SIN-5 sub-polygons (5 polygons total covering
+#: public landfills + ex-Enichem private area + marine areas).
+SIN_TARGET_SITO = "MANFREDONIA"
+
+
+def normalize_sin_manfredonia(
+    raw_path: Path = DATA_RAW / "sin" / "SIN.shp",
+) -> gpd.GeoDataFrame:
+    """Normalize the authoritative SIN Manfredonia perimeter.
+
+    Replaces the OSM ``industrial_areas`` proxy for the SIN layer
+    (OPEN-SIN-1 in ``SPECIFICATIONS.md`` — closed once this file is
+    present). The source shapefile is in EPSG:32633 and contains 18
+    SIN polygons across Puglia; we filter to ``SITO == "MANFREDONIA"``
+    (5 polygons) before passing to the generic clip step.
+    """
+    gdf = gpd.read_file(raw_path)
+    filtered = gdf[gdf["SITO"] == SIN_TARGET_SITO].copy()
+    return base.conform_to_schema(
+        filtered,
+        layer_id="sin_manfredonia",
+        source_id="mase_sin_manfredonia_manual",
+        # SIN-5 perimeter initial decree 2000-01-10, modified 2024-12-02.
+        year_data=2024,
+        category="sin",
+        name_col="SITO",
+        extra_columns=("DGC_CODICE",),
+    )
+
+
 # --- natura2000 (MASE national bundle filtered to AOI bbox) ----------
 
 #: Default Natura 2000 shapefile path inside the zip (single .shp).
@@ -351,4 +384,7 @@ NORMALIZERS: dict[str, NormalizerSpec] = {
         layer_id="archeological_areas", fn=normalize_archeological_areas
     ),
     "natura2000": NormalizerSpec(layer_id="natura2000", fn=normalize_natura2000),
+    "sin_manfredonia": NormalizerSpec(
+        layer_id="sin_manfredonia", fn=normalize_sin_manfredonia
+    ),
 }

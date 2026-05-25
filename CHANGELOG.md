@@ -15,6 +15,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-25 — SIN Manfredonia authoritative perimeter (closes OPEN-SIN-1,
+  SPECIFICATIONS.md **v0.9**).
+  - User supplied an authoritative MASE/ISPRA Puglia SIN shapefile at
+    `data/raw/sin/SIN.shp` (EPSG:32633, 18 polygons spanning Bari,
+    Brindisi, Manfredonia and Taranto SINs).
+  - Provenance sidecar generated next to the raw bundle; the
+    `access_method` field flags it as a user-supplied drop with the
+    source URL still pending confirmation.
+  - New normalizer `normalize_sin_manfredonia` filters to
+    `SITO == "MANFREDONIA"` (5 polygons covering public landfills +
+    ex-Enichem private area + marine areas), conforms to the canonical
+    schema with `name_it="MANFREDONIA"`, `category="sin"`,
+    `source_id="mase_sin_manfredonia_manual"`, `year_data=2024`
+    (SIN-5 perimeter modification of 02/12/2024).
+  - `mfd-map process vector sin_manfredonia` produces a deterministic
+    `data/processed/sin_manfredonia.geojson` with 4 polygons after
+    clip to near-coast AOI (1 marine polygon falls outside the band).
+  - SPECIFICATIONS.md §4 row 5 updated; OPEN-SIN-1 marked closed.
+  - OSM `industrial_areas` remains as a separate context layer.
+  - **139 tests passing, 97.79 % coverage**, ruff clean.
 - 2026-05-25 — Phase 4b: 9 more vector normalizers (12 total).
   - `processing/normalize.py` gains a small `_normalize_osm_layer`
     helper that DRYs the per-layer OSM normalizers to ~5 lines each.

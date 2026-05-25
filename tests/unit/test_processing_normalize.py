@@ -140,7 +140,7 @@ def test_normalizers_registry_contains_expected_layer_ids():
         "roads", "cycle_paths", "cycle_routes",
         "harbours", "beaches", "wetlands",
         "industrial_areas", "archeological_areas",
-        "natura2000",
+        "natura2000", "sin_manfredonia",
     }
     assert expected <= set(normalize.NORMALIZERS)
     for lid, spec in normalize.NORMALIZERS.items():
@@ -357,6 +357,64 @@ def test_normalize_natura2000_filters_by_aoi_bbox(tmp_path: Path):
     assert (out["year_data"] == 2025).all()
     assert "Zone umide della Capitanata" in out["name_it"].tolist()
     assert "tipo_sito" in out.columns
+
+
+# --- sin_manfredonia (authoritative MASE/ISPRA perimeter) -----------
+
+def _write_sin_shp(tmp_path: Path) -> Path:
+    """Build a minimal SIN-like shapefile with multiple Puglia sites."""
+    shp = tmp_path / "SIN.shp"
+    gpd.GeoDataFrame(
+        {
+            "DGC_CODICE": [18.0, 18.0, 18.0, 37.0, 0.0],
+            "SITO": ["MANFREDONIA", "MANFREDONIA", "MANFREDONIA", "TARANTO", "BARI"],
+        },
+        geometry=[
+            # Three Manfredonia polygons in EPSG:32633 (UTM 33N).
+            Polygon([
+                (572_000, 4_605_000), (575_000, 4_605_000),
+                (575_000, 4_608_000), (572_000, 4_608_000),
+                (572_000, 4_605_000),
+            ]),
+            Polygon([
+                (575_000, 4_605_000), (578_000, 4_605_000),
+                (578_000, 4_608_000), (575_000, 4_608_000),
+                (575_000, 4_605_000),
+            ]),
+            Polygon([
+                (570_000, 4_600_000), (573_000, 4_600_000),
+                (573_000, 4_603_000), (570_000, 4_603_000),
+                (570_000, 4_600_000),
+            ]),
+            # Other Puglia SINs — must be filtered out.
+            Polygon([
+                (680_000, 4_480_000), (682_000, 4_480_000),
+                (682_000, 4_482_000), (680_000, 4_482_000),
+                (680_000, 4_480_000),
+            ]),
+            Polygon([
+                (620_000, 4_550_000), (622_000, 4_550_000),
+                (622_000, 4_552_000), (620_000, 4_552_000),
+                (620_000, 4_550_000),
+            ]),
+        ],
+        crs="EPSG:32633",
+    ).to_file(shp, driver="ESRI Shapefile")
+    return shp
+
+
+def test_normalize_sin_manfredonia_filters_to_manfredonia_only(tmp_path: Path):
+    shp = _write_sin_shp(tmp_path)
+    out = normalize.normalize_sin_manfredonia(raw_path=shp)
+    assert len(out) == 3   # only the three MANFREDONIA rows
+    assert (out["layer_id"] == "sin_manfredonia").all()
+    assert (out["source_id"] == "mase_sin_manfredonia_manual").all()
+    assert (out["category"] == "sin").all()
+    assert (out["year_data"] == 2024).all()
+    assert (out["name_it"] == "MANFREDONIA").all()
+    assert "DGC_CODICE" in out.columns
+    # CRS preserved at this stage; downstream `to_storage_crs` reprojects.
+    assert out.crs.to_epsg() == 32633
 
 
 def test_natura_shapefile_inside_raises_when_no_shp(tmp_path: Path):
