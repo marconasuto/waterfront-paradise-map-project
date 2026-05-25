@@ -181,9 +181,22 @@ Phase 2 is unblocked.
       8-bit colormap COG; EMODnet bathymetry same; DTM hillshade).
 - [ ] **4d — Catalog generator** (walk `data/raw/**/*.provenance.json`
       + processed outputs into `data/catalog.yaml`).
-- [ ] **4e — Mandatory features promotion** (Lago Salso + other
-      wetlands from MASE Natura 2000 IT9110005 → `data/processed/
-      mandatory_for_aoi/`; rebuild AOI with real perimeters).
+- [x] **4e — Mandatory features promotion.**
+      `src/manfredonia_map/processing/mandatory.py` lifts already-
+      processed layers into `data/processed/mandatory_for_aoi/` for
+      the AOI builder. 3 promotions wired:
+      - `lago_salso` ← `wetlands.geojson` filter `name_it ~ "lago salso"`
+        (2 polygons, area 0.000253 deg² — ~3× tighter than the old
+        1.8 km buffered point).
+      - `sin_manfredonia` ← whole `sin_manfredonia.geojson` layer
+        (4 polygons after AOI clip, area 0.000915 deg²).
+      - `grotta_scaloria` ← `archeological_areas.geojson` filter
+        `name_it ~ "grotta scaloria"` (1 point buffered 300 m).
+      CLI: `mfd-map process mandatory-features` + pixi task
+      `process-mandatory-features`. AOI rebuild deterministic; all
+      5 sanity points still inside. `config/mandatory_locations.yaml`
+      kept as belt-and-suspenders fallback (the unioned polygons
+      dominate the AOI shape; the points add a harmless cushion).
 
 ## Phase 5 — Mapbox publishing
 

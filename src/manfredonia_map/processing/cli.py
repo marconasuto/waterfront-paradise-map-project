@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 
 from manfredonia_map.paths import CONFIG_DIR, DATA_PROCESSED
-from manfredonia_map.processing import base, normalize
+from manfredonia_map.processing import base, mandatory, normalize
 
 logger = logging.getLogger(__name__)
 
@@ -99,3 +99,32 @@ def process_vectors_all(
     if failures:
         msg = "; ".join(f"{lid}: {err}" for lid, err in failures)
         raise click.ClickException(f"processing failed for: {msg}")
+
+
+@process.command(name="mandatory-features")
+@click.option(
+    "--processed-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=DATA_PROCESSED,
+    show_default=True,
+)
+@click.option(
+    "--out-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=None,
+    help="Defaults to ``<processed-dir>/mandatory_for_aoi``.",
+)
+def process_mandatory_features(processed_dir: Path, out_dir: Path | None) -> None:
+    """Promote real perimeters into the AOI builder's mandatory-features set."""
+    failures: list[tuple[str, str]] = []
+    for spec in mandatory.PROMOTIONS.values():
+        click.echo(f"--- promote {spec.feature_id}")
+        try:
+            out = mandatory.promote(spec, processed_dir=processed_dir, out_dir=out_dir)
+            click.echo(f"  wrote {out}")
+        except (FileNotFoundError, ValueError) as exc:
+            logger.warning("promotion %s failed: %s", spec.feature_id, exc)
+            failures.append((spec.feature_id, str(exc)))
+    if failures:
+        msg = "; ".join(f"{fid}: {err}" for fid, err in failures)
+        raise click.ClickException(f"promotion failed for: {msg}")

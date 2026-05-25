@@ -3,11 +3,18 @@
 # mandatory-features set, guaranteeing inclusion even when the point lies
 # outside the 2 km coastal band.
 #
-# When Phase 3 acquires authoritative perimeters (SIN polygon from MASE,
-# wetland boundaries from MASE Natura 2000, archaeological vincoli from
-# MiC Vincoli in Rete), each acquired GeoJSON in
-# data/processed/mandatory_for_aoi/ takes priority over the matching entry
-# below and the buffer can be removed.
+# Phase 4e (2026-05-25) promoted real perimeters into
+# data/processed/mandatory_for_aoi/ for: `lago_salso`, `sin_manfredonia`,
+# `grotta_scaloria`. The matching buffered entries below are kept as a
+# fallback for fresh checkouts that haven't run Phase 4 yet; once the
+# processed files exist they are unioned together with the buffered
+# points, so the real polygons dominate the AOI shape (the points just
+# add a small, harmless cushion).
+#
+# Still without an upstream polygon and therefore relying entirely on the
+# buffered point: `oasi_laguna_del_re` (informal name; not a Natura 2000
+# site by that exact string — verify when you have the time), and
+# `acqua_di_cristo` (small beach; coastal anyway).
 
 version: 1
 

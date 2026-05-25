@@ -15,6 +15,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-25 — Phase 4e: mandatory features promotion + AOI rebuild.
+  - `src/manfredonia_map/processing/mandatory.py`: `PROMOTIONS`
+    registry + `promote()` function lift already-processed layers
+    into `data/processed/mandatory_for_aoi/` for the AOI builder.
+  - 3 promotions wired:
+    - `lago_salso` ← `wetlands.geojson` filter (2 polygons, area
+      0.000253 deg² — ~3× tighter than the old 1.8 km buffered point).
+    - `sin_manfredonia` ← whole `sin_manfredonia.geojson` layer
+      (4 polygons after AOI clip, area 0.000915 deg²).
+    - `grotta_scaloria` ← `archeological_areas.geojson` filter
+      (1 point buffered 300 m, area 0.000031 deg²).
+  - CLI: `mfd-map process mandatory-features` + pixi task
+    `process-mandatory-features`. Both promotion and AOI rebuild
+    deterministic (identical SHAs across consecutive runs).
+  - All 5 AOI sanity points still inside; `config/mandatory_locations
+    .yaml` kept as a belt-and-suspenders fallback (the real polygons
+    dominate the AOI shape; the buffered points add a harmless
+    cushion). YAML header updated to document the supersession.
+  - **154 tests passing, 98.02 % coverage**, ruff clean.
 - 2026-05-25 — SIN Manfredonia authoritative perimeter wired through
   the **Regione Puglia open-data CKAN** dataset (closes OPEN-SIN-1,
   SPECIFICATIONS.md **v0.9**).
