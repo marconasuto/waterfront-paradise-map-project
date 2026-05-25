@@ -177,8 +177,25 @@ Phase 2 is unblocked.
       `roads=2,047`, `wetlands=23` (incl. *Lago Salso* x2 +
       *Lago Salso - Prati allagati*). Two consecutive runs produce
       identical SHAs.
-- [ ] **4c — Raster processing** (TINITALY DTM → reproject + clip +
-      8-bit colormap COG; EMODnet bathymetry same; DTM hillshade).
+- [x] **4c — Raster processing** (DTM + bathymetry).
+      `src/manfredonia_map/processing/raster.py`: read GeoTIFF (loose,
+      zipped, or directory-pick-single) → reproject to EPSG:32633 →
+      clip to AOI → analytical Zarr in `data/interim/` → hand-rolled
+      hypsometric tint → 4-band 8-bit RGBA COG in `data/processed/`
+      (Mapbox-ready). CLI: `mfd-map process raster <id>` +
+      `process rasters-all`; pixi tasks `process-raster` /
+      `process-rasters-all`. Real outputs:
+      - `tinitaly_dtm_8bit.tif` (278 KB, 2085×1534, overviews [2, 4])
+        + `tinitaly_dtm.zarr`
+      - `emodnet_bathymetry_8bit.tif` (11.5 KB, 210×155)
+        + `emodnet_bathymetry.zarr`
+      Caught and fixed three production issues: zarr 3.x consolidated-
+      metadata warning (turned off — local stores don't need it),
+      rio-cogeo nodata-vs-alpha-band ambiguity (dropped explicit
+      nodata since alpha encodes transparency), and the
+      ``_block_network`` fixture rejecting asyncio's local socket-pair
+      (now allows AF_UNIX while still blocking AF_INET/AF_INET6).
+      Hillshade derivation deferred to 4c-2.
 - [ ] **4d — Catalog generator** (walk `data/raw/**/*.provenance.json`
       + processed outputs into `data/catalog.yaml`).
 - [x] **4e — Mandatory features promotion.**

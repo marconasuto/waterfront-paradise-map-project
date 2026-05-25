@@ -7,8 +7,8 @@ from pathlib import Path
 
 import click
 
-from manfredonia_map.paths import CONFIG_DIR, DATA_PROCESSED
-from manfredonia_map.processing import base, mandatory, normalize
+from manfredonia_map.paths import CONFIG_DIR, DATA_INTERIM, DATA_PROCESSED
+from manfredonia_map.processing import base, mandatory, normalize, raster
 
 logger = logging.getLogger(__name__)
 
@@ -128,3 +128,102 @@ def process_mandatory_features(processed_dir: Path, out_dir: Path | None) -> Non
     if failures:
         msg = "; ".join(f"{fid}: {err}" for fid, err in failures)
         raise click.ClickException(f"promotion failed for: {msg}")
+
+
+# --- rasters ----------------------------------------------------------
+
+def _run_raster(
+    raster_id: str, aoi_path: Path, interim_dir: Path, processed_dir: Path
+) -> tuple[Path, Path]:
+    """Run the standard raster pipeline for one ``raster_id``."""
+    if raster_id not in raster.PROCESSORS:
+        raise click.ClickException(
+            f"unknown raster_id={raster_id!r}; known: {sorted(raster.PROCESSORS)}"
+        )
+    spec = raster.PROCESSORS[raster_id]
+    aoi = base.read_aoi_polygon(aoi_path)
+    zarr_path, cog_path = raster.process_raster(
+        spec, aoi, interim_dir=interim_dir, processed_dir=processed_dir,
+    )
+    click.echo(f"Wrote {zarr_path}  (analytical Zarr)")
+    click.echo(f"Wrote {cog_path}  (8-bit hypsometric COG)")
+    return zarr_path, cog_path
+
+
+@process.command(name="raster")
+@click.argument("raster_id", type=str)
+@click.option(
+    "--aoi",
+    "aoi_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=CONFIG_DIR / "aoi.geojson",
+    show_default=True,
+    help="AOI polygon to clip against (default = ``aoi.geojson`` alias).",
+)
+@click.option(
+    "--interim-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=DATA_INTERIM,
+    show_default=True,
+)
+@click.option(
+    "--processed-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=DATA_PROCESSED,
+    show_default=True,
+)
+def process_raster_cmd(
+    raster_id: str, aoi_path: Path, interim_dir: Path, processed_dir: Path
+) -> None:
+    """Process one raster end-to-end (reproject + clip + 8-bit COG)."""
+    _run_raster(raster_id, aoi_path, interim_dir, processed_dir)
+
+
+@process.command(name="rasters-all")
+@click.option(
+    "--aoi",
+    "aoi_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=CONFIG_DIR / "aoi.geojson",
+    show_default=True,
+)
+@click.option(
+    "--interim-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=DATA_INTERIM,
+    show_default=True,
+)
+@click.option(
+    "--processed-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=DATA_PROCESSED,
+    show_default=True,
+)
+@click.option(
+    "--skip",
+    "skip_rasters",
+    multiple=True,
+    type=str,
+    help="Raster ids to skip (may be repeated).",
+)
+def process_rasters_all(
+    aoi_path: Path,
+    interim_dir: Path,
+    processed_dir: Path,
+    skip_rasters: tuple[str, ...],
+) -> None:
+    """Process every registered raster."""
+    failures: list[tuple[str, str]] = []
+    for raster_id in sorted(raster.PROCESSORS):
+        if raster_id in skip_rasters:
+            click.echo(f"--- skip {raster_id}")
+            continue
+        click.echo(f"--- process raster {raster_id}")
+        try:
+            _run_raster(raster_id, aoi_path, interim_dir, processed_dir)
+        except Exception as exc:
+            logger.exception("processing raster %s failed", raster_id)
+            failures.append((raster_id, str(exc)))
+    if failures:
+        msg = "; ".join(f"{rid}: {err}" for rid, err in failures)
+        raise click.ClickException(f"raster processing failed for: {msg}")

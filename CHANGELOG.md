@@ -15,6 +15,36 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-25 — Phase 4c: raster processing (DTM + bathymetry → 8-bit COG).
+  - `src/manfredonia_map/processing/raster.py`: read raw GeoTIFF
+    (loose, zipped, or directory-pick-single) → `rioxarray` →
+    reproject to EPSG:32633 → clip to AOI → analytical Zarr under
+    `data/interim/` → hand-rolled hypsometric tint (8-stop terrain
+    ramp covering deep sea to alpine summit) → 4-band 8-bit RGBA
+    COG under `data/processed/` (Mapbox-ready, internal overviews
+    via `rio-cogeo` with the `deflate` profile).
+  - CLI: `mfd-map process raster <id>` + `mfd-map process
+    rasters-all [--skip ...]`. Pixi tasks `process-raster` /
+    `process-rasters-all`.
+  - Real outputs from `pixi run process-rasters-all`:
+    - `tinitaly_dtm_8bit.tif` — 2085×1534, 4-band uint8, 278 KB,
+      internal overviews [2, 4] + `tinitaly_dtm.zarr` interim.
+    - `emodnet_bathymetry_8bit.tif` — 210×155, 4-band uint8, 11.5 KB
+      + `emodnet_bathymetry.zarr` interim.
+    Both clipped tightly to the near-coast AOI (~572 km E, 4595 km N
+    to ~588 km E, 4616 km N in UTM 33N).
+  - Caught and fixed three production issues:
+    - zarr 3.x raised `ZarrUserWarning` for consolidated metadata
+      (not in v3 spec) — disabled, local stores don't benefit.
+    - rio-cogeo warned that nodata + alpha band is ambiguous — dropped
+      the explicit nodata since the alpha band already encodes
+      transparency.
+    - `tests/conftest.py` `_block_network` fixture refused asyncio's
+      AF_UNIX socket-pair (zarr 3.x uses async internally) — fixture
+      now only blocks AF_INET / AF_INET6, leaving local sockets alone.
+  - Hillshade derivation deferred to 4c-2 (the Zarr interim is in
+    place ready to feed it).
+  - **172 tests passing, 97.97 % coverage**, ruff clean.
 - 2026-05-25 — Phase 4e: mandatory features promotion + AOI rebuild.
   - `src/manfredonia_map/processing/mandatory.py`: `PROMOTIONS`
     registry + `promote()` function lift already-processed layers
