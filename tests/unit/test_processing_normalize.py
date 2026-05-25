@@ -359,11 +359,13 @@ def test_normalize_natura2000_filters_by_aoi_bbox(tmp_path: Path):
     assert "tipo_sito" in out.columns
 
 
-# --- sin_manfredonia (authoritative MASE/ISPRA perimeter) -----------
+# --- sin_manfredonia (Regione Puglia open-data perimeter) ------------
 
-def _write_sin_shp(tmp_path: Path) -> Path:
-    """Build a minimal SIN-like shapefile with multiple Puglia sites."""
-    shp = tmp_path / "SIN.shp"
+def _write_sin_zip(tmp_path: Path) -> Path:
+    """Build a minimal Regione-Puglia-like zip with a SIN shapefile inside."""
+    inner_dir = tmp_path / "sin_src" / "sin"
+    inner_dir.mkdir(parents=True)
+    shp = inner_dir / "SIN.shp"
     gpd.GeoDataFrame(
         {
             "DGC_CODICE": [18.0, 18.0, 18.0, 37.0, 0.0],
@@ -400,15 +402,19 @@ def _write_sin_shp(tmp_path: Path) -> Path:
         ],
         crs="EPSG:32633",
     ).to_file(shp, driver="ESRI Shapefile")
-    return shp
+    zip_path = tmp_path / "sin_puglia.zip"
+    with zipfile.ZipFile(zip_path, "w") as zf:
+        for f in inner_dir.glob("SIN.*"):
+            zf.write(f, arcname=f"sin/{f.name}")
+    return zip_path
 
 
 def test_normalize_sin_manfredonia_filters_to_manfredonia_only(tmp_path: Path):
-    shp = _write_sin_shp(tmp_path)
-    out = normalize.normalize_sin_manfredonia(raw_path=shp)
+    z = _write_sin_zip(tmp_path)
+    out = normalize.normalize_sin_manfredonia(raw_path=z)
     assert len(out) == 3   # only the three MANFREDONIA rows
     assert (out["layer_id"] == "sin_manfredonia").all()
-    assert (out["source_id"] == "mase_sin_manfredonia_manual").all()
+    assert (out["source_id"] == "regione_puglia_sin").all()
     assert (out["category"] == "sin").all()
     assert (out["year_data"] == 2024).all()
     assert (out["name_it"] == "MANFREDONIA").all()

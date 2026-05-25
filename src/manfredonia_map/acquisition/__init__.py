@@ -18,6 +18,7 @@ from manfredonia_map.acquisition import (
     istat,
     mase,
     osm,
+    regione_puglia,
     tinitaly,
     vir,
 )
@@ -30,6 +31,7 @@ __all__ = [
     "istat",
     "mase",
     "osm",
+    "regione_puglia",
     "tinitaly",
     "vir",
 ]

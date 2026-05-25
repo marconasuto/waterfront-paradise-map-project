@@ -16,6 +16,7 @@ from manfredonia_map.acquisition import (
     istat,
     mase,
     osm,
+    regione_puglia,
     tinitaly,
     vir,
 )
@@ -540,3 +541,49 @@ def acquire_ispra_hydrography_all(aoi_path: Path, skip_layers: tuple[str, ...]) 
             failures.append(layer)
     if failures:
         raise click.ClickException(f"acquisitions failed: {', '.join(failures)}")
+
+
+# --- Regione Puglia (dati.puglia.it / CKAN) ---------------------------
+
+@acquire.group(name="regione-puglia")
+def acquire_regione_puglia() -> None:
+    """Download Regione Puglia open datasets (dati.puglia.it CKAN)."""
+
+
+@acquire_regione_puglia.command(name="dataset")
+@click.argument("dataset_id", type=click.Choice(["sin"]))
+@click.option(
+    "--out",
+    "out_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help="Destination zip path. Defaults to data/raw/<source_id>/<filename>.",
+)
+def acquire_regione_puglia_dataset(dataset_id: str, out_path: Path | None) -> None:
+    """Download one Regione Puglia CKAN dataset (currently only ``sin``)."""
+    spec = regione_puglia.RegionePugliaSpec(dataset_id=dataset_id)  # type: ignore[arg-type]
+    out = (
+        out_path
+        if out_path is not None
+        else DATA_RAW / spec.source_id / spec.out_filename
+    )
+    logger.info("Downloading %s -> %s", spec.url, out)
+    sha = http.download_file(
+        spec.url,
+        out,
+        headers={"User-Agent": "manfredonia-map/0.0.1 (acquisition pipeline)"},
+    )
+    prov = base.Provenance(
+        source_id=spec.source_id,
+        publisher=spec.publisher,
+        dataset=spec.dataset,
+        url=spec.url,
+        access_method="HTTPS (CKAN open data)",
+        license="CC-BY-4.0",
+        accessed_at=base.now_iso_utc(),
+        sha256=sha,
+    )
+    stamped = base.stamp_provenance(prov, out)
+    base.write_provenance(stamped, out.with_suffix(out.suffix + ".provenance.json"))
+    click.echo(f"Wrote {out} ({stamped.byte_count} bytes)")
+    click.echo(f"Wrote {out.with_suffix(out.suffix + '.provenance.json')}")

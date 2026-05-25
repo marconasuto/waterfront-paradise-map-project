@@ -282,22 +282,27 @@ SIN_TARGET_SITO = "MANFREDONIA"
 
 
 def normalize_sin_manfredonia(
-    raw_path: Path = DATA_RAW / "sin" / "SIN.shp",
+    raw_path: Path = DATA_RAW / "regione_puglia_sin" / "sin_puglia.zip",
 ) -> gpd.GeoDataFrame:
     """Normalize the authoritative SIN Manfredonia perimeter.
 
-    Replaces the OSM ``industrial_areas`` proxy for the SIN layer
-    (OPEN-SIN-1 in ``SPECIFICATIONS.md`` — closed once this file is
-    present). The source shapefile is in EPSG:32633 and contains 18
-    SIN polygons across Puglia; we filter to ``SITO == "MANFREDONIA"``
-    (5 polygons) before passing to the generic clip step.
+    Source: **Regione Puglia / InnovaPuglia** open-data CKAN dataset
+    *Siti di Interesse Nazionale (SIN)* —
+    ``https://dati.puglia.it/ckan/dataset/siti-di-interesse-nazionale-sin``
+    (CC-BY-4.0). The shapefile inside the zip is in EPSG:32633 and
+    contains 18 SIN polygons across all 4 Puglia SINs (Bari, Brindisi,
+    Manfredonia, Taranto); we filter to ``SITO == "MANFREDONIA"``
+    (5 polygons covering public landfills + ex-Enichem private area +
+    marine areas) before passing to the generic clip step.
+
+    Closes OPEN-SIN-1 in ``SPECIFICATIONS.md``.
     """
-    gdf = gpd.read_file(raw_path)
+    gdf = gpd.read_file(f"zip://{raw_path}!sin/SIN.shp")
     filtered = gdf[gdf["SITO"] == SIN_TARGET_SITO].copy()
     return base.conform_to_schema(
         filtered,
         layer_id="sin_manfredonia",
-        source_id="mase_sin_manfredonia_manual",
+        source_id="regione_puglia_sin",
         # SIN-5 perimeter initial decree 2000-01-10, modified 2024-12-02.
         year_data=2024,
         category="sin",

@@ -102,13 +102,15 @@ Phase 2 is unblocked.
       (ZPS), IT9110039 *Promontorio del Gargano* (70k ha), IT9110041
       *Aloisa - Carapelle*. Note: "Oasi Laguna del Re" is an informal
       name; the formal Natura 2000 site is IT9110005 or IT9110038.
-- [x] **SIN Manfredonia** authoritative perimeter — MASE/ISPRA Puglia
-      SIN shapefile (EPSG:32633, 5 Manfredonia polygons covering
-      public landfills + ex-Enichem + marine areas) **manually
-      supplied by user 2026-05-25** at `data/raw/sin/SIN.shp`.
-      Provenance sidecar written; source URL pending user confirmation.
-      OPEN-SIN-1 closed. OSM `industrial_areas` retained as a separate
-      context layer.
+- [x] **SIN Manfredonia** authoritative perimeter — **Regione Puglia /
+      InnovaPuglia** open-data CKAN dataset *Siti di Interesse
+      Nazionale (SIN)* at
+      <https://dati.puglia.it/ckan/dataset/siti-di-interesse-nazionale-sin>
+      (CC-BY-4.0; bundle covers all 4 Puglia SINs; we filter
+      `SITO == "MANFREDONIA"`, 5 polygons). Wired in
+      `acquisition/regione_puglia.py` for reproducible re-fetch +
+      `mfd-map acquire regione-puglia dataset sin`. OPEN-SIN-1 closed.
+      OSM `industrial_areas` retained as a separate context layer.
 - [~] **Archeology** — MiC Vincoli in Rete authoritative WFS is also
       not publicly exposed (see OPEN-VIR-1). v1 ships with:
       - the OSM `historic=archaeological_site` proxy already in place

@@ -15,26 +15,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
-- 2026-05-25 — SIN Manfredonia authoritative perimeter (closes OPEN-SIN-1,
+- 2026-05-25 — SIN Manfredonia authoritative perimeter wired through
+  the **Regione Puglia open-data CKAN** dataset (closes OPEN-SIN-1,
   SPECIFICATIONS.md **v0.9**).
-  - User supplied an authoritative MASE/ISPRA Puglia SIN shapefile at
-    `data/raw/sin/SIN.shp` (EPSG:32633, 18 polygons spanning Bari,
-    Brindisi, Manfredonia and Taranto SINs).
-  - Provenance sidecar generated next to the raw bundle; the
-    `access_method` field flags it as a user-supplied drop with the
-    source URL still pending confirmation.
-  - New normalizer `normalize_sin_manfredonia` filters to
-    `SITO == "MANFREDONIA"` (5 polygons covering public landfills +
-    ex-Enichem private area + marine areas), conforms to the canonical
-    schema with `name_it="MANFREDONIA"`, `category="sin"`,
-    `source_id="mase_sin_manfredonia_manual"`, `year_data=2024`
-    (SIN-5 perimeter modification of 02/12/2024).
-  - `mfd-map process vector sin_manfredonia` produces a deterministic
-    `data/processed/sin_manfredonia.geojson` with 4 polygons after
-    clip to near-coast AOI (1 marine polygon falls outside the band).
-  - SPECIFICATIONS.md §4 row 5 updated; OPEN-SIN-1 marked closed.
-  - OSM `industrial_areas` remains as a separate context layer.
-  - **139 tests passing, 97.79 % coverage**, ruff clean.
+  - Source identified by the user:
+    <https://dati.puglia.it/ckan/dataset/siti-di-interesse-nazionale-sin>
+    — *Siti di Interesse Nazionale (SIN)*, published by InnovaPuglia
+    (Servizio Territorio e Ambiente), CC-BY-4.0, dataset last updated
+    2025-08-04. Shapefile bundle covers all 4 Puglia SINs (Bari,
+    Brindisi, Manfredonia, Taranto) in EPSG:32633.
+  - `src/manfredonia_map/acquisition/regione_puglia.py`:
+    `RegionePugliaSpec(dataset_id="sin")` knows the canonical CKAN
+    download URL (dataset 70c4d257…, resource 7263c82e…).
+  - CLI: `mfd-map acquire regione-puglia dataset sin` + pixi task
+    `acquire-regione-puglia-sin`. Reuses the existing httpx streaming
+    downloader.
+  - User-supplied loose `SIN.{shp,dbf,prj,shx}` files re-packaged into
+    a single `data/raw/regione_puglia_sin/sin_puglia.zip` matching what
+    `acquire` would produce, with a proper provenance sidecar
+    (publisher, license, URL all correct).
+  - `normalize_sin_manfredonia` now reads `zip://…!sin/SIN.shp`,
+    filters to `SITO == "MANFREDONIA"` (5 polygons), `source_id` is
+    `regione_puglia_sin` to match the acquisition spec.
+  - End-to-end run produces 4 deterministic polygons in
+    `data/processed/sin_manfredonia.geojson` after clip to near-coast
+    AOI (1 marine sub-polygon falls outside the band).
+  - SPECIFICATIONS.md §4 row 5 and §18 OPEN-SIN-1 both updated to
+    cite the real source. OSM `industrial_areas` retained as a
+    separate context layer.
+  - **142 tests passing, 97.88 % coverage**, ruff clean.
 - 2026-05-25 — Phase 4b: 9 more vector normalizers (12 total).
   - `processing/normalize.py` gains a small `_normalize_osm_layer`
     helper that DRYs the per-layer OSM normalizers to ~5 lines each.
