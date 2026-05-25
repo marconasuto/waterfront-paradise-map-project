@@ -206,8 +206,17 @@ Phase 2 is unblocked.
       `tinitaly_dtm_hillshade_8bit.tif` — 2085×1534 4-band uint8,
       300 KB, internal overviews [2, 4], values 0–230 with mean 65
       (good shadow/highlight distribution).
-- [ ] **4d — Catalog generator** (walk `data/raw/**/*.provenance.json`
-      + processed outputs into `data/catalog.yaml`).
+- [x] **4d — Catalog generator.** `src/manfredonia_map/catalog/`
+      (`models.py` pydantic schemas, `builder.py` walks every
+      provenance sidecar + processed output, `cli.py` exposes
+      `mfd-map catalog build/validate`). `data/catalog.yaml` is the
+      tracked artifact (whitelisted in `.gitignore`) and the single
+      source of truth Phase 5 publishing + the web app consume.
+      Real `catalog-build` produced 18 sources / 13 vector layers /
+      3 raster layers (incl. the hillshade derived-from link). Two
+      consecutive builds produce byte-identical bytes except for the
+      intentional `generated_at` timestamp; round-trip validated via
+      pydantic.
 - [x] **4e — Mandatory features promotion.**
       `src/manfredonia_map/processing/mandatory.py` lifts already-
       processed layers into `data/processed/mandatory_for_aoi/` for

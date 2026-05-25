@@ -1,0 +1,458 @@
+aoi:
+  alias_path: config/aoi.geojson
+  alias_sha256: d6a1e16adda1e19d802f34c81a53adf4379e3a9d46edefcbeaad3d78f812c261
+  buffer_m: 1000.0
+  buffered_path: config/aoi_buffered.geojson
+  buffered_sha256: 96ba904802ad8e4bce80bebde4db857df354ca101e68f7d873bbb0b272bf25a9
+  coastal_band_m: 2000.0
+  near_coast_path: config/aoi_near_coast.geojson
+  near_coast_sha256: fe9590eb242bdc1e5ba68a1aebbdacd974b927e3266a29e936ae7806548f68e9
+  source_path: config/aoi_source.geojson
+  source_sha256: 897f2b6d1792d8b31abc5df06592c2e6e99c4fe1a7447c0319c71d815ad5e20b
+generated_at: '2026-05-25T19:26:03+00:00'
+raster_layers:
+- bands: 4
+  crs: EPSG:32633
+  derived_from: null
+  height: 210
+  layer_id: emodnet_bathymetry
+  processed_path: data/processed/emodnet_bathymetry_8bit.tif
+  processed_sha256: 0cdb8929e2308a9f345351297f9daa3ea9205b2ee0923e19e8a2d6a75909b33d
+  source_id: emodnet_bathymetry_dtm2024_mean
+  type: raster
+  width: 155
+- bands: 4
+  crs: EPSG:32633
+  derived_from: null
+  height: 2085
+  layer_id: tinitaly_dtm
+  processed_path: data/processed/tinitaly_dtm_8bit.tif
+  processed_sha256: dd3036aee5058288a3dd583e8a6a013186a3898de8969883a620d9bb264ee54f
+  source_id: tinitaly_1_1_e46005_s10
+  type: raster
+  width: 1534
+- bands: 4
+  crs: EPSG:32633
+  derived_from: tinitaly_dtm
+  height: 2085
+  layer_id: tinitaly_dtm_hillshade
+  processed_path: data/processed/tinitaly_dtm_hillshade_8bit.tif
+  processed_sha256: f278711b68e3d4ae93e98cf8eff524f68ecf07d36b204b37bbbdfed67c6ea258
+  source_id: tinitaly_1_1_e46005_s10
+  type: raster
+  width: 1534
+sources:
+- access_method: Overpass via osmnx
+  accessed_at: '2026-05-23T17:40:06+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 88875
+  dataset: OSM natural=coastline
+  license: ODbL-1.0
+  publisher: OpenStreetMap contributors
+  raw_path: data/raw/coastline/coastline.geojson
+  sha256: b5a06db20b8d79a8c7e087a1f368dd930642039570b85588913b82d3320d1af4
+  source_id: osm_coastline
+  url: https://overpass-api.de/api/interpreter
+  year_data: null
+- access_method: WCS GetCoverage
+  accessed_at: '2026-05-24T07:40:24+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 393616
+  dataset: EMODnet Bathymetry — Digital Bathymetry DTM 2024 (mean coverage, WCS clip)
+  license: CC-BY-4.0
+  publisher: EMODnet Bathymetry Consortium
+  raw_path: data/raw/emodnet_bathymetry/emodnet_dtm2024_mean_w15.7940_s41.4852_e16.0550_n41.6930_r0.001042.tif
+  sha256: e97aaad31b21cd764986a967c23dd1b2bcaf42f8b2db874594a610be9320ee07
+  source_id: emodnet_bathymetry_dtm2024_mean
+  url: https://ows.emodnet-bathymetry.eu/wcs?service=wcs&version=1.0.0&request=getcoverage&coverage=emodnet%3Amean&crs=EPSG%3A4326&bbox=15.7939511%2C41.4852251%2C16.0550328%2C41.6930058&format=image%2Ftiff&interpolation=nearest&resx=0.0010416666666666667&resy=0.0010416666666666667
+  year_data: 2024
+- access_method: WFS 2.0.0 GetFeature
+  accessed_at: '2026-05-25T06:21:11+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 127017
+  dataset: ISPRA — autorita bacino (Reticolo Idrografico Nazionale 1:250.000, AOI
+    bbox clip via WFS)
+  license: CC-BY-4.0
+  publisher: ISPRA
+  raw_path: data/raw/ispra_hydrography/hy_autorita_bacino_aoi.geojson
+  sha256: 1cd86bea82893c15279fe9b74b82817abc2a7f284cca4eca9de07eba8efa0363
+  source_id: ispra_hy_autorita_bacino
+  url: https://sdi.isprambiente.it/geoserver/hy/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=hy%3Aautorita_bacino&srsName=EPSG%3A4326&bbox=15.7939511%2C41.4852251%2C16.0550328%2C41.6930058%2CEPSG%3A4326&outputFormat=application%2Fjson
+  year_data: null
+- access_method: WFS 2.0.0 GetFeature
+  accessed_at: '2026-05-25T06:21:11+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 166989
+  dataset: ISPRA — bacini principali (Reticolo Idrografico Nazionale 1:250.000, AOI
+    bbox clip via WFS)
+  license: CC-BY-4.0
+  publisher: ISPRA
+  raw_path: data/raw/ispra_hydrography/hy_bacini_principali_aoi.geojson
+  sha256: 9541a6af8ede0e54142e76c5f1322bdd1c1e4b7f983b8fb5266f29e7806f5789
+  source_id: ispra_hy_bacini_principali
+  url: https://sdi.isprambiente.it/geoserver/hy/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=hy%3Abacini_principali&srsName=EPSG%3A4326&bbox=15.7939511%2C41.4852251%2C16.0550328%2C41.6930058%2CEPSG%3A4326&outputFormat=application%2Fjson
+  year_data: null
+- access_method: WFS 2.0.0 GetFeature
+  accessed_at: '2026-05-25T06:21:11+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 147
+  dataset: ISPRA — bacini secondari (Reticolo Idrografico Nazionale 1:250.000, AOI
+    bbox clip via WFS)
+  license: CC-BY-4.0
+  publisher: ISPRA
+  raw_path: data/raw/ispra_hydrography/hy_bacini_secondari_aoi.geojson
+  sha256: 348be28b8990478936ab5bc67dd178027389f39f2181eaf2caf8557dc1a72d18
+  source_id: ispra_hy_bacini_secondari
+  url: https://sdi.isprambiente.it/geoserver/hy/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=hy%3Abacini_secondari&srsName=EPSG%3A4326&bbox=15.7939511%2C41.4852251%2C16.0550328%2C41.6930058%2CEPSG%3A4326&outputFormat=application%2Fjson
+  year_data: null
+- access_method: WFS 2.0.0 GetFeature
+  accessed_at: '2026-05-25T06:21:10+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 27360
+  dataset: ISPRA — reticolo idrografico (Reticolo Idrografico Nazionale 1:250.000,
+    AOI bbox clip via WFS)
+  license: CC-BY-4.0
+  publisher: ISPRA
+  raw_path: data/raw/ispra_hydrography/hy_reticolo_idrografico_aoi.geojson
+  sha256: d30397e9f742307e23a23f5bb0b2e1474ccce2a8d4abbf99de0b46d6f2b19c4f
+  source_id: ispra_hy_reticolo_idrografico
+  url: https://sdi.isprambiente.it/geoserver/hy/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=hy%3Areticolo_idrografico&srsName=EPSG%3A4326&bbox=15.7939511%2C41.4852251%2C16.0550328%2C41.6930058%2CEPSG%3A4326&outputFormat=application%2Fjson
+  year_data: null
+- access_method: HTTPS
+  accessed_at: '2026-05-24T05:55:36+00:00'
+  bbox: null
+  byte_count: 11882341
+  dataset: ISTAT — Confini amministrativi al 1 gennaio 2024 (generalizzati)
+  license: CC-BY-3.0
+  publisher: ISTAT
+  raw_path: data/raw/istat_admin/Limiti01012024_g.zip
+  sha256: c3545d15a15bdb1271db22a5ce5cb21614c72422736cf6b9cd1e6426896be265
+  source_id: istat_limiti_2024_generalized
+  url: https://www.istat.it/storage/cartografia/confini_amministrativi/generalizzati/2024/Limiti01012024_g.zip
+  year_data: 2024
+- access_method: HTTPS
+  accessed_at: '2026-05-24T06:24:11+00:00'
+  bbox: null
+  byte_count: 33919654
+  dataset: MASE — Rete Natura 2000 (SIC/ZSC/ZPS), trasmissione CE dicembre 2025 (tuttiicampi)
+  license: non-commercial, cite source
+  publisher: MASE
+  raw_path: data/raw/mase_natura2000/sic_zps_ita_32_tuttiicampi_2025.zip
+  sha256: b0ec697b1b48de569c059ff80ea0376ac9be7f83f58e8488f1176bf56c538494
+  source_id: mase_natura2000_2025_tuttiicampi
+  url: https://download.mase.gov.it/Natura2000/Trasmissione%20CE_dicembre2025/sic_zps_ita_32_tuttiicampi.zip
+  year_data: 2025
+- access_method: Overpass via osmnx
+  accessed_at: '2026-05-24T06:07:12+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 5047
+  dataset: OSM historic=archaeological_site
+  license: ODbL-1.0
+  publisher: OpenStreetMap contributors
+  raw_path: data/raw/osm_archaeology/archaeology.geojson
+  sha256: 85af47559e397480cbed0a38318081280f3dc8bf13abdf5c019a1e02548e0e5b
+  source_id: osm_archaeology
+  url: https://overpass-api.de/api/interpreter
+  year_data: null
+- access_method: Overpass via osmnx
+  accessed_at: '2026-05-23T22:20:10+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 37887
+  dataset: OSM natural=beach
+  license: ODbL-1.0
+  publisher: OpenStreetMap contributors
+  raw_path: data/raw/osm_beaches/beaches.geojson
+  sha256: add32c7839190bceade8683efe5e42a8c7c9956c2b47d55c9899ffaab0eb7382
+  source_id: osm_beaches
+  url: https://overpass-api.de/api/interpreter
+  year_data: null
+- access_method: Overpass via osmnx
+  accessed_at: '2026-05-23T22:20:11+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 89713
+  dataset: OSM natural=coastline
+  license: ODbL-1.0
+  publisher: OpenStreetMap contributors
+  raw_path: data/raw/osm_coastline/coastline.geojson
+  sha256: 9615d6206cf3f4efcd1f7aa8d274c166fef5f9cc5b32fb2108d7a7b7f4b48ff1
+  source_id: osm_coastline
+  url: https://overpass-api.de/api/interpreter
+  year_data: null
+- access_method: Overpass via osmnx
+  accessed_at: '2026-05-23T22:20:12+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 1335
+  dataset: OSM highway=cycleway / bicycle=designated
+  license: ODbL-1.0
+  publisher: OpenStreetMap contributors
+  raw_path: data/raw/osm_cycle_paths/cycle_paths.geojson
+  sha256: d41b2b22b3e9d45c56f92c52b516b32a934b1675acd5a16e6f794fcffd43ab17
+  source_id: osm_cycle_paths
+  url: https://overpass-api.de/api/interpreter
+  year_data: null
+- access_method: Overpass via osmnx
+  accessed_at: '2026-05-23T22:20:21+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 28641
+  dataset: OSM harbour / landuse=harbour / man_made=pier|breakwater
+  license: ODbL-1.0
+  publisher: OpenStreetMap contributors
+  raw_path: data/raw/osm_harbours/harbours.geojson
+  sha256: 38e0424a953ee622ae7239e95d419fab66de79c92cf8878a3fe29d67b2c20d13
+  source_id: osm_harbours
+  url: https://overpass-api.de/api/interpreter
+  year_data: null
+- access_method: Overpass via osmnx
+  accessed_at: '2026-05-24T06:07:08+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 3452
+  dataset: OSM landuse=industrial / landuse=brownfield
+  license: ODbL-1.0
+  publisher: OpenStreetMap contributors
+  raw_path: data/raw/osm_industrial/industrial.geojson
+  sha256: 5be4ac8bfa92fbe1988b7c62637e92361cf1632b93d64f9ebd4e11633c892088
+  source_id: osm_industrial
+  url: https://overpass-api.de/api/interpreter
+  year_data: null
+- access_method: Overpass via osmnx
+  accessed_at: '2026-05-23T22:20:32+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 6042009
+  dataset: OSM highway=*
+  license: ODbL-1.0
+  publisher: OpenStreetMap contributors
+  raw_path: data/raw/osm_roads/roads.geojson
+  sha256: d5e497b6bf9d79674ce18c797c4d48bdbb6f05bbb0ffd65955f6c17031c22aee
+  source_id: osm_roads
+  url: https://overpass-api.de/api/interpreter
+  year_data: null
+- access_method: Overpass via osmnx
+  accessed_at: '2026-05-23T22:20:42+00:00'
+  bbox:
+  - 15.7939511
+  - 41.4852251
+  - 16.0550328
+  - 41.6930058
+  byte_count: 53454
+  dataset: OSM natural=wetland
+  license: ODbL-1.0
+  publisher: OpenStreetMap contributors
+  raw_path: data/raw/osm_wetlands/wetlands.geojson
+  sha256: ded5bce9bb4cc573035613f16af958937252921a6f2bde217acd6777f032deb9
+  source_id: osm_wetlands
+  url: https://overpass-api.de/api/interpreter
+  year_data: null
+- access_method: HTTPS (CKAN open data) — bundle reconstructed from user-supplied
+    SIN.shp
+  accessed_at: '2026-05-25T08:30:00+00:00'
+  bbox: null
+  byte_count: 172855
+  dataset: Regione Puglia — Siti di Interesse Nazionale (SIN), shapefile bundle including
+    Bari / Brindisi / Manfredonia / Taranto
+  license: CC-BY-4.0
+  publisher: Regione Puglia / InnovaPuglia (Servizio Territorio e Ambiente)
+  raw_path: data/raw/regione_puglia_sin/sin_puglia.zip
+  sha256: e0b85d18da171f224c068e5e37586316fb48259aa47b0ac186d4f06e7d86e459
+  source_id: regione_puglia_sin
+  url: https://dati.puglia.it/ckan/dataset/70c4d257-d87e-4533-9e18-b9515b469b5b/resource/7263c82e-de36-43b9-98f1-0e84cf78f5a3/download/sin.zip
+  year_data: null
+- access_method: HTTPS
+  accessed_at: '2026-05-24T06:53:53+00:00'
+  bbox: null
+  byte_count: 130501006
+  dataset: INGV TINITALY/1.1 DEM — tile e46005_s10
+  license: CC-BY-4.0
+  publisher: INGV
+  raw_path: data/raw/tinitaly/e46005_s10.zip
+  sha256: 006da32109970740767bc9d160e9d75a4b4f388f14a507f4bf44c59241d085e8
+  source_id: tinitaly_1_1_e46005_s10
+  url: https://tinitaly.pi.ingv.it/data/e46005_s10/e46005_s10.zip
+  year_data: null
+vector_layers:
+- category: admin_comune
+  feature_count: 2
+  geom_types:
+  - Polygon
+  layer_id: admin_boundaries
+  processed_path: data/processed/admin_boundaries.geojson
+  processed_sha256: e606c7712141b00c6058aad407d309b56c0d5329d39847b972a8ba07927607a2
+  source_id: istat_limiti_2024_generalized
+  type: vector
+  year_data: 2024
+- category: archeological
+  feature_count: 3
+  geom_types:
+  - Point
+  - Polygon
+  layer_id: archeological_areas
+  processed_path: data/processed/archeological_areas.geojson
+  processed_sha256: 116c7ddc5f9e0647cf30881a19ffde357bc92ef243842a532e99fc5f0b161026
+  source_id: osm_archaeology
+  type: vector
+  year_data: 2026
+- category: beach
+  feature_count: 17
+  geom_types:
+  - Point
+  - Polygon
+  layer_id: beaches
+  processed_path: data/processed/beaches.geojson
+  processed_sha256: b83e562a488d6b372875a8455c5981ecbe22c686dbb736e07ff79f1832f91a6b
+  source_id: osm_beaches
+  type: vector
+  year_data: 2026
+- category: coastline
+  feature_count: 3
+  geom_types:
+  - LineString
+  layer_id: coastline
+  processed_path: data/processed/coastline.geojson
+  processed_sha256: 7e6f54f07d563b24ec6c5f56bcd2e36ad0aaf00c6e84a89bcdd1360130730be2
+  source_id: osm_coastline
+  type: vector
+  year_data: 2026
+- category: null
+  feature_count: 0
+  geom_types: []
+  layer_id: cycle_paths
+  processed_path: data/processed/cycle_paths.geojson
+  processed_sha256: 121546b438f07ec9110ca0b12535c9d7325ffd0660229db25c88f7f1f1ee3c08
+  source_id: null
+  type: vector
+  year_data: null
+- category: null
+  feature_count: 0
+  geom_types: []
+  layer_id: cycle_routes
+  processed_path: data/processed/cycle_routes.geojson
+  processed_sha256: 121546b438f07ec9110ca0b12535c9d7325ffd0660229db25c88f7f1f1ee3c08
+  source_id: null
+  type: vector
+  year_data: null
+- category: harbour
+  feature_count: 52
+  geom_types:
+  - LineString
+  - Polygon
+  layer_id: harbours
+  processed_path: data/processed/harbours.geojson
+  processed_sha256: d0d11ff3f82e8d292491d3697ad4f838351383c8f1e7d3282288098597efc4a7
+  source_id: osm_harbours
+  type: vector
+  year_data: 2026
+- category: water
+  feature_count: 14
+  geom_types:
+  - LineString
+  layer_id: hydrography_surface
+  processed_path: data/processed/hydrography_surface.geojson
+  processed_sha256: 176aed4f840f20252b851a6d0408ca148f4b8d9d277679e5ea7cdfe8bd1eda2f
+  source_id: ispra_hy_reticolo_idrografico
+  type: vector
+  year_data: 2020
+- category: industrial
+  feature_count: 5
+  geom_types:
+  - Polygon
+  layer_id: industrial_areas
+  processed_path: data/processed/industrial_areas.geojson
+  processed_sha256: ce686160f1653c6600655797f31da9231ea9cb6bcd6111f82c2af2ab2dfd07c4
+  source_id: osm_industrial
+  type: vector
+  year_data: 2026
+- category: natura2000
+  feature_count: 5
+  geom_types:
+  - MultiPolygon
+  - Polygon
+  layer_id: natura2000
+  processed_path: data/processed/natura2000.geojson
+  processed_sha256: 615bc751ba2be8238abba33fa173959c3dafcf57d32cc05ffa6bc8f5a1d72e32
+  source_id: mase_natura2000_2025_tuttiicampi
+  type: vector
+  year_data: 2025
+- category: road
+  feature_count: 2047
+  geom_types:
+  - LineString
+  - MultiLineString
+  layer_id: roads
+  processed_path: data/processed/roads.geojson
+  processed_sha256: b3744a682e56516fd2193e0e0bf639e4a4f6141387d6573ff7978d98a3390dc6
+  source_id: osm_roads
+  type: vector
+  year_data: 2026
+- category: sin
+  feature_count: 4
+  geom_types:
+  - Polygon
+  layer_id: sin_manfredonia
+  processed_path: data/processed/sin_manfredonia.geojson
+  processed_sha256: 0e4b1d88a8e1cf94c365b53d4d05932e29f23be468a7d65e8c5b4c396d791dd9
+  source_id: regione_puglia_sin
+  type: vector
+  year_data: 2024
+- category: wetland
+  feature_count: 23
+  geom_types:
+  - MultiPolygon
+  - Polygon
+  layer_id: wetlands
+  processed_path: data/processed/wetlands.geojson
+  processed_sha256: 969124c684faff81754e74bf69959c33140049bc06cc4913cfd05c4feb51395a
+  source_id: osm_wetlands
+  type: vector
+  year_data: 2026
+version: 1

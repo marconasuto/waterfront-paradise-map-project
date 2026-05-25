@@ -15,6 +15,29 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-25 — Phase 4d: catalog generator (data/catalog.yaml).
+  - `src/manfredonia_map/catalog/{__init__, models, builder, cli}.py`
+    wired into the top-level CLI as `mfd-map catalog`.
+  - Pydantic schema (`Catalog`, `AoiInfo`, `Source`, `VectorLayer`,
+    `RasterLayer`) — strict, frozen, extra="forbid". Schema version 1.
+  - Builder walks: every `data/raw/**/*.provenance.json` (→ `Source`),
+    every `data/processed/*.geojson` (→ `VectorLayer` with feature
+    count + geom types + per-feature source_id), every
+    `data/processed/*_8bit.tif` (→ `RasterLayer` with width / height
+    / band count / CRS, source_id resolved via
+    `processing.raster.PROCESSORS`, `derived_from` set for hillshade
+    siblings), plus all four AOI shapes hashed in `AoiInfo`.
+  - CLI: `mfd-map catalog build` + `mfd-map catalog validate`. Pixi
+    tasks `catalog-build` / `catalog-validate`.
+  - `data/catalog.yaml` is the tracked artifact (already whitelisted
+    in `.gitignore`); deterministic YAML (sort_keys=True, atomic
+    tempfile+rename); two consecutive builds are byte-identical aside
+    from the intentional `generated_at` timestamp.
+  - Real `catalog-build` produced **18 sources, 13 vector layers,
+    3 raster layers** (incl. the `tinitaly_dtm_hillshade` derived
+    entry linked back to `tinitaly_dtm`). `catalog-validate` round-
+    trips cleanly through pydantic.
+  - **209 tests passing, 97.94 % coverage**, ruff clean.
 - 2026-05-25 — Phase 4c-2: DTM hillshade derivation.
   - `src/manfredonia_map/processing/hillshade.py`:
     `compute_hillshade(elevation, cellsize_x, cellsize_y, azimuth_deg,
