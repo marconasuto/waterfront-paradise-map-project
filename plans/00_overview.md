@@ -70,12 +70,18 @@ Phase 2 is unblocked.
 
 - See `plans/01_data_acquisition.md`.
 - [x] **OSM layer registry** — `osm.LAYERS` + `mfd-map acquire osm <layer>`
-      + `mfd-map acquire osm all`. 6 layers covered.
+      + `mfd-map acquire osm all`. **9 layers** covered (coastline,
+      roads, cycle_paths, cycle_routes, harbours, beaches, wetlands,
+      industrial, archaeology).
 - [x] **Coastline** — OSM `natural=coastline` (4 LineStrings, ~88 KB, ODbL).
 - [x] **Roads** — OSM `highway=*` (2,770 features, ~5.8 MB, ODbL).
 - [x] **Cycle paths** — OSM `highway=cycleway` / `bicycle=designated`
-      (2 features — sparse in the AOI, will augment with MIT Ciclovia
-      Adriatica later).
+      (2 features — sparse in the AOI).
+- [~] **Cycle routes (Ciclovia Adriatica)** — registered as
+      `osm.LAYERS["cycle_routes"]` (`route=bicycle` relations) but
+      **zero matches in our AOI**. Neither OSM, MIT Open Data nor
+      Bicitalia exposes the Ciclovia Adriatica geometry programmatically
+      for Manfredonia. Tracked as OPEN-CICLOVIA-1.
 - [x] **Harbours** — OSM `harbour=*` / `landuse=harbour` /
       `man_made=pier|breakwater` (52 features).
 - [x] **Beaches** — OSM `natural=beach` (19 features).
@@ -116,6 +122,15 @@ Phase 2 is unblocked.
       float32 at 1/16 arc-minute (~115 m). Values are unified land+sea
       elevation (min −16.76 m near coast, max +667 m on Gargano,
       mean +63.93 m). CC-BY-4.0.
+- [x] **Surface hydrography** — ISPRA `sdi.isprambiente.it/geoserver/hy`
+      WFS, all 4 layers AOI-bbox clipped: `reticolo_idrografico` (27 KB,
+      ~34 features incl. Cervaro + Carapelle torrents),
+      `bacini_principali` (167 KB), `bacini_secondari` (147 B — none
+      intersect AOI), `autorita_bacino` (127 KB). CC-BY-4.0.
+- [ ] **Underground hydrography (CII500K)** — ISPRA Carta Idrogeologica
+      d'Italia 1:500.000 is on `portalesgi.isprambiente.it` not the
+      `hy` workspace; programmatic endpoint not yet wired up. Tracked
+      as OPEN-CII500K-1.
 - [x] **Admin boundaries** — ISTAT 2024 (generalizzato), 11.88 MB zip
       containing comuni / province / regioni / ripartizioni shapefiles
       in EPSG:32632. Manfredonia (PRO_COM_T=071029) and Monte

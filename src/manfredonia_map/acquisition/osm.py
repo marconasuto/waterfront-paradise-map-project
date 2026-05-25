@@ -52,6 +52,16 @@ LAYERS: dict[str, OsmLayerSpec] = {
         tags={"highway": "cycleway", "bicycle": "designated"},
         allowed_geom_types=frozenset({"LineString", "MultiLineString"}),
     ),
+    # Long-distance signed bike routes (relations), e.g. Ciclovia Adriatica.
+    # OSM relations are the canonical home for routes that span tagged
+    # highway segments; this complements `cycle_paths` (which only catches
+    # dedicated cycling *infrastructure*).
+    "cycle_routes": OsmLayerSpec(
+        source_id="osm_cycle_routes",
+        dataset="OSM route=bicycle (long-distance signed routes)",
+        tags={"route": "bicycle"},
+        allowed_geom_types=frozenset({"LineString", "MultiLineString"}),
+    ),
     "harbours": OsmLayerSpec(
         source_id="osm_harbours",
         dataset="OSM harbour / landuse=harbour / man_made=pier|breakwater",
@@ -101,10 +111,20 @@ LAYERS: dict[str, OsmLayerSpec] = {
 
 
 def _default_osmnx_fetcher(bbox: Bbox, tags: Tags) -> gpd.GeoDataFrame:  # pragma: no cover
-    """Default fetcher — calls ``osmnx.features_from_bbox`` (network)."""
-    import osmnx as ox  # noqa: PLC0415  # lazy: osmnx pulls a heavy dep tree
+    """Default fetcher — calls ``osmnx.features_from_bbox`` (network).
 
-    return ox.features_from_bbox(bbox=bbox, tags=tags)
+    osmnx 2.x raises ``InsufficientResponseError`` instead of returning
+    an empty GeoDataFrame when no features match. We catch it and return
+    an empty GDF so the rest of the pipeline can handle "no data" as a
+    normal (loggable) outcome rather than an exception.
+    """
+    import osmnx as ox  # noqa: PLC0415  # lazy: osmnx pulls a heavy dep tree
+    from osmnx._errors import InsufficientResponseError  # noqa: PLC0415
+
+    try:
+        return ox.features_from_bbox(bbox=bbox, tags=tags)
+    except InsufficientResponseError:
+        return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
 
 
 def fetch_features(

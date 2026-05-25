@@ -12,6 +12,7 @@ from manfredonia_map.acquisition import (
     base,
     emodnet,
     http,
+    ispra,
     istat,
     mase,
     osm,
@@ -441,3 +442,101 @@ def acquire_vir_ingest(kml_path: Path, label: str, out_dir: Path | None) -> None
     base.write_provenance(stamped, dst.with_suffix(dst.suffix + ".provenance.json"))
     click.echo(f"Staged {dst} ({stamped.byte_count} bytes)")
     click.echo(f"Wrote {dst.with_suffix(dst.suffix + '.provenance.json')}")
+
+
+# --- ISPRA hydrography --------------------------------------------------
+
+@acquire.group(name="ispra")
+def acquire_ispra() -> None:
+    """Download ISPRA national datasets via WFS."""
+
+
+def _persist_ispra_hydro(spec: ispra.IspraHydrographySpec, out: Path) -> None:
+    """Download an ISPRA WFS GeoJSON + write provenance sidecar."""
+    sha = http.download_file(
+        spec.url,
+        out,
+        headers={"User-Agent": "manfredonia-map/0.0.1 (acquisition pipeline)"},
+        timeout_s=180.0,
+    )
+    prov = base.Provenance(
+        source_id=spec.source_id,
+        publisher="ISPRA",
+        dataset=spec.dataset,
+        url=spec.url,
+        access_method="WFS 2.0.0 GetFeature",
+        license="CC-BY-4.0",
+        accessed_at=base.now_iso_utc(),
+        bbox=spec.bbox,
+        query={"typeNames": f"hy:{spec.layer}", "srsName": "EPSG:4326"},
+        sha256=sha,
+    )
+    stamped = base.stamp_provenance(prov, out)
+    base.write_provenance(stamped, out.with_suffix(".provenance.json"))
+    click.echo(f"Wrote {out} ({stamped.byte_count} bytes)")
+
+
+@acquire_ispra.command(name="hydrography")
+@click.argument("layer", type=click.Choice(list(ispra.LAYERS), case_sensitive=False))
+@click.option(
+    "--aoi",
+    "aoi_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=CONFIG_DIR / "aoi_buffered.geojson",
+    show_default=True,
+    help="GeoJSON whose bounding box defines the WFS bbox filter.",
+)
+@click.option(
+    "--out",
+    "out_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help="Destination GeoJSON path. Defaults to data/raw/ispra_hydrography/<filename>.",
+)
+def acquire_ispra_hydrography(layer: str, aoi_path: Path, out_path: Path | None) -> None:
+    """Fetch one ISPRA hydrography WFS layer clipped to the AOI bbox."""
+    bbox = _bbox_from_aoi(aoi_path)
+    spec = ispra.IspraHydrographySpec(layer=layer, bbox=bbox)  # type: ignore[arg-type]
+    out = (
+        out_path
+        if out_path is not None
+        else DATA_RAW / "ispra_hydrography" / spec.out_filename
+    )
+    logger.info("Downloading %s -> %s", spec.url, out)
+    _persist_ispra_hydro(spec, out)
+
+
+@acquire_ispra.command(name="hydrography-all")
+@click.option(
+    "--aoi",
+    "aoi_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=CONFIG_DIR / "aoi_buffered.geojson",
+    show_default=True,
+    help="GeoJSON whose bounding box defines the WFS bbox filter.",
+)
+@click.option(
+    "--skip",
+    "skip_layers",
+    multiple=True,
+    type=click.Choice(list(ispra.LAYERS), case_sensitive=False),
+    help="Layers to skip (may be repeated).",
+)
+def acquire_ispra_hydrography_all(aoi_path: Path, skip_layers: tuple[str, ...]) -> None:
+    """Fetch every ISPRA hydrography layer in `ispra.LAYERS`."""
+    bbox = _bbox_from_aoi(aoi_path)
+    failures: list[str] = []
+    for layer in ispra.LAYERS:
+        if layer in skip_layers:
+            click.echo(f"--- skip ispra:hy:{layer}")
+            continue
+        click.echo(f"--- acquire ispra:hy:{layer}")
+        try:
+            spec = ispra.IspraHydrographySpec(layer=layer, bbox=bbox)
+            out = DATA_RAW / "ispra_hydrography" / spec.out_filename
+            _persist_ispra_hydro(spec, out)
+        except (http.DownloadError, click.ClickException) as exc:
+            logger.warning("ispra:hy:%s failed: %s", layer, exc)
+            failures.append(layer)
+    if failures:
+        raise click.ClickException(f"acquisitions failed: {', '.join(failures)}")

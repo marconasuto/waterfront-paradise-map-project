@@ -22,9 +22,9 @@ that contradicts this file is wrong and must be reconciled here first.
 
 | Field           | Value                                |
 |-----------------|--------------------------------------|
-| Version         | 0.7                                  |
+| Version         | 0.8                                  |
 | Created         | 2026-05-23                           |
-| Last updated    | 2026-05-24 (Phase 3g + 3h: EMODnet bathymetry via WCS; VIR manual-ingest CLI documented; OPEN-VIR-1 recorded) |
+| Last updated    | 2026-05-25 (Phase 3i: ISPRA surface hydrography via WFS; OSM cycle_routes registered; OPEN-CICLOVIA-1 and OPEN-CII500K-1 recorded) |
 | Owner           | Marco Nasuto                         |
 | Change log      | See `CHANGELOG.md` (root)            |
 | Related plans   | `plans/00_overview.md` and subplans  |
@@ -502,6 +502,8 @@ Use cases (for design pressure today, ship target post-v1):
 | OPEN-LICENSE-1 | MASE Natura 2000 is "non-commercial" — confirm museum/urban-planning use is OK | user | closed — **confirmed** by user 2026-05-23; cite source on every layer use |
 | OPEN-OSM-1    | Confirm we accept ODbL attribution for OSM-derived layers in the storymap | user  | closed — **confirmed** by user 2026-05-23; ODbL attribution shown in legend + footer |
 | OPEN-STACK-1  | Raster library choice (added v0.3)                                        | user  | closed — **xarray + zarr + rioxarray + dask**; pixi for environment management |
+| OPEN-CICLOVIA-1 | Ciclovia Adriatica geometry is not programmatically downloadable for this AOI. MIT Open Data publishes only a CSV list of route names (no geometry). Bicitalia gates the GPX behind a routing UI (no direct file URL). OSM has zero `route=bicycle` relations whose member ways intersect the Manfredonia AOI bbox — Ciclovia Adriatica is not yet tagged as an OSM relation through Manfredonia. v1 ships with OSM `cycle_paths` (sparse cycling infrastructure) only. Resolution paths: (a) manual GPX export from Bicitalia / Wikiloc + ingest via a future `acquire ciclovia ingest --gpx` CLI (same pattern as VIR), (b) wait for upstream OSM tagging, (c) approximate by clipping OSM coastal road segments. | user | **open — v1 ships with OSM cycle_paths only** |
+| OPEN-CII500K-1 | ISPRA *Carta Idrogeologica d'Italia 1:500.000* (CII500K, 2025 — underground hydrogeology) is published on `portalesgi.isprambiente.it` rather than the `sdi.isprambiente.it/geoserver/hy` WFS we use for surface hydrography. Its programmatic endpoint is not yet wired into `acquisition/ispra.py`. v1 ships with surface only; **underground hydrography remains an unresolved layer** in spec §4 row 2. | spec | open |
 | OPEN-VIR-1    | Authoritative MiC *Vincoli in Rete* archaeological vincoli are not exposed via a public, programmatic WFS / WMS URL. The portal at `vincoliinrete.beniculturali.it` only allows per-site KML / CSV / PDF export through manual UI navigation; the internal WFS layer is gated by institutional auth. Same gap on GNA (`gna.cultura.gov.it`) and SITAP (`sitap.cultura.gov.it`). Options: (a) formal MiC data request, (b) per-site manual KML export via `mfd-map acquire vir ingest --kml`, (c) keep OSM `historic=archaeological_site` (Grotta Scaloria + Siponto + Parco archeologico + Coppa Nevigata) as the v1 proxy. | user | **open — v1 ships with OSM proxy + manual-ingest CLI** |
 | OPEN-SIN-1    | Authoritative MASE SIN-5 Manfredonia perimeter is not exposed via a public, programmatic URL. The SIN page on `bonifichesiticontaminati.mite.gov.it/sin-5/` shows a map image but no shapefile/GeoJSON/WFS link; MOSAICO/ReNDiS expose WFS only behind the ISPRA metadata catalog UI; `sgi2.isprambiente.it/geoserver` does not host SIN. Options: (a) formal data request to MASE/ISPRA, (b) manual digitization from the SIN-5 decree maps, (c) keep OSM `landuse=industrial` ("Zona Industriale di Manfredonia-Monte Sant'Angelo") as the v1 proxy. | user | **open — v1 ships with the OSM proxy** |
 

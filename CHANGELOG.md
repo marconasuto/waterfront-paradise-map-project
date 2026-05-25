@@ -15,6 +15,36 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-25 — Phase 3i: ISPRA surface hydrography + OSM cycle_routes
+  (SPECIFICATIONS.md **v0.8**).
+  - `src/manfredonia_map/acquisition/ispra.py`: `IspraHydrographySpec`
+    builds WFS 2.0.0 GetFeature URLs against
+    `sdi.isprambiente.it/geoserver/hy/wfs` with our AOI bbox and
+    `application/json` output. 4 layers covered
+    (`reticolo_idrografico`, `bacini_principali`, `bacini_secondari`,
+    `autorita_bacino`).
+  - CLI: `mfd-map acquire ispra hydrography <layer>` and
+    `mfd-map acquire ispra hydrography-all [--skip ...]`. Pixi task
+    `acquire-ispra-hydrography-all`.
+  - Real downloads: total 322 KB across 4 GeoJSONs. CC-BY-4.0. The
+    `reticolo_idrografico` AOI clip includes the **Cervaro** (feeds
+    Lago Salso) and **Carapelle** torrents.
+  - **OSM gains `cycle_routes`** (`route=bicycle` relations) — long-
+    distance signed routes that complement `cycle_paths`. The default
+    osmnx fetcher now catches `InsufficientResponseError` and returns
+    an empty GeoDataFrame so "no matching features" is a normal,
+    loggable outcome (used by the new `cycle_routes` and any future
+    AOI-sparse layer).
+  - **Ciclovia Adriatica blocked**: zero `route=bicycle` relations
+    intersect our AOI (Ciclovia Adriatica not tagged through
+    Manfredonia in OSM); MIT Open Data publishes only a route-name
+    CSV; Bicitalia gates GPX behind a routing UI. Documented as
+    OPEN-CICLOVIA-1.
+  - **Underground hydrography**: ISPRA CII500K (Carta Idrogeologica
+    1:500.000, 2025) is on `portalesgi.isprambiente.it`, not the `hy`
+    workspace. Documented as OPEN-CII500K-1; v1 ships with surface
+    hydrography only.
+  - **93 tests passing, 98.68 % coverage**, ruff clean.
 - 2026-05-24 — Phase 3h: MiC Vincoli in Rete — manual-ingest CLI
   (SPECIFICATIONS.md **v0.7**, OPEN-VIR-1 recorded).
   - Authoritative VIR archaeological vincoli are not exposed via any
