@@ -18,6 +18,6 @@ returns a clean GeoDataFrame. The CLI then runs reproject → clip →
 make-valid → write atomically.
 """
 
-from manfredonia_map.processing import base, mandatory, normalize, raster
+from manfredonia_map.processing import base, hillshade, mandatory, normalize, raster
 
-__all__ = ["base", "mandatory", "normalize", "raster"]
+__all__ = ["base", "hillshade", "mandatory", "normalize", "raster"]

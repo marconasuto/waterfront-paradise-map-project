@@ -195,7 +195,17 @@ Phase 2 is unblocked.
       nodata since alpha encodes transparency), and the
       ``_block_network`` fixture rejecting asyncio's local socket-pair
       (now allows AF_UNIX while still blocking AF_INET/AF_INET6).
-      Hillshade derivation deferred to 4c-2.
+- [x] **4c-2 — DTM hillshade derivation.**
+      `src/manfredonia_map/processing/hillshade.py`:
+      `compute_hillshade(elevation, cellsize_x, cellsize_y, azimuth_deg,
+      altitude_deg, z_factor)` implements the Esri-style lighting model
+      via `numpy.gradient` central differences. `grayscale_to_rgba`
+      wraps to a 4-band RGBA so it can blend on top of the
+      hypsometric COG. CLI: `mfd-map process hillshade <raster_id>`
+      + pixi task `process-hillshade`. Real run produces
+      `tinitaly_dtm_hillshade_8bit.tif` — 2085×1534 4-band uint8,
+      300 KB, internal overviews [2, 4], values 0–230 with mean 65
+      (good shadow/highlight distribution).
 - [ ] **4d — Catalog generator** (walk `data/raw/**/*.provenance.json`
       + processed outputs into `data/catalog.yaml`).
 - [x] **4e — Mandatory features promotion.**

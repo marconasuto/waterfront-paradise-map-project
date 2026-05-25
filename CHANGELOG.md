@@ -15,6 +15,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-25 — Phase 4c-2: DTM hillshade derivation.
+  - `src/manfredonia_map/processing/hillshade.py`:
+    `compute_hillshade(elevation, cellsize_x, cellsize_y, azimuth_deg,
+    altitude_deg, z_factor)` runs the standard Esri-style lighting model
+    using `numpy.gradient` central differences (with explicit
+    NaN-masking because central diff does not propagate NaN through
+    a single masked cell). `grayscale_to_rgba` wraps the result in a
+    4-band RGBA so it can blend on top of the hypsometric COG via a
+    multiply layer.
+  - CLI: `mfd-map process hillshade <raster_id>` (configurable
+    `--azimuth-deg`, `--altitude-deg`, `--z-factor`); pixi task
+    `process-hillshade`. Re-reads the raw GeoTIFF through the same
+    `raster.read_raster` + `reproject_and_clip` so geometry stays
+    aligned with the hypsometric COG.
+  - Real output: `data/processed/tinitaly_dtm_hillshade_8bit.tif` —
+    2085×1534, 4-band uint8, 300 KB, internal overviews [2, 4],
+    values 0–230 with mean 65 (good shadow/highlight distribution).
+  - **185 tests passing, 98.01 % coverage**, ruff clean.
 - 2026-05-25 — Phase 4c: raster processing (DTM + bathymetry → 8-bit COG).
   - `src/manfredonia_map/processing/raster.py`: read raw GeoTIFF
     (loose, zipped, or directory-pick-single) → `rioxarray` →

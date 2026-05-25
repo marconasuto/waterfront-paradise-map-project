@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 
 from manfredonia_map.paths import CONFIG_DIR, DATA_INTERIM, DATA_PROCESSED
-from manfredonia_map.processing import base, mandatory, normalize, raster
+from manfredonia_map.processing import base, hillshade, mandatory, normalize, raster
 
 logger = logging.getLogger(__name__)
 
@@ -227,3 +227,54 @@ def process_rasters_all(
     if failures:
         msg = "; ".join(f"{rid}: {err}" for rid, err in failures)
         raise click.ClickException(f"raster processing failed for: {msg}")
+
+
+@process.command(name="hillshade")
+@click.argument("raster_id", type=str)
+@click.option(
+    "--aoi",
+    "aoi_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=CONFIG_DIR / "aoi.geojson",
+    show_default=True,
+)
+@click.option(
+    "--processed-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=DATA_PROCESSED,
+    show_default=True,
+)
+@click.option(
+    "--azimuth-deg", type=float,
+    default=hillshade.DEFAULT_AZIMUTH_DEG, show_default=True,
+)
+@click.option(
+    "--altitude-deg", type=float,
+    default=hillshade.DEFAULT_ALTITUDE_DEG, show_default=True,
+)
+@click.option(
+    "--z-factor", type=float,
+    default=hillshade.DEFAULT_Z_FACTOR, show_default=True,
+)
+def process_hillshade_cmd(
+    raster_id: str,
+    aoi_path: Path,
+    processed_dir: Path,
+    azimuth_deg: float,
+    altitude_deg: float,
+    z_factor: float,
+) -> None:
+    """Derive a hillshade COG from a registered raster (e.g. ``tinitaly_dtm``)."""
+    if raster_id not in raster.PROCESSORS:
+        raise click.ClickException(
+            f"unknown raster_id={raster_id!r}; known: {sorted(raster.PROCESSORS)}"
+        )
+    aoi = base.read_aoi_polygon(aoi_path)
+    out = hillshade.process_hillshade(
+        raster_id, aoi,
+        processed_dir=processed_dir,
+        azimuth_deg=azimuth_deg,
+        altitude_deg=altitude_deg,
+        z_factor=z_factor,
+    )
+    click.echo(f"Wrote {out}  (8-bit hillshade COG)")
