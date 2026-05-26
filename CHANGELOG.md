@@ -6,6 +6,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
 ## [Unreleased]
 
 ### Added
+- 2026-05-26 — Phase 6b: basemap switcher.
+  - `webapp/src/map/style-merge.ts` translates `mapbox://styles/<u>/<id>`
+    into the REST endpoint, fetches the full basemap style, then
+    `mergeOverlay()` appends our `manfredonia-*` sources + layers on
+    top (minus the overlay's `background` layer, since the basemap
+    already provides one). Sprite + glyphs + initial camera come from
+    the basemap.
+  - `webapp/src/config/loader.ts` parses `config/basemaps.yaml` (and
+    highlights / color_scheme for later phases) via the `yaml` package.
+    Shallow validation rejects empty lists or entries missing required
+    fields with clear error messages.
+  - `webapp/src/ui/basemap-control.ts` exposes a `BasemapControl`
+    implementing Mapbox's `IControl` interface — a small Italian-labelled
+    `<select>` mounted top-left that triggers `map.setStyle()` on change.
+  - 26 new vitest tests (style-merge: 11, config-loader: 10,
+    basemap-control: 5); suite at 34 passed. Build at 529 KB gzipped.
 - 2026-05-26 — Phase 6a: web app scaffold (Vite + TypeScript +
   Mapbox GL JS).
   - `webapp/` Vite + TS scaffold. Strict tsconfig (no unchecked index

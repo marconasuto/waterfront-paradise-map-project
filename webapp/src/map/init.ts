@@ -10,11 +10,11 @@ export interface InitMapOptions {
 }
 
 /**
- * Boot a Mapbox GL JS map from a prebuilt style document.
+ * Boot a Mapbox GL JS map from a (possibly already-merged) style document.
  *
- * The style's center/zoom drive the initial camera; the access token is
- * set on the module global before construction so all source/sprite/glyph
- * fetches carry it.
+ * The token is set on the module global before construction so all source,
+ * sprite and glyph fetches carry it. The URL hash drives the camera so
+ * deep links survive reloads.
  */
 export function initMap({ container, style, env }: InitMapOptions): MapboxMap {
   mapboxgl.accessToken = env.mapboxPublicToken;

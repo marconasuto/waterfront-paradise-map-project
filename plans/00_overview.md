@@ -310,9 +310,18 @@ Phase 2 is unblocked.
       Build produces ~498 KB gzipped (Mapbox GL JS dominates; our
       code is 1.2 KB). Pixi tasks: `web-install / web-dev / web-build
       / web-preview / web-test / web-typecheck / web-sync`.
-- [ ] **6b — Style + basemap switcher.** Wire `config/basemaps.yaml`
-      into a UI control that swaps the underlying basemap without
-      losing layer state.
+- [x] **6b — Basemap switcher.** `src/map/style-merge.ts` fetches a
+      Mapbox-hosted basemap style via the Styles REST API
+      (`mapbox://styles/<u>/<id>` → `api.mapbox.com/styles/v1/...`)
+      and `mergeOverlay()` appends our `manfredonia-*` sources +
+      layers on top, minus the overlay's `background` (the basemap
+      already has one). `src/config/loader.ts` parses
+      `config/basemaps.yaml` (mirrored to `public/`). `BasemapControl`
+      is a Mapbox `IControl` that renders a `<select>` in the Italian
+      UI; on change it re-fetches and `map.setStyle()` the merged
+      style. 26 new vitest tests (style-merge, config-loader,
+      basemap-control); 34 total, all green. Build = 529 KB gzipped
+      (well under the 2 MB budget).
 - [ ] **6c — Layer panel.** Visibility, opacity, drag-reorder,
       attribution chip showing publisher + year from the catalog.
 - [ ] **6d — Highlights + popups.** Markers from
