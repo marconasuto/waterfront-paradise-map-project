@@ -234,9 +234,17 @@ hypothesis = ">=6.100"
 mypy = ">=1.10"
 pre-commit = ">=3.6"
 
+# `web` feature — Node + pnpm for the Vite/TS storymap under webapp/.
+# Optional: install with `pixi install -e web` only when working on the
+# frontend. Keeps the default env Python-only.
+[tool.pixi.feature.web.dependencies]
+nodejs = ">=20"
+pnpm = ">=9"
+
 [tool.pixi.environments]
 default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
+web = { features = ["web"], solve-group = "default" }
 
 [tool.pixi.tasks]
 lint = "ruff check ."
@@ -271,3 +279,17 @@ publish-style = "mfd-map publish style"
 process = "mfd-map process all"
 publish = "mfd-map publish all"
 all = { depends-on = ["lint", "typecheck", "test-cov"] }
+
+# --- web (Phase 6) ---
+# Frontend tasks live under the `web` env so they don't pollute the
+# default Python env. Run with `pixi run -e web <task>` or use the
+# convenience aliases below which already pin the env.
+
+[tool.pixi.feature.web.tasks]
+web-install = { cmd = "pnpm install --frozen-lockfile=false", cwd = "webapp" }
+web-dev = { cmd = "pnpm run dev", cwd = "webapp" }
+web-build = { cmd = "pnpm run build", cwd = "webapp" }
+web-preview = { cmd = "pnpm run preview", cwd = "webapp" }
+web-test = { cmd = "pnpm run test", cwd = "webapp" }
+web-typecheck = { cmd = "pnpm run typecheck", cwd = "webapp" }
+web-sync = { cmd = "node scripts/sync-config.mjs", cwd = "webapp" }

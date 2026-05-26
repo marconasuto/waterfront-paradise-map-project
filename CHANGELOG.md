@@ -6,6 +6,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
 ## [Unreleased]
 
 ### Added
+- 2026-05-26 — Phase 6a: web app scaffold (Vite + TypeScript +
+  Mapbox GL JS).
+  - `webapp/` Vite + TS scaffold. Strict tsconfig (no unchecked index
+    access, exact optional properties). Single persistent map booted
+    from the prebuilt `data/processed/style.json`; navigation + scale
+    controls; URL-hash camera state.
+  - `webapp/scripts/sync-config.mjs` mirrors the Python pipeline's
+    outputs (style.json + catalog.yaml + config/*.yaml) into
+    `webapp/public/` at dev/build time. Synced files are gitignored;
+    the canonical copies live at repo root.
+  - Vitest + jsdom test setup with an 8-test suite covering the style
+    loader (success, HTTP error, malformed JSON, version/sources/
+    layers validation). 90/85 coverage gate.
+  - Pixi `web` feature ships Node 26 + pnpm 10 from conda-forge so a
+    single `pixi install -e web` brings up the frontend env. New
+    tasks: `web-install / web-dev / web-build / web-preview /
+    web-test / web-typecheck / web-sync`.
+  - First build: 498 KB gzipped total (Mapbox GL JS = 497 KB; our
+    code = 1.2 KB) — well under the 2 MB budget.
+  - Closes OPEN-WEB-1: Vite + TS chosen over Astro / SvelteKit; the
+    storymap engine will be custom (~300 LOC) rather than a fork of
+    mapbox/storytelling.
 - 2026-05-26 — Phase 5c: Mapbox GL JS style JSON generator.
   - `src/manfredonia_map/publishing/styles.py` builds a complete style
     document (sources + ordered layer stack + sprite/glyphs metadata)

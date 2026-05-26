@@ -287,9 +287,47 @@ Phase 2 is unblocked.
       CLI command rather than a Studio paste. Deferred until the web
       app needs faster style iteration.
 
-## Phase 6 — Web app + storymap
+## Phase 6 — Web app + storymap (in flight)
 
 - See `plans/05_web_app.md` and `plans/06_storymap.md`.
+- **Decisions locked 2026-05-26** (closes OPEN-WEB-1):
+  - Framework: **Vite + TypeScript** (vanilla, no SPA framework). One
+    persistent map; the storymap is one HTML page that scrolls.
+  - Storymap engine: **custom** IntersectionObserver-driven (~300 LOC).
+  - Layout: **webapp/ subdir** of this repo. Node + pnpm vendored via
+    a new pixi `web` feature so a single `pixi install -e web` brings
+    up the whole frontend env.
+- [x] **6a — Scaffold.** `webapp/` with Vite + TS + Mapbox GL JS.
+      Strict tsconfig (noUncheckedIndexedAccess +
+      exactOptionalPropertyTypes); jsdom + vitest with a 90/85
+      coverage gate. `scripts/sync-config.mjs` copies
+      `data/processed/style.json` + `data/catalog.yaml` +
+      `config/{basemaps,highlights,color_scheme,layers}.yaml` into
+      `webapp/public/` at dev/build time (the synced files are
+      gitignored; canonical lives at repo root). `src/main.ts` boots
+      the map from the prebuilt style; `src/map/style-loader.ts` +
+      `src/map/init.ts` are pure modules with 8 vitest unit tests.
+      Build produces ~498 KB gzipped (Mapbox GL JS dominates; our
+      code is 1.2 KB). Pixi tasks: `web-install / web-dev / web-build
+      / web-preview / web-test / web-typecheck / web-sync`.
+- [ ] **6b — Style + basemap switcher.** Wire `config/basemaps.yaml`
+      into a UI control that swaps the underlying basemap without
+      losing layer state.
+- [ ] **6c — Layer panel.** Visibility, opacity, drag-reorder,
+      attribution chip showing publisher + year from the catalog.
+- [ ] **6d — Highlights + popups.** Markers from
+      `config/highlights.yaml`; popups load
+      `content/it/locations/<id>.md`.
+- [ ] **6e — Slide engine.** IntersectionObserver scroll triggers
+      drive `map.flyTo()`; per-slide frontmatter controls camera +
+      `layers_visible` + highlights. Markdown lives under
+      `content/it/slides/`.
+- [ ] **6f — Drag-and-drop overlay.** Ephemeral client-side
+      `.geojson` overlay; shapefile / GeoPackage support is a stretch
+      goal.
+- [ ] **6g — A11y + Lighthouse.** Keyboard nav, focus rings, palette
+      contrast checks; Lighthouse ≥ 90 perf / ≥ 95 a11y on a fresh
+      load.
 
 ## Phase 7 — Content authoring
 
