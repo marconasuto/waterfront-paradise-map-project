@@ -242,7 +242,10 @@ def publish_upload(
                 if Path(entry.input_path).is_absolute()
                 else Path.cwd() / entry.input_path,
                 tileset_id=entry.mapbox_tileset_id,
-                name=f"{entry.layer_id} (Manfredonia coastal map)",
+                # Mapbox 422s on display names with spaces or parens; pass
+                # the slug-clean tileset id as the display name too. The
+                # human-friendly name can be edited in Studio later.
+                name=entry.mapbox_tileset_id,
             )
         except (FileNotFoundError, uploads_mod.MapboxUploadError) as exc:
             logger.warning("upload %s failed: %s", entry.layer_id, exc)

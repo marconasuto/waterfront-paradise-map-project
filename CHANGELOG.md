@@ -15,6 +15,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-26 — Phase 5b live: 14/14 tilesets uploaded to `marconasuto.*`.
+  - First live run failed all 14 with `HTTP 422 'Invalid "name" value'` —
+    Mapbox rejects display-name strings containing spaces / parentheses
+    (our CLI was sending `"<layer_id> (Manfredonia coastal map)"`).
+  - Fix: send the slug-clean `mapbox_tileset_id` as the display name
+    too (e.g. `manfredonia-coastline-v1`); the human-friendly name can
+    be edited in Mapbox Studio later if desired.
+  - Re-run after the fix: **14/14 complete=True progress=100% error=None**.
+    Tilesets live: `marconasuto.manfredonia-{admin_boundaries,
+    archeological_are, beaches, coastline, harbours,
+    hydrography_surfa, industrial_areas, natura2000, roads,
+    sin_manfredonia, wetlands, emodnet_bathymetr, tinitaly_dtm,
+    tinitaly_dtm_hill}-v1`.
 - 2026-05-26 — Phase 5b: programmatic Mapbox uploader.
   - `src/manfredonia_map/publishing/uploads_api.py` —
     `MapboxUploadsClient` wraps the three-step Uploads API dance:
