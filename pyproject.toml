@@ -30,6 +30,7 @@ dependencies = [
     # HTTP / download
     "httpx>=0.27",
     "tenacity>=8.2",         # retries
+    "boto3>=1.34",           # Mapbox Uploads API needs S3 PUT via SigV4
     # Config / content
     "pydantic>=2.6",
     "pydantic-settings>=2.2",
@@ -188,6 +189,7 @@ proj = ">=9.3"
 geos = ">=3.12"
 libnetcdf = ">=4.9"
 tippecanoe = ">=2.50"
+boto3 = ">=1.34"
 # Vector geo
 geopandas = ">=0.14"
 pyogrio = ">=0.7"
@@ -264,6 +266,7 @@ catalog-validate = "mfd-map catalog validate"
 publish-prepare-mbtiles = "mfd-map publish prepare-mbtiles"
 publish-manifest = "mfd-map publish manifest"
 publish-prepare = "mfd-map publish prepare"
+publish-upload = "mfd-map publish upload"
 process = "mfd-map process all"
 publish = "mfd-map publish all"
 all = { depends-on = ["lint", "typecheck", "test-cov"] }

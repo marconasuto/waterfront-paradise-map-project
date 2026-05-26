@@ -254,10 +254,16 @@ Phase 2 is unblocked.
       harbours, hydrography_surface, industrial_areas, natura2000,
       roads, sin_manfredonia, wetlands — total ~800 KB) and a
       14-entry manifest (11 vector + 3 raster).
-- [ ] **5b — Programmatic upload to Mapbox** (MTS for vectors via
-      `mapbox-tilesets` CLI / SDK; Uploads API for rasters with
-      boto3-or-equivalent S3 dance). Reads `data/publish_manifest.yaml`
-      as input.
+- [x] **5b — Programmatic upload to Mapbox.**
+      `src/manfredonia_map/publishing/uploads_api.py`
+      (`MapboxUploadsClient`) wraps the three-step Uploads API dance
+      (POST credentials → boto3 PUT to temp S3 → POST upload spec
+      → poll status). Single uniform path for both vector MBTiles
+      and raster COGs. `mfd-map publish upload` reads
+      `data/publish_manifest.yaml` and runs the dance per entry;
+      defaults to `--dry-run` so a re-run cannot accidentally upload
+      until the user passes `--no-dry-run`. boto3 added as a
+      conda-forge dep for the S3 SigV4 step.
 - [ ] **5c — Style management** — one custom style declaring every
       uploaded tileset, layer paint props sourced from
       `config/color_scheme.yaml`, runtime visibility toggles in the

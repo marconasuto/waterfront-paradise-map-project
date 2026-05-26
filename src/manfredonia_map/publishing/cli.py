@@ -13,6 +13,7 @@ from manfredonia_map.paths import DATA_DIR, DATA_PROCESSED
 from manfredonia_map.publishing import manifest as manifest_mod
 from manfredonia_map.publishing import settings as settings_mod
 from manfredonia_map.publishing import tippecanoe as tippecanoe_mod
+from manfredonia_map.publishing import uploads_api as uploads_mod
 
 logger = logging.getLogger(__name__)
 
@@ -156,3 +157,105 @@ def publish_prepare(ctx: click.Context) -> None:
     """Run ``prepare-mbtiles`` then ``manifest`` end-to-end."""
     ctx.invoke(publish_prepare_mbtiles)
     ctx.invoke(publish_manifest)
+
+
+# --- upload (Phase 5b) --------------------------------------------------
+
+def _summarise(entry: manifest_mod.ManifestEntry) -> str:
+    return (
+        f"{entry.layer_type:6s} {entry.layer_id:24s} → "
+        f"{entry.mapbox_tileset_id}  ({entry.input_path})"
+    )
+
+
+@publish.command(name="upload")
+@click.option(
+    "--manifest",
+    "manifest_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=DATA_DIR / "publish_manifest.yaml",
+    show_default=True,
+)
+@click.option(
+    "--only",
+    "only_layers",
+    multiple=True,
+    type=str,
+    help="Restrict to specific layer ids (may be repeated).",
+)
+@click.option(
+    "--skip",
+    "skip_layers",
+    multiple=True,
+    type=str,
+    help="Layer ids to skip (may be repeated).",
+)
+@click.option(
+    "--dry-run/--no-dry-run",
+    default=True,
+    show_default=True,
+    help="Default is dry-run: print what would be uploaded but make no API calls. "
+    "Pass --no-dry-run to actually publish to your Mapbox account.",
+)
+def publish_upload(
+    manifest_path: Path,
+    only_layers: tuple[str, ...],
+    skip_layers: tuple[str, ...],
+    dry_run: bool,
+) -> None:
+    """Upload every manifest entry to Mapbox (dry-run by default)."""
+    entries = manifest_mod.load(manifest_path)
+    selected = [
+        e for e in entries
+        if (not only_layers or e.layer_id in only_layers)
+        and e.layer_id not in skip_layers
+    ]
+    if not selected:
+        click.echo("nothing to upload (manifest filter excluded everything).")
+        return
+
+    s = settings_mod.MapboxSettings()
+
+    if dry_run:
+        click.echo(f"--- DRY RUN ({len(selected)} entries; no API calls) ---")
+        for e in selected:
+            click.echo(_summarise(e))
+        click.echo(
+            "\nRe-run with `--no-dry-run` to actually publish to "
+            f"`{s.username or '<MAPBOX_USERNAME>'}.…`."
+        )
+        return
+
+    username = s.require_username()
+    secret_token = s.require_secret_token()
+    client = uploads_mod.MapboxUploadsClient(
+        username=username, secret_token=secret_token,
+    )
+
+    failures: list[tuple[str, str]] = []
+    results: list[uploads_mod.UploadResult] = []
+    for entry in selected:
+        click.echo(f"--- upload {entry.layer_id} → {entry.mapbox_tileset_id}")
+        try:
+            result = client.publish(
+                Path(entry.input_path)
+                if Path(entry.input_path).is_absolute()
+                else Path.cwd() / entry.input_path,
+                tileset_id=entry.mapbox_tileset_id,
+                name=f"{entry.layer_id} (Manfredonia coastal map)",
+            )
+        except (FileNotFoundError, uploads_mod.MapboxUploadError) as exc:
+            logger.warning("upload %s failed: %s", entry.layer_id, exc)
+            failures.append((entry.layer_id, str(exc)))
+            continue
+        results.append(result)
+        click.echo(
+            f"  upload_id={result.upload_id} complete={result.complete} "
+            f"progress={result.progress:.0%} error={result.error}"
+        )
+
+    ok = sum(1 for r in results if r.complete and not r.error)
+    click.echo(f"\nuploaded {ok}/{len(selected)} successfully.")
+    if failures:
+        msg = "; ".join(f"{lid}: {err}" for lid, err in failures)
+        raise click.ClickException(f"uploads failed for: {msg}")

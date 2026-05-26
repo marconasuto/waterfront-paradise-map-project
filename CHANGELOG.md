@@ -15,6 +15,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-26 — Phase 5b: programmatic Mapbox uploader.
+  - `src/manfredonia_map/publishing/uploads_api.py` —
+    `MapboxUploadsClient` wraps the three-step Uploads API dance:
+    `POST /uploads/v1/<user>/credentials` (returns temp AWS creds)
+    → `boto3` `upload_fileobj` into the Mapbox-controlled S3 bucket
+    → `POST /uploads/v1/<user>` (tileset spec) → poll
+    `GET /uploads/v1/<user>/<upload_id>` until `complete` or `error`.
+    Single uniform path for both vector MBTiles and raster COGs.
+  - All HTTP calls go through an injectable `httpx.Client`; the S3
+    PUT goes through an injectable `S3Putter` callable. Unit tests
+    use `respx` for the Mapbox endpoints and a captured-side-effect
+    fake for the S3 step — no real boto3/S3 / Mapbox calls in the
+    test suite (`tests/conftest.py` still blocks INET sockets).
+  - CLI: `mfd-map publish upload` reads `data/publish_manifest.yaml`,
+    supports `--only` / `--skip` filters, **defaults to `--dry-run`**
+    so accidental re-runs cannot upload. Pixi task `publish-upload`.
+  - `boto3 >=1.34` added to conda-forge pixi deps + `[project.dependencies]`
+    for the S3 SigV4 signing.
+  - Real `--dry-run` invocation correctly listed all 14 manifest
+    entries targeted at `marconasuto.<tileset_id>`. Live upload
+    awaits explicit `--no-dry-run`.
+  - **253 tests passing, 96.38 % coverage**, ruff clean.
 - 2026-05-26 — Phase 5a: MBTiles + publish manifest.
   - `src/manfredonia_map/publishing/{__init__, settings, tippecanoe,
     manifest, cli}.py` wired into the top-level CLI as
