@@ -15,6 +15,40 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
   - MCP server: design hooks now, build later.
   - Deployment target: static site (GH Pages / Netlify / Vercel).
   - Mapbox: secret token to be created with scopes for the pipeline.
+- 2026-05-26 — Phase 5a: MBTiles + publish manifest.
+  - `src/manfredonia_map/publishing/{__init__, settings, tippecanoe,
+    manifest, cli}.py` wired into the top-level CLI as
+    `mfd-map publish`.
+  - `publishing.settings.MapboxSettings` (pydantic-settings) reads
+    `MAPBOX_SECRET_TOKEN`, `MAPBOX_PUBLIC_TOKEN`, `MAPBOX_USERNAME`
+    from `.env`.
+  - `publishing.tippecanoe`: subprocess wrapper around the conda-forge
+    tippecanoe binary. Pinned flags: `-zg --drop-densest-as-needed
+    --extend-zooms-if-still-dropping --coalesce-densest-as-needed
+    --no-tile-stats --force`. (Intentionally **omitted**
+    `--read-parallel` — it splits the input on newlines for parallel
+    reads, which fragmented features in our pretty-printed deterministic
+    GeoJSON outputs. Single-thread reading is fast enough at our scale.)
+  - `publishing.manifest`: reads `data/catalog.yaml` + the
+    `data/processed/mbtiles/` directory + the COGs, emits a
+    deterministic `data/publish_manifest.yaml`. Each entry pins the
+    layer id, source id, suggested Mapbox tileset id (slugified with
+    the 32-char limit), input path + SHA-256, description + attribution
+    (CC-BY/ODbL-compliant), and a direct Mapbox Studio "add tileset"
+    URL for manual upload.
+  - CLI: `mfd-map publish prepare-mbtiles` (with `--only` / `--skip`),
+    `publish manifest`, `publish prepare` (both, end-to-end). Pixi
+    tasks `publish-prepare-mbtiles` / `publish-manifest` /
+    `publish-prepare`.
+  - Real `publish prepare` produced **11 MBTiles** (admin_boundaries,
+    archeological_areas, beaches, coastline, harbours,
+    hydrography_surface, industrial_areas, natura2000, roads,
+    sin_manfredonia, wetlands — total ~800 KB; cycle_paths +
+    cycle_routes correctly skipped because they have no features) and
+    a **14-entry manifest** (11 vector + 3 raster).
+  - `data/publish_manifest.yaml` whitelisted in `.gitignore` next to
+    `data/catalog.yaml`.
+  - **234 tests passing, 96.27 % coverage**, ruff clean.
 - 2026-05-25 — Phase 4d: catalog generator (data/catalog.yaml).
   - `src/manfredonia_map/catalog/{__init__, models, builder, cli}.py`
     wired into the top-level CLI as `mfd-map catalog`.

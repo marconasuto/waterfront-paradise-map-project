@@ -71,6 +71,7 @@ data/processed/**
 !data/interim/.gitkeep
 !data/processed/.gitkeep
 !data/catalog.yaml
+!data/publish_manifest.yaml
 
 # common geo binaries
 *.tif

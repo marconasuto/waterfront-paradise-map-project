@@ -1,0 +1,154 @@
+entries:
+- attribution: 'ISTAT. License: CC-BY-3.0'
+  description: 'Layer: admin_boundaries. Source: ISTAT — Confini amministrativi al
+    1 gennaio 2024 (generalizzati) (ISTAT).'
+  input_path: data/processed/mbtiles/admin_boundaries.mbtiles
+  input_sha256: 6f77d4ad08e15201260167b9328072aeaa8b50cf4999b790750dea0f23363560
+  layer_id: admin_boundaries
+  layer_type: vector
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-admin_boundaries-v1/
+  mapbox_tileset_id: manfredonia-admin_boundaries-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-admin_boundaries-v1
+  source_id: istat_limiti_2024_generalized
+- attribution: 'OpenStreetMap contributors. License: ODbL-1.0'
+  description: 'Layer: archeological_areas. Source: OSM historic=archaeological_site
+    (OpenStreetMap contributors).'
+  input_path: data/processed/mbtiles/archeological_areas.mbtiles
+  input_sha256: cf27c498cbfb683c80eb019765809ad768848a4c53b3e204a37d33be47acb6d6
+  layer_id: archeological_areas
+  layer_type: vector
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-archeological_are-v1/
+  mapbox_tileset_id: manfredonia-archeological_are-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-archeological_are-v1
+  source_id: osm_archaeology
+- attribution: 'OpenStreetMap contributors. License: ODbL-1.0'
+  description: 'Layer: beaches. Source: OSM natural=beach (OpenStreetMap contributors).'
+  input_path: data/processed/mbtiles/beaches.mbtiles
+  input_sha256: 676c471a201781b8ad3300a18cbf3e5d902623d0d8998466a8ba132ddbed976d
+  layer_id: beaches
+  layer_type: vector
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-beaches-v1/
+  mapbox_tileset_id: manfredonia-beaches-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-beaches-v1
+  source_id: osm_beaches
+- attribution: 'OpenStreetMap contributors. License: ODbL-1.0'
+  description: 'Layer: coastline. Source: OSM natural=coastline (OpenStreetMap contributors).'
+  input_path: data/processed/mbtiles/coastline.mbtiles
+  input_sha256: 130970a24c5b7137e927adc88bcf82772cdbe20a24ecb79cc20a6318b7bc75a5
+  layer_id: coastline
+  layer_type: vector
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-coastline-v1/
+  mapbox_tileset_id: manfredonia-coastline-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-coastline-v1
+  source_id: osm_coastline
+- attribution: 'OpenStreetMap contributors. License: ODbL-1.0'
+  description: 'Layer: harbours. Source: OSM harbour / landuse=harbour / man_made=pier|breakwater
+    (OpenStreetMap contributors).'
+  input_path: data/processed/mbtiles/harbours.mbtiles
+  input_sha256: 20557cfd6af3e3c355904f4a2967629a6a9f8c69106a822614923e59eac84094
+  layer_id: harbours
+  layer_type: vector
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-harbours-v1/
+  mapbox_tileset_id: manfredonia-harbours-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-harbours-v1
+  source_id: osm_harbours
+- attribution: 'ISPRA. License: CC-BY-4.0'
+  description: 'Layer: hydrography_surface. Source: ISPRA — reticolo idrografico (Reticolo
+    Idrografico Nazionale 1:250.000, AOI bbox clip via WFS) (ISPRA).'
+  input_path: data/processed/mbtiles/hydrography_surface.mbtiles
+  input_sha256: 39f94f6d2cefb1f345abe5075056c1f7b100e79bf36a524104c337c2119ec5ee
+  layer_id: hydrography_surface
+  layer_type: vector
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-hydrography_surfa-v1/
+  mapbox_tileset_id: manfredonia-hydrography_surfa-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-hydrography_surfa-v1
+  source_id: ispra_hy_reticolo_idrografico
+- attribution: 'OpenStreetMap contributors. License: ODbL-1.0'
+  description: 'Layer: industrial_areas. Source: OSM landuse=industrial / landuse=brownfield
+    (OpenStreetMap contributors).'
+  input_path: data/processed/mbtiles/industrial_areas.mbtiles
+  input_sha256: fbfa9bcb2c36d6eee44289af82a314706a238210de3c4a76b68005c7ad82959c
+  layer_id: industrial_areas
+  layer_type: vector
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-industrial_areas-v1/
+  mapbox_tileset_id: manfredonia-industrial_areas-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-industrial_areas-v1
+  source_id: osm_industrial
+- attribution: 'MASE. License: non-commercial, cite source'
+  description: 'Layer: natura2000. Source: MASE — Rete Natura 2000 (SIC/ZSC/ZPS),
+    trasmissione CE dicembre 2025 (tuttiicampi) (MASE).'
+  input_path: data/processed/mbtiles/natura2000.mbtiles
+  input_sha256: 4f93272b667bb5ed8bced1043d6d1b10575d1fe8555b4e14a302a6fcbde0d52d
+  layer_id: natura2000
+  layer_type: vector
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-natura2000-v1/
+  mapbox_tileset_id: manfredonia-natura2000-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-natura2000-v1
+  source_id: mase_natura2000_2025_tuttiicampi
+- attribution: 'OpenStreetMap contributors. License: ODbL-1.0'
+  description: 'Layer: roads. Source: OSM highway=* (OpenStreetMap contributors).'
+  input_path: data/processed/mbtiles/roads.mbtiles
+  input_sha256: 3729f377955debd34a036cbe4c3f7fe654e3e42477216211307964c1f35bddc7
+  layer_id: roads
+  layer_type: vector
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-roads-v1/
+  mapbox_tileset_id: manfredonia-roads-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-roads-v1
+  source_id: osm_roads
+- attribution: 'Regione Puglia / InnovaPuglia (Servizio Territorio e Ambiente). License:
+    CC-BY-4.0'
+  description: 'Layer: sin_manfredonia. Source: Regione Puglia — Siti di Interesse
+    Nazionale (SIN), shapefile bundle including Bari / Brindisi / Manfredonia / Taranto
+    (Regione Puglia / InnovaPuglia (Servizio Territorio e Ambiente)).'
+  input_path: data/processed/mbtiles/sin_manfredonia.mbtiles
+  input_sha256: 311e3e20a0158bf1e3688d34696c373b237fc2f7541a93215c84c1a13e4b92af
+  layer_id: sin_manfredonia
+  layer_type: vector
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-sin_manfredonia-v1/
+  mapbox_tileset_id: manfredonia-sin_manfredonia-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-sin_manfredonia-v1
+  source_id: regione_puglia_sin
+- attribution: 'OpenStreetMap contributors. License: ODbL-1.0'
+  description: 'Layer: wetlands. Source: OSM natural=wetland (OpenStreetMap contributors).'
+  input_path: data/processed/mbtiles/wetlands.mbtiles
+  input_sha256: 543f0813e31d8c9f0002ef16433d0f5fc81f14830036819f66550125166f9526
+  layer_id: wetlands
+  layer_type: vector
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-wetlands-v1/
+  mapbox_tileset_id: manfredonia-wetlands-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-wetlands-v1
+  source_id: osm_wetlands
+- attribution: 'EMODnet Bathymetry Consortium. License: CC-BY-4.0'
+  description: 'Layer: emodnet_bathymetry. Source: EMODnet Bathymetry — Digital Bathymetry
+    DTM 2024 (mean coverage, WCS clip) (EMODnet Bathymetry Consortium).'
+  input_path: data/processed/emodnet_bathymetry_8bit.tif
+  input_sha256: 0cdb8929e2308a9f345351297f9daa3ea9205b2ee0923e19e8a2d6a75909b33d
+  layer_id: emodnet_bathymetry
+  layer_type: raster
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-emodnet_bathymetr-v1/
+  mapbox_tileset_id: manfredonia-emodnet_bathymetr-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-emodnet_bathymetr-v1
+  source_id: emodnet_bathymetry_dtm2024_mean
+- attribution: 'INGV. License: CC-BY-4.0'
+  description: 'Layer: tinitaly_dtm. Source: INGV TINITALY/1.1 DEM — tile e46005_s10
+    (INGV).'
+  input_path: data/processed/tinitaly_dtm_8bit.tif
+  input_sha256: dd3036aee5058288a3dd583e8a6a013186a3898de8969883a620d9bb264ee54f
+  layer_id: tinitaly_dtm
+  layer_type: raster
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-tinitaly_dtm-v1/
+  mapbox_tileset_id: manfredonia-tinitaly_dtm-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-tinitaly_dtm-v1
+  source_id: tinitaly_1_1_e46005_s10
+- attribution: 'INGV. License: CC-BY-4.0'
+  description: 'Layer: tinitaly_dtm_hillshade. Source: INGV TINITALY/1.1 DEM — tile
+    e46005_s10 (INGV).'
+  input_path: data/processed/tinitaly_dtm_hillshade_8bit.tif
+  input_sha256: f278711b68e3d4ae93e98cf8eff524f68ecf07d36b204b37bbbdfed67c6ea258
+  layer_id: tinitaly_dtm_hillshade
+  layer_type: raster
+  mapbox_studio_url: https://studio.mapbox.com/tilesets/marconasuto.manfredonia-tinitaly_dtm_hill-v1/
+  mapbox_tileset_id: manfredonia-tinitaly_dtm_hill-v1
+  mapbox_tileset_url: mapbox://tileset/marconasuto.manfredonia-tinitaly_dtm_hill-v1
+  source_id: tinitaly_1_1_e46005_s10
+version: 1

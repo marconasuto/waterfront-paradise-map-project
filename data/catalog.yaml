@@ -9,7 +9,7 @@ aoi:
   near_coast_sha256: fe9590eb242bdc1e5ba68a1aebbdacd974b927e3266a29e936ae7806548f68e9
   source_path: config/aoi_source.geojson
   source_sha256: 897f2b6d1792d8b31abc5df06592c2e6e99c4fe1a7447c0319c71d815ad5e20b
-generated_at: '2026-05-25T19:26:03+00:00'
+generated_at: '2026-05-26T03:41:16+00:00'
 raster_layers:
 - bands: 4
   crs: EPSG:32633

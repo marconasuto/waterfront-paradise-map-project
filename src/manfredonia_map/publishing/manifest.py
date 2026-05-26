@@ -1,0 +1,270 @@
+"""Publish manifest — what to upload to Mapbox, where to, and how.
+
+Reads ``data/catalog.yaml`` and emits ``data/publish_manifest.yaml``
+with one entry per layer (vector and raster) containing:
+
+- ``layer_id`` — matches the catalog.
+- ``source_id`` — back-reference to the upstream provenance.
+- ``mapbox_tileset_id`` — the ``<username>.<id>`` Mapbox uses (Mapbox
+  caps the suffix at 32 chars and only allows ``[a-z0-9_-]``).
+- ``input_path`` — the file we'd upload (MBTiles for vectors, COG for
+  rasters).
+- ``input_sha256`` — pinned for traceability.
+- ``description`` / ``attribution`` — required by CC-BY / ODbL etc.,
+  shown by Mapbox in the tileset metadata.
+- ``mapbox_studio_url`` — direct UI link for a manual upload, useful
+  when the Phase 5b programmatic upload has not been wired up yet.
+
+Phase 5b consumes this manifest to do the actual uploads.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import os
+import re
+import tempfile
+from dataclasses import dataclass
+from pathlib import Path
+
+import yaml
+
+from manfredonia_map.catalog import builder as catalog_builder
+from manfredonia_map.catalog import models as catalog_models
+from manfredonia_map.paths import DATA_DIR, DATA_PROCESSED, REPO_ROOT
+
+
+def _safe_rel(path: Path, repo_root: Path) -> str:
+    """Format ``path`` relative to ``repo_root``; absolute fallback if outside."""
+    p = path.resolve()
+    try:
+        return str(p.relative_to(repo_root.resolve()))
+    except ValueError:
+        return str(p)
+
+#: Mapbox limits tileset id suffixes to 32 characters and only allows
+#: lowercase letters, digits, underscore and hyphen.
+_TILESET_ID_MAX = 32
+_TILESET_ID_PATTERN = re.compile(r"[^a-z0-9_-]")
+_TILESET_ID_PREFIX = "manfredonia-"
+_TILESET_ID_VERSION = "-v1"
+
+_MBTILES_DIR_NAME = "mbtiles"
+
+
+@dataclass(frozen=True)
+class ManifestEntry:
+    """One layer ready to upload."""
+
+    layer_id: str
+    layer_type: str            # "vector" | "raster"
+    source_id: str | None
+    mapbox_tileset_id: str
+    mapbox_tileset_url: str    # mapbox://tileset/<user>.<id>
+    input_path: str
+    input_sha256: str
+    description: str
+    attribution: str
+    mapbox_studio_url: str
+
+    def as_dict(self) -> dict[str, object]:
+        """Plain-dict form used by the YAML writer."""
+        return {
+            "attribution": self.attribution,
+            "description": self.description,
+            "input_path": self.input_path,
+            "input_sha256": self.input_sha256,
+            "layer_id": self.layer_id,
+            "layer_type": self.layer_type,
+            "mapbox_studio_url": self.mapbox_studio_url,
+            "mapbox_tileset_id": self.mapbox_tileset_id,
+            "mapbox_tileset_url": self.mapbox_tileset_url,
+            "source_id": self.source_id,
+        }
+
+
+def slugify_tileset_id(layer_id: str) -> str:
+    """Map a ``layer_id`` to a Mapbox-valid tileset id suffix."""
+    cleaned = _TILESET_ID_PATTERN.sub("-", layer_id.lower())
+    suffix = _TILESET_ID_VERSION
+    budget = _TILESET_ID_MAX - len(_TILESET_ID_PREFIX) - len(suffix)
+    return f"{_TILESET_ID_PREFIX}{cleaned[:budget].strip('-')}{suffix}"
+
+
+def _sha256_of(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _attribution_for(source: catalog_models.Source | None) -> str:
+    if source is None:
+        return "Manfredonia coastal map pipeline."
+    license_part = f"License: {source.license}" if source.license else ""
+    return f"{source.publisher}. {license_part}".strip()
+
+
+def _description_for(layer_id: str, source: catalog_models.Source | None) -> str:
+    base = f"Layer: {layer_id}."
+    if source is None:
+        return base
+    return f"{base} Source: {source.dataset} ({source.publisher})."
+
+
+def _studio_url(username: str, full_tileset_id: str) -> str:
+    return (
+        f"https://studio.mapbox.com/tilesets/{full_tileset_id}/"
+        if username
+        else "https://studio.mapbox.com/tilesets/  # MAPBOX_USERNAME unset"
+    )
+
+
+def _resolve_source(
+    catalog: catalog_models.Catalog, source_id: str | None
+) -> catalog_models.Source | None:
+    if source_id is None:
+        return None
+    for s in catalog.sources:
+        if s.source_id == source_id:
+            return s
+    return None
+
+
+def build_entries(
+    catalog: catalog_models.Catalog,
+    *,
+    username: str,
+    mbtiles_dir: Path,
+    processed_dir: Path,
+    repo_root: Path,
+) -> list[ManifestEntry]:
+    """Build one :class:`ManifestEntry` per vector + raster layer."""
+    entries: list[ManifestEntry] = []
+
+    for vl in catalog.vector_layers:
+        if vl.feature_count == 0:
+            continue   # nothing to upload
+        mbtiles = mbtiles_dir / f"{vl.layer_id}.mbtiles"
+        if not mbtiles.exists():
+            continue   # generated by `publish prepare-mbtiles` first
+        src = _resolve_source(catalog, vl.source_id)
+        tileset_suffix = slugify_tileset_id(vl.layer_id)
+        full_id = f"{username or '<MAPBOX_USERNAME>'}.{tileset_suffix}"
+        entries.append(
+            ManifestEntry(
+                layer_id=vl.layer_id,
+                layer_type="vector",
+                source_id=vl.source_id,
+                mapbox_tileset_id=tileset_suffix,
+                mapbox_tileset_url=f"mapbox://tileset/{full_id}",
+                input_path=_safe_rel(mbtiles, repo_root),
+                input_sha256=_sha256_of(mbtiles),
+                description=_description_for(vl.layer_id, src),
+                attribution=_attribution_for(src),
+                mapbox_studio_url=_studio_url(username, full_id),
+            )
+        )
+
+    for rl in catalog.raster_layers:
+        tif = processed_dir / Path(rl.processed_path).name
+        if not tif.exists():
+            continue
+        src = _resolve_source(catalog, rl.source_id)
+        tileset_suffix = slugify_tileset_id(rl.layer_id)
+        full_id = f"{username or '<MAPBOX_USERNAME>'}.{tileset_suffix}"
+        entries.append(
+            ManifestEntry(
+                layer_id=rl.layer_id,
+                layer_type="raster",
+                source_id=rl.source_id,
+                mapbox_tileset_id=tileset_suffix,
+                mapbox_tileset_url=f"mapbox://tileset/{full_id}",
+                input_path=_safe_rel(tif, repo_root),
+                input_sha256=_sha256_of(tif),
+                description=_description_for(rl.layer_id, src),
+                attribution=_attribution_for(src),
+                mapbox_studio_url=_studio_url(username, full_id),
+            )
+        )
+
+    return entries
+
+
+def write(entries: list[ManifestEntry], out_path: Path) -> None:
+    """Atomically write a deterministic YAML manifest."""
+    payload = {
+        "version": 1,
+        "entries": [e.as_dict() for e in entries],
+    }
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=out_path.name + ".", dir=out_path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            yaml.safe_dump(
+                payload, f, sort_keys=True, allow_unicode=True, default_flow_style=False,
+            )
+        os.replace(tmp, out_path)
+        os.chmod(out_path, 0o644)
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+
+
+def default_mbtiles_dir(processed_dir: Path = DATA_PROCESSED) -> Path:
+    """Return the conventional location for tippecanoe outputs."""
+    return processed_dir / _MBTILES_DIR_NAME
+
+
+def default_manifest_path(data_dir: Path = DATA_DIR) -> Path:
+    """Return the conventional location for the publish manifest."""
+    return data_dir / "publish_manifest.yaml"
+
+
+def build_and_write(
+    catalog: catalog_models.Catalog,
+    *,
+    username: str,
+    mbtiles_dir: Path | None = None,
+    processed_dir: Path = DATA_PROCESSED,
+    repo_root: Path = REPO_ROOT,
+    out_path: Path | None = None,
+) -> list[ManifestEntry]:
+    """Build the manifest and write it to disk; return the entries."""
+    entries = build_entries(
+        catalog,
+        username=username,
+        mbtiles_dir=mbtiles_dir or default_mbtiles_dir(processed_dir),
+        processed_dir=processed_dir,
+        repo_root=repo_root,
+    )
+    write(entries, out_path or default_manifest_path())
+    return entries
+
+
+def load(path: Path) -> list[ManifestEntry]:
+    """Load + parse an existing manifest YAML."""
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict) or "entries" not in payload:
+        raise ValueError(f"{path} is not a valid publish manifest")
+    return [
+        ManifestEntry(
+            layer_id=e["layer_id"],
+            layer_type=e["layer_type"],
+            source_id=e.get("source_id"),
+            mapbox_tileset_id=e["mapbox_tileset_id"],
+            mapbox_tileset_url=e["mapbox_tileset_url"],
+            input_path=e["input_path"],
+            input_sha256=e["input_sha256"],
+            description=e["description"],
+            attribution=e["attribution"],
+            mapbox_studio_url=e["mapbox_studio_url"],
+        )
+        for e in payload["entries"]
+    ]
+
+
+def fresh_catalog() -> catalog_models.Catalog:
+    """Convenience wrapper for ``catalog_builder.assemble`` with defaults."""
+    return catalog_builder.assemble()

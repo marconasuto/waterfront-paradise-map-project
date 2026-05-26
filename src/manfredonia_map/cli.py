@@ -36,8 +36,10 @@ from manfredonia_map.acquisition.cli import acquire as _acquire  # noqa: E402
 from manfredonia_map.aoi.cli import build_aoi as _build_aoi  # noqa: E402
 from manfredonia_map.catalog.cli import catalog as _catalog  # noqa: E402
 from manfredonia_map.processing.cli import process as _process  # noqa: E402
+from manfredonia_map.publishing.cli import publish as _publish  # noqa: E402
 
 main.add_command(_build_aoi, name="build-aoi")
 main.add_command(_acquire, name="acquire")
 main.add_command(_process, name="process")
 main.add_command(_catalog, name="catalog")
+main.add_command(_publish, name="publish")

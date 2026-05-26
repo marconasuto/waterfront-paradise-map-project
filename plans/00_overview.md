@@ -234,9 +234,34 @@ Phase 2 is unblocked.
       kept as belt-and-suspenders fallback (the unioned polygons
       dominate the AOI shape; the points add a harmless cushion).
 
-## Phase 5 — Mapbox publishing
+## Phase 5 — Mapbox publishing (in flight)
 
 - See `plans/04_mapbox_integration.md`.
+- [x] **5a — MBTiles generation + publish manifest.**
+      `src/manfredonia_map/publishing/{__init__, settings, tippecanoe,
+      manifest, cli}.py`. Pydantic-settings module loads
+      `MAPBOX_SECRET_TOKEN` / `MAPBOX_PUBLIC_TOKEN` / `MAPBOX_USERNAME`
+      from `.env`. Tippecanoe wrapper pins deterministic flags (no
+      `--read-parallel`, which fragmented features in our pretty-
+      printed GeoJSON). Manifest module reads the catalog and emits
+      `data/publish_manifest.yaml` with one entry per vector / raster
+      layer carrying the suggested Mapbox tileset id, input path +
+      SHA, description / attribution (CC-BY/ODbL compliant), and a
+      direct Mapbox Studio "add tileset" URL. CLI:
+      `mfd-map publish prepare-mbtiles` + `publish manifest` +
+      `publish prepare` (both). Real run produced 11 MBTiles
+      (admin_boundaries, archeological_areas, beaches, coastline,
+      harbours, hydrography_surface, industrial_areas, natura2000,
+      roads, sin_manfredonia, wetlands — total ~800 KB) and a
+      14-entry manifest (11 vector + 3 raster).
+- [ ] **5b — Programmatic upload to Mapbox** (MTS for vectors via
+      `mapbox-tilesets` CLI / SDK; Uploads API for rasters with
+      boto3-or-equivalent S3 dance). Reads `data/publish_manifest.yaml`
+      as input.
+- [ ] **5c — Style management** — one custom style declaring every
+      uploaded tileset, layer paint props sourced from
+      `config/color_scheme.yaml`, runtime visibility toggles in the
+      web app via `setLayoutProperty`.
 
 ## Phase 6 — Web app + storymap
 
