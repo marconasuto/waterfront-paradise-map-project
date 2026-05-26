@@ -100,6 +100,42 @@ body {
   color: var(--panel-accent);
 }
 
+/* --- Highlight popups ---------------------------------------------- */
+
+.highlight-popup__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.highlight-popup__chip {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--panel-bg);
+  color: var(--panel-fg);
+  padding: 2px 8px;
+  border-radius: 999px;
+  align-self: flex-start;
+}
+
+.highlight-popup__title {
+  font-size: 16px;
+  margin: 0;
+  color: #1c2a33;
+}
+
+.highlight-popup__body {
+  font-size: 13px;
+  color: #1c2a33;
+  line-height: 1.4;
+}
+
+.highlight-popup__body p:first-child {
+  margin-top: 0;
+}
+
 @media (max-width: 720px) {
   #app {
     grid-template-columns: 1fr;

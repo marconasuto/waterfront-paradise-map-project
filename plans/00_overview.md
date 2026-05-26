@@ -341,9 +341,17 @@ Phase 2 is unblocked.
       → `map.moveLayer(id, beforeId)` rewrites the overlay-only
       portion of the layer stack. Persisted alongside visibility +
       opacity. Deferred to keep 6c shippable.
-- [ ] **6d — Highlights + popups.** Markers from
-      `config/highlights.yaml`; popups load
-      `content/it/locations/<id>.md`.
+- [x] **6d — Highlights + popups.** `mapboxgl.Marker` instances per
+      `config/highlights.yaml` entry, colored from the palette via
+      `style_token`. Click opens a popup with title + category chip;
+      the markdown body is fetched async from
+      `public/content/it/<content_ref>` via `src/content/loader.ts`
+      (using `marked` for the parse). When the body is missing — Phase
+      7 hasn't authored it yet — the popup degrades to an Italian
+      "Contenuto in arrivo" placeholder. `sync-config.mjs` now also
+      mirrors `content/it/` recursively into `public/`. 14 new vitest
+      tests (content-loader 7, highlights 7); suite at 75 passed.
+      Build 542 KB gzipped.
 - [ ] **6e — Slide engine.** IntersectionObserver scroll triggers
       drive `map.flyTo()`; per-slide frontmatter controls camera +
       `layers_visible` + highlights. Markdown lives under

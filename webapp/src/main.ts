@@ -1,5 +1,5 @@
 import { indexLayerMeta, loadCatalog } from "./config/catalog";
-import { loadBasemaps } from "./config/loader";
+import { loadBasemaps, loadColorScheme, loadHighlights } from "./config/loader";
 import { loadEnv } from "./env";
 import { initMap } from "./map/init";
 import { loadStyle, styleLayerCount, styleSourceCount } from "./map/style-loader";
@@ -17,6 +17,7 @@ import {
   type LayerState,
 } from "./state/layer-state";
 import { BasemapControl } from "./ui/basemap-control";
+import { attachHighlights } from "./ui/highlights";
 import { LayerPanel, defaultLayerLabel } from "./ui/layer-panel";
 
 async function main(): Promise<void> {
@@ -27,13 +28,15 @@ async function main(): Promise<void> {
   }
   const env = loadEnv();
 
-  const [overlay, basemapsCfg, catalog] = await Promise.all([
+  const [overlay, basemapsCfg, catalog, highlightsCfg, colorScheme] = await Promise.all([
     loadStyle("/style.json"),
     loadBasemaps("/basemaps.yaml"),
     loadCatalog("/catalog.yaml"),
+    loadHighlights("/highlights.yaml"),
+    loadColorScheme("/color_scheme.yaml"),
   ]);
   console.info(
-    `[manfredonia-map] overlay: ${styleSourceCount(overlay)} sources, ${styleLayerCount(overlay)} layers; ${basemapsCfg.basemaps.length} basemaps; ${catalog.sources.length} catalog sources`,
+    `[manfredonia-map] overlay: ${styleSourceCount(overlay)} sources, ${styleLayerCount(overlay)} layers; ${basemapsCfg.basemaps.length} basemaps; ${catalog.sources.length} catalog sources; ${highlightsCfg.highlights.length} highlights`,
   );
 
   const layerIds = extractManfredoniaLayerIds(overlay);
@@ -81,6 +84,13 @@ async function main(): Promise<void> {
     meta,
     label: defaultLayerLabel,
     onChange: persist,
+  });
+
+  map.on("load", () => {
+    attachHighlights(map, {
+      highlights: highlightsCfg.highlights,
+      palette: colorScheme.palette,
+    });
   });
 }
 

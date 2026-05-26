@@ -17,7 +17,7 @@
  * until `pixi run publish-style` has been run); the build still proceeds.
  */
 
-import { copyFileSync, existsSync, mkdirSync, statSync } from "node:fs";
+import { copyFileSync, cpSync, existsSync, mkdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -49,6 +49,17 @@ for (const { src, dst, required } of MAPPINGS) {
   copyFileSync(absSrc, absDst);
   const { size } = statSync(absDst);
   console.info(`[sync-config] ok    ${src} -> public/${dst}  (${size} B)`);
+}
+
+// Italian content (locations + slides + media). The tree may not exist
+// yet (Phase 7); copy recursively when it does.
+const CONTENT_SRC = join(REPO_ROOT, "content", "it");
+const CONTENT_DST = join(WEBAPP_PUBLIC, "content", "it");
+if (existsSync(CONTENT_SRC)) {
+  cpSync(CONTENT_SRC, CONTENT_DST, { recursive: true });
+  console.info(`[sync-config] ok    content/it/  -> public/content/it/  (recursive)`);
+} else {
+  console.warn(`[sync-config] INFO  skip content/it/ (not yet authored — Phase 7)`);
 }
 
 if (missing > 0) {

@@ -6,6 +6,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
 ## [Unreleased]
 
 ### Added
+- 2026-05-26 — Phase 6d: highlights markers + popups.
+  - `mapboxgl.Marker` per `config/highlights.yaml` entry, color
+    sourced from `config/color_scheme.yaml` via the entry's
+    `style_token`. Click opens a Mapbox popup with title + category
+    chip; the markdown body is fetched asynchronously from
+    `public/content/it/<content_ref>` via `src/content/loader.ts`
+    (uses `marked` for the parse) and substituted into the popup
+    once it arrives.
+  - Missing markdown bodies degrade to an Italian "Contenuto in
+    arrivo" placeholder so the marker UI works end-to-end before
+    Phase 7 fills the content.
+  - HTML output from user-controlled fields is escaped to neutralise
+    accidental injection from yaml-authored titles.
+  - `sync-config.mjs` now recursively mirrors `content/it/` into
+    `public/content/it/` whenever the source tree exists.
+  - Added `marked@^14` dependency (+12 KB gzipped).
+  - 14 new vitest tests (content-loader 7, highlights 7); suite at
+    75 passed. Build 542 KB gzipped.
 - 2026-05-26 — Phase 6c: layer panel (visibility + opacity + persist).
   - Right-docked `<aside id="layer-panel">` renders one row per
     `manfredonia-*` layer: visibility checkbox, opacity slider

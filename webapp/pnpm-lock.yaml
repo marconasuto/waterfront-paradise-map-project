@@ -11,6 +11,9 @@ importers:
       mapbox-gl:
         specifier: ^3.6.0
         version: 3.24.0
+      marked:
+        specifier: ^14.1.0
+        version: 14.1.4
     devDependencies:
       '@types/mapbox-gl':
         specifier: ^3.4.0
@@ -1067,6 +1070,11 @@ packages:
 
   mapbox-gl@3.24.0:
     resolution: {integrity: sha512-R+FdFUB3DnoE5FYASV7lGSiRyMkSblcZ2UEy7b2pt7s5ZbCxFIUPXd0E6iAFd8OdvdA2VtbvZZVylzAZNaurjA==}
+
+  marked@14.1.4:
+    resolution: {integrity: sha512-vkVZ8ONmUdPnjCKc5uTRvmkRbx4EAi2OkTOXmfTDhZz3OFqMNBM1oTTWwTr4HY4uAEojhzPf+Fy8F1DWa3Sndg==}
+    engines: {node: '>= 18'}
+    hasBin: true
 
   martinez-polygon-clipping@0.8.1:
     resolution: {integrity: sha512-9PLLMzMPI6ihHox4Ns6LpVBLpRc7sbhULybZ/wyaY8sY3ECNe2+hxm1hA2/9bEEpRrdpjoeduBuZLg2aq1cSIQ==}
@@ -2466,6 +2474,8 @@ snapshots:
       quickselect: 3.0.0
       supercluster: 8.0.1
       tinyqueue: 3.0.0
+
+  marked@14.1.4: {}
 
   martinez-polygon-clipping@0.8.1:
     dependencies:
