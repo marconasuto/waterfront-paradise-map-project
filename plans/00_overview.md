@@ -322,8 +322,25 @@ Phase 2 is unblocked.
       style. 26 new vitest tests (style-merge, config-loader,
       basemap-control); 34 total, all green. Build = 529 KB gzipped
       (well under the 2 MB budget).
-- [ ] **6c — Layer panel.** Visibility, opacity, drag-reorder,
-      attribution chip showing publisher + year from the catalog.
+- [x] **6c — Layer panel (visibility + opacity + persist).**
+      Right-docked panel (`<aside id="layer-panel">`) renders one row
+      per `manfredonia-*` layer: visibility checkbox, opacity slider
+      (0–100 %), and an "ⓘ" attribution chip whose tooltip carries
+      `dataset — publisher (year). Licenza: …` resolved from the
+      catalog. `src/state/layer-state.ts` is a pure module: extracts
+      layer ids from the merged style, reconciles stored state with
+      the live layer list (clamping out-of-range opacity, dropping
+      removed layers), persists to `localStorage` under
+      `manfredonia-map:layer-state:v1`, and applies state to the map
+      via `setLayoutProperty(visibility)` +
+      `setPaintProperty(${type}-opacity)`. State is reapplied on every
+      `style.load` so basemap swaps preserve the user's choices.
+      27 new vitest tests (catalog 6 / layer-state 14 / layer-panel
+      7); suite at 61 passed. Build 530 KB gzipped.
+- [ ] **6c-2 — Drag-reorder.** HTML5 drag-and-drop on each layer row
+      → `map.moveLayer(id, beforeId)` rewrites the overlay-only
+      portion of the layer stack. Persisted alongside visibility +
+      opacity. Deferred to keep 6c shippable.
 - [ ] **6d — Highlights + popups.** Markers from
       `config/highlights.yaml`; popups load
       `content/it/locations/<id>.md`.

@@ -6,6 +6,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
 ## [Unreleased]
 
 ### Added
+- 2026-05-26 — Phase 6c: layer panel (visibility + opacity + persist).
+  - Right-docked `<aside id="layer-panel">` renders one row per
+    `manfredonia-*` layer: visibility checkbox, opacity slider
+    (0–100 %), and an "ⓘ" attribution chip showing
+    `dataset — publisher (year). Licenza: …` from the catalog.
+  - `webapp/src/state/layer-state.ts` is a pure module: extracts
+    layer ids from the merged style, reconciles stored state with the
+    current layer list (clamps out-of-range opacity, drops removed
+    layers), persists to `localStorage` under
+    `manfredonia-map:layer-state:v1`, and applies state to the map
+    via `setLayoutProperty(visibility)` +
+    `setPaintProperty(${type}-opacity)`. State is reapplied on every
+    `style.load` so basemap swaps preserve user choices.
+  - `webapp/src/config/catalog.ts` parses the synced
+    `public/catalog.yaml` and resolves `layer_id → {publisher,
+    dataset, license, year}` for the attribution UI; falls back to
+    "Sconosciuto" when a layer's source is missing.
+  - 27 new vitest tests (catalog 6, layer-state 14, layer-panel 7);
+    suite at 61 passed. Build 530 KB gzipped.
+  - **6c-2 deferred**: drag-reorder of overlay layers. Hooks in place
+    (state array is the render order); will land alongside 6e.
 - 2026-05-26 — Phase 6b: basemap switcher.
   - `webapp/src/map/style-merge.ts` translates `mapbox://styles/<u>/<id>`
     into the REST endpoint, fetches the full basemap style, then
