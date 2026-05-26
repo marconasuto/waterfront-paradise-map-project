@@ -43,17 +43,13 @@ class MapboxSettings(BaseSettings):
     def require_username(self) -> str:
         """Return the username or raise a clear error if unset."""
         if not self.username:
-            raise RuntimeError(
-                "MAPBOX_USERNAME is not set. Add it to .env (see .env.example)."
-            )
+            raise RuntimeError("MAPBOX_USERNAME is not set. Add it to .env (see .env.example).")
         return self.username
 
     def require_secret_token(self) -> str:
         """Return the secret token or raise a clear error if unset."""
         if not self.secret_token:
-            raise RuntimeError(
-                "MAPBOX_SECRET_TOKEN is not set. Add it to .env (see .env.example)."
-            )
+            raise RuntimeError("MAPBOX_SECRET_TOKEN is not set. Add it to .env (see .env.example).")
         return self.secret_token
 
 

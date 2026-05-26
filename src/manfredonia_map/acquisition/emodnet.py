@@ -29,7 +29,7 @@ NATIVE_RES_DEG = 1.0 / (16.0 * 60.0)
 class EmodnetBathymetrySpec:
     """Static spec for one EMODnet Bathymetry WCS GetCoverage request."""
 
-    bbox: tuple[float, float, float, float]   # (west, south, east, north) in EPSG:4326
+    bbox: tuple[float, float, float, float]  # (west, south, east, north) in EPSG:4326
     res_deg: float = NATIVE_RES_DEG
     coverage: str = "emodnet:mean"
     base_url: str = "https://ows.emodnet-bathymetry.eu/wcs"

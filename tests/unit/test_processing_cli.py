@@ -74,13 +74,15 @@ def test_process_vector_runs_pipeline_end_to_end(
             "source_id": ["fake", "fake"],
         },
         geometry=[
-            LineString([(15.9, 41.6), (15.95, 41.65)]),   # inside AOI
-            LineString([(0.0, 0.0), (0.1, 0.1)]),         # far outside
+            LineString([(15.9, 41.6), (15.95, 41.65)]),  # inside AOI
+            LineString([(0.0, 0.0), (0.1, 0.1)]),  # far outside
         ],
         crs="EPSG:4326",
     )
     monkeypatch.setitem(
-        normalize.NORMALIZERS, "stub", _stub_normalizer(stub_gdf),
+        normalize.NORMALIZERS,
+        "stub",
+        _stub_normalizer(stub_gdf),
     )
 
     aoi = _aoi_4326(tmp_path)
@@ -126,7 +128,9 @@ def test_process_vector_reprojects_input_to_4326(
         crs="EPSG:32633",
     )
     monkeypatch.setitem(
-        normalize.NORMALIZERS, "stub", _stub_normalizer(stub_gdf),
+        normalize.NORMALIZERS,
+        "stub",
+        _stub_normalizer(stub_gdf),
     )
 
     aoi = _aoi_4326(tmp_path)
@@ -149,19 +153,32 @@ def test_process_vectors_all_runs_each_and_skips(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     stub_a = gpd.GeoDataFrame(
-        {"id": ["a"], "layer_id": ["a"], "name_it": ["A"], "category": ["x"],
-         "year_data": [2024], "source_id": ["s"]},
+        {
+            "id": ["a"],
+            "layer_id": ["a"],
+            "name_it": ["A"],
+            "category": ["x"],
+            "year_data": [2024],
+            "source_id": ["s"],
+        },
         geometry=[Point(15.9, 41.6)],
         crs="EPSG:4326",
     )
     stub_b = gpd.GeoDataFrame(
-        {"id": ["b"], "layer_id": ["b"], "name_it": ["B"], "category": ["x"],
-         "year_data": [2024], "source_id": ["s"]},
+        {
+            "id": ["b"],
+            "layer_id": ["b"],
+            "name_it": ["B"],
+            "category": ["x"],
+            "year_data": [2024],
+            "source_id": ["s"],
+        },
         geometry=[Point(15.95, 41.65)],
         crs="EPSG:4326",
     )
     monkeypatch.setattr(
-        normalize, "NORMALIZERS",
+        normalize,
+        "NORMALIZERS",
         {
             "stub_a": normalize.NormalizerSpec(layer_id="stub_a", fn=lambda: stub_a),
             "stub_b": normalize.NormalizerSpec(layer_id="stub_b", fn=lambda: stub_b),
@@ -186,13 +203,20 @@ def test_process_vectors_all_collects_failures(
         raise RuntimeError("kaboom")
 
     good_gdf = gpd.GeoDataFrame(
-        {"id": ["a"], "layer_id": ["a"], "name_it": ["A"], "category": ["x"],
-         "year_data": [2024], "source_id": ["s"]},
+        {
+            "id": ["a"],
+            "layer_id": ["a"],
+            "name_it": ["A"],
+            "category": ["x"],
+            "year_data": [2024],
+            "source_id": ["s"],
+        },
         geometry=[Point(15.9, 41.6)],
         crs="EPSG:4326",
     )
     monkeypatch.setattr(
-        normalize, "NORMALIZERS",
+        normalize,
+        "NORMALIZERS",
         {
             "good": normalize.NormalizerSpec(layer_id="good", fn=lambda: good_gdf),
             "bad": normalize.NormalizerSpec(layer_id="bad", fn=_boom),

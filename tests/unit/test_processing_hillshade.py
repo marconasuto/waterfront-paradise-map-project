@@ -16,6 +16,7 @@ from manfredonia_map.processing import hillshade, raster
 
 # --- compute_hillshade pure-function tests ----------------------------
 
+
 def test_compute_hillshade_shape_and_dtype():
     elevation = np.linspace(0, 100, 10 * 12).reshape(10, 12).astype(np.float32)
     hs = hillshade.compute_hillshade(elevation, cellsize_x=10.0, cellsize_y=10.0)
@@ -45,9 +46,13 @@ def test_compute_hillshade_se_facing_slope_in_shadow():
     elevation = ((width - xx) + (height - yy)).astype(np.float32) * 5.0
     hs = hillshade.compute_hillshade(elevation, cellsize_x=10.0, cellsize_y=10.0)
     interior_mean = int(hs[1:-1, 1:-1].mean())
-    flat_value = int(hillshade.compute_hillshade(
-        np.full_like(elevation, 50.0), cellsize_x=10.0, cellsize_y=10.0,
-    )[1, 1])
+    flat_value = int(
+        hillshade.compute_hillshade(
+            np.full_like(elevation, 50.0),
+            cellsize_x=10.0,
+            cellsize_y=10.0,
+        )[1, 1]
+    )
     assert interior_mean < flat_value
 
 
@@ -58,9 +63,13 @@ def test_compute_hillshade_nw_facing_slope_in_light():
     elevation = (xx + yy).astype(np.float32) * 5.0
     hs = hillshade.compute_hillshade(elevation, cellsize_x=10.0, cellsize_y=10.0)
     interior_mean = int(hs[1:-1, 1:-1].mean())
-    flat_value = int(hillshade.compute_hillshade(
-        np.full_like(elevation, 50.0), cellsize_x=10.0, cellsize_y=10.0,
-    )[1, 1])
+    flat_value = int(
+        hillshade.compute_hillshade(
+            np.full_like(elevation, 50.0),
+            cellsize_x=10.0,
+            cellsize_y=10.0,
+        )[1, 1]
+    )
     assert interior_mean > flat_value
 
 
@@ -82,6 +91,7 @@ def test_compute_hillshade_rejects_non_positive_cellsize():
 
 # --- grayscale_to_rgba ------------------------------------------------
 
+
 def test_grayscale_to_rgba_shape_and_alpha():
     gray = np.array([[0, 100, 200]], dtype=np.uint8)
     rgba = hillshade.grayscale_to_rgba(gray)
@@ -95,6 +105,7 @@ def test_grayscale_to_rgba_shape_and_alpha():
 
 
 # --- _coerce_xarray ---------------------------------------------------
+
 
 def test_coerce_xarray_passes_ndarray_through():
     arr = np.zeros((3, 3))
@@ -110,41 +121,62 @@ def test_coerce_xarray_unwraps_dataarray():
 
 # --- end-to-end via the synthetic raster helper ----------------------
 
+
 def _write_synthetic_geotiff(path: Path) -> None:
     width, height = 100, 80
     west, south, east, north = 1_065_000, 4_605_000, 1_080_000, 4_640_000
     transform = from_bounds(west, south, east, north, width, height)
     yy, xx = np.indices((height, width))
-    arr = (-20 + (xx / max(width - 1, 1)) * 400
-           + (yy / max(height - 1, 1)) * 420).astype(np.float32)
+    arr = (-20 + (xx / max(width - 1, 1)) * 400 + (yy / max(height - 1, 1)) * 420).astype(
+        np.float32
+    )
     with rasterio.open(
-        path, "w", driver="GTiff", height=height, width=width,
-        count=1, dtype="float32", crs="EPSG:32632", transform=transform,
+        path,
+        "w",
+        driver="GTiff",
+        height=height,
+        width=width,
+        count=1,
+        dtype="float32",
+        crs="EPSG:32632",
+        transform=transform,
         nodata=-9999,
     ) as ds:
         ds.write(arr, 1)
 
 
 def _aoi_for_synthetic() -> Polygon:
-    return Polygon([
-        (15.81, 41.55), (15.95, 41.55), (15.95, 41.70), (15.81, 41.70),
-        (15.81, 41.55),
-    ])
+    return Polygon(
+        [
+            (15.81, 41.55),
+            (15.95, 41.55),
+            (15.95, 41.70),
+            (15.81, 41.70),
+            (15.81, 41.55),
+        ]
+    )
 
 
 def test_process_hillshade_writes_cog(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     raw = tmp_path / "in.tif"
     _write_synthetic_geotiff(raw)
     monkeypatch.setitem(
-        raster.PROCESSORS, "fake",
+        raster.PROCESSORS,
+        "fake",
         raster.RasterProcessorSpec(
-            raster_id="fake", raw_path=raw, source_id="syn",
-            year_data=2024, value_min=-50.0, value_max=850.0,
+            raster_id="fake",
+            raw_path=raw,
+            source_id="syn",
+            year_data=2024,
+            value_min=-50.0,
+            value_max=850.0,
         ),
     )
 
     out = hillshade.process_hillshade(
-        "fake", _aoi_for_synthetic(), processed_dir=tmp_path / "processed",
+        "fake",
+        _aoi_for_synthetic(),
+        processed_dir=tmp_path / "processed",
     )
     assert out == tmp_path / "processed" / "fake_hillshade_8bit.tif"
     with rasterio.open(out) as ds:
@@ -161,6 +193,7 @@ def test_process_hillshade_rejects_unknown_id(monkeypatch: pytest.MonkeyPatch):
 
 # --- CLI -------------------------------------------------------------
 
+
 def _write_aoi_file(tmp_path: Path) -> Path:
     p = tmp_path / "aoi.geojson"
     p.write_text(
@@ -176,8 +209,10 @@ def _write_aoi_file(tmp_path: Path) -> Path:
                             "type": "Polygon",
                             "coordinates": [
                                 [
-                                    [15.81, 41.55], [15.95, 41.55],
-                                    [15.95, 41.70], [15.81, 41.70],
+                                    [15.81, 41.55],
+                                    [15.95, 41.55],
+                                    [15.95, 41.70],
+                                    [15.81, 41.70],
                                     [15.81, 41.55],
                                 ]
                             ],
@@ -191,16 +226,19 @@ def _write_aoi_file(tmp_path: Path) -> Path:
     return p
 
 
-def test_cli_hillshade_runs_end_to_end(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_cli_hillshade_runs_end_to_end(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     raw = tmp_path / "in.tif"
     _write_synthetic_geotiff(raw)
     monkeypatch.setitem(
-        raster.PROCESSORS, "fake",
+        raster.PROCESSORS,
+        "fake",
         raster.RasterProcessorSpec(
-            raster_id="fake", raw_path=raw, source_id="syn",
-            year_data=2024, value_min=-50.0, value_max=850.0,
+            raster_id="fake",
+            raw_path=raw,
+            source_id="syn",
+            year_data=2024,
+            value_min=-50.0,
+            value_max=850.0,
         ),
     )
     aoi = _write_aoi_file(tmp_path)
@@ -213,9 +251,7 @@ def test_cli_hillshade_runs_end_to_end(
     assert (out_dir / "fake_hillshade_8bit.tif").exists()
 
 
-def test_cli_hillshade_unknown_raster_id(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_cli_hillshade_unknown_raster_id(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(raster, "PROCESSORS", {})
     aoi = _write_aoi_file(tmp_path)
     result = CliRunner().invoke(

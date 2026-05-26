@@ -44,12 +44,12 @@ from manfredonia_map.processing import base
 #: Each row: ``(normalised_elevation_in_[0,1], (R, G, B))``. Chosen for
 #: combined land+sea rasters (TINITALY land DTM, EMODnet land+sea DEM).
 TERRAIN_STOPS: tuple[tuple[float, tuple[int, int, int]], ...] = (
-    (0.00, (10, 50, 130)),    # deep sea
-    (0.15, (60, 130, 200)),   # shallow sea / coastal shelf
+    (0.00, (10, 50, 130)),  # deep sea
+    (0.15, (60, 130, 200)),  # shallow sea / coastal shelf
     (0.20, (220, 220, 160)),  # beach / lowland
-    (0.30, (110, 180, 90)),   # green plain
-    (0.50, (170, 150, 80)),   # foothills
-    (0.75, (140, 100, 60)),   # peaks
+    (0.30, (110, 180, 90)),  # green plain
+    (0.50, (170, 150, 80)),  # foothills
+    (0.75, (140, 100, 60)),  # peaks
     (0.90, (200, 200, 200)),  # alpine
     (1.00, (255, 255, 255)),  # summit
 )
@@ -104,9 +104,7 @@ def _resolve_emodnet_geotiff(raw_dir: Path) -> Path:
     if not tifs:
         raise FileNotFoundError(f"no GeoTIFF in {raw_dir}")
     if len(tifs) > 1:
-        raise ValueError(
-            f"expected exactly one GeoTIFF in {raw_dir}; found {len(tifs)}"
-        )
+        raise ValueError(f"expected exactly one GeoTIFF in {raw_dir}; found {len(tifs)}")
     return tifs[0]
 
 
@@ -117,9 +115,7 @@ def read_raster(spec: RasterProcessorSpec) -> xr.DataArray:
         # when the wrong tile id is configured.
         with zipfile.ZipFile(spec.raw_path) as zf:
             if spec.inner_zip_filename not in zf.namelist():
-                raise FileNotFoundError(
-                    f"{spec.inner_zip_filename} not in {spec.raw_path}"
-                )
+                raise FileNotFoundError(f"{spec.inner_zip_filename} not in {spec.raw_path}")
         return rioxarray.open_rasterio(
             f"zip://{spec.raw_path}!{spec.inner_zip_filename}", masked=True
         )
@@ -128,20 +124,14 @@ def read_raster(spec: RasterProcessorSpec) -> xr.DataArray:
     return rioxarray.open_rasterio(spec.raw_path, masked=True)
 
 
-def reproject_and_clip(
-    da: xr.DataArray, *, dst_crs: str, aoi: BaseGeometry
-) -> xr.DataArray:
+def reproject_and_clip(da: xr.DataArray, *, dst_crs: str, aoi: BaseGeometry) -> xr.DataArray:
     """Re-project to ``dst_crs`` and clip to the AOI polygon."""
     reprojected = da.rio.reproject(dst_crs, resampling=Resampling.bilinear)
-    aoi_in_dst = (
-        gpd.GeoDataFrame(geometry=[aoi], crs=base.STORAGE_CRS).to_crs(dst_crs).geometry
-    )
+    aoi_in_dst = gpd.GeoDataFrame(geometry=[aoi], crs=base.STORAGE_CRS).to_crs(dst_crs).geometry
     return reprojected.rio.clip(aoi_in_dst, drop=True, all_touched=True)
 
 
-def hypsometric_tint(
-    values: np.ndarray, *, value_min: float, value_max: float
-) -> np.ndarray:
+def hypsometric_tint(values: np.ndarray, *, value_min: float, value_max: float) -> np.ndarray:
     """Map a 2-D elevation array to an ``(H, W, 4)`` ``uint8`` RGBA array.
 
     Pixels with NaN (nodata) get ``alpha = 0`` so they render transparent
@@ -163,9 +153,7 @@ def hypsometric_tint(
     return np.stack([r, g, b, a], axis=-1).astype(np.uint8)
 
 
-def _rgba_to_dataarray(
-    rgba: np.ndarray, *, ref_da: xr.DataArray
-) -> xr.DataArray:
+def _rgba_to_dataarray(rgba: np.ndarray, *, ref_da: xr.DataArray) -> xr.DataArray:
     """Wrap a ``(H, W, 4)`` ``uint8`` array as an xarray ``(band, y, x)``."""
     # rgba shape: (H, W, 4) → transpose to (4, H, W).
     bands = rgba.transpose(2, 0, 1)
@@ -186,9 +174,7 @@ def _rgba_to_dataarray(
     return out
 
 
-def write_8bit_cog(
-    rgba_da: xr.DataArray, out_path: Path, *, profile_name: str = "deflate"
-) -> None:
+def write_8bit_cog(rgba_da: xr.DataArray, out_path: Path, *, profile_name: str = "deflate") -> None:
     """Write an 8-bit RGBA ``xarray`` DataArray as a Cloud-Optimized GeoTIFF.
 
     Uses ``rio-cogeo`` to produce a real COG with internal overviews and

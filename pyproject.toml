@@ -267,6 +267,7 @@ publish-prepare-mbtiles = "mfd-map publish prepare-mbtiles"
 publish-manifest = "mfd-map publish manifest"
 publish-prepare = "mfd-map publish prepare"
 publish-upload = "mfd-map publish upload"
+publish-style = "mfd-map publish style"
 process = "mfd-map process all"
 publish = "mfd-map publish all"
 all = { depends-on = ["lint", "typecheck", "test-cov"] }

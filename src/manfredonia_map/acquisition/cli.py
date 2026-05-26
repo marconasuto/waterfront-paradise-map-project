@@ -153,6 +153,7 @@ def acquire_osm_all(aoi_path: Path, skip_layers: tuple[str, ...]) -> None:
 
 # --- ISTAT --------------------------------------------------------------
 
+
 @acquire.group(name="istat")
 def acquire_istat() -> None:
     """Download ISTAT national datasets."""
@@ -202,6 +203,7 @@ def acquire_istat_boundaries(year: int, generalized: bool, out_path: Path | None
 
 # --- MASE ---------------------------------------------------------------
 
+
 @acquire.group(name="mase")
 def acquire_mase() -> None:
     """Download MASE datasets (Ministero dell'Ambiente e della Sicurezza Energetica)."""
@@ -226,11 +228,7 @@ def acquire_mase() -> None:
 def acquire_mase_natura2000(year: int, variant: str, out_path: Path | None) -> None:
     """Download MASE Rete Natura 2000 (SIC/ZSC/ZPS) national bundle."""
     spec = mase.MaseNatura2000Spec(year=year, variant=variant)  # type: ignore[arg-type]
-    out = (
-        out_path
-        if out_path is not None
-        else DATA_RAW / "mase_natura2000" / spec.out_filename
-    )
+    out = out_path if out_path is not None else DATA_RAW / "mase_natura2000" / spec.out_filename
     logger.info("Downloading %s -> %s", spec.url, out)
     sha = http.download_file(
         spec.url,
@@ -255,6 +253,7 @@ def acquire_mase_natura2000(year: int, variant: str, out_path: Path | None) -> N
 
 
 # --- TINITALY -----------------------------------------------------------
+
 
 @acquire.group(name="tinitaly")
 def acquire_tinitaly() -> None:
@@ -293,11 +292,7 @@ def acquire_tinitaly_tile(
 ) -> None:
     """Download one TINITALY/1.1 tile (e.g. ``e41005_s10``)."""
     spec = tinitaly.TinitalyTileSpec(tile_id=tile_id)
-    out = (
-        out_path
-        if out_path is not None
-        else DATA_RAW / "tinitaly" / spec.out_filename
-    )
+    out = out_path if out_path is not None else DATA_RAW / "tinitaly" / spec.out_filename
     if not verify_ssl:
         logger.warning(
             "SSL verification disabled for %s (TINITALY uses a self-signed cert).",
@@ -328,6 +323,7 @@ def acquire_tinitaly_tile(
 
 
 # --- EMODnet -----------------------------------------------------------
+
 
 @acquire.group(name="emodnet")
 def acquire_emodnet() -> None:
@@ -365,11 +361,7 @@ def acquire_emodnet_bathymetry(
     """Download EMODnet Bathymetry DTM 2024 clipped to AOI bbox via WCS."""
     bbox = _bbox_from_aoi(aoi_path)
     spec = emodnet.EmodnetBathymetrySpec(bbox=bbox, res_deg=res_deg)
-    out = (
-        out_path
-        if out_path is not None
-        else DATA_RAW / "emodnet_bathymetry" / spec.out_filename
-    )
+    out = out_path if out_path is not None else DATA_RAW / "emodnet_bathymetry" / spec.out_filename
     logger.info("Downloading %s -> %s", spec.url, out)
     sha = http.download_file(
         spec.url,
@@ -397,6 +389,7 @@ def acquire_emodnet_bathymetry(
 
 
 # --- MiC Vincoli in Rete ------------------------------------------------
+
 
 @acquire.group(name="vir")
 def acquire_vir() -> None:
@@ -446,6 +439,7 @@ def acquire_vir_ingest(kml_path: Path, label: str, out_dir: Path | None) -> None
 
 
 # --- ISPRA hydrography --------------------------------------------------
+
 
 @acquire.group(name="ispra")
 def acquire_ispra() -> None:
@@ -498,11 +492,7 @@ def acquire_ispra_hydrography(layer: str, aoi_path: Path, out_path: Path | None)
     """Fetch one ISPRA hydrography WFS layer clipped to the AOI bbox."""
     bbox = _bbox_from_aoi(aoi_path)
     spec = ispra.IspraHydrographySpec(layer=layer, bbox=bbox)  # type: ignore[arg-type]
-    out = (
-        out_path
-        if out_path is not None
-        else DATA_RAW / "ispra_hydrography" / spec.out_filename
-    )
+    out = out_path if out_path is not None else DATA_RAW / "ispra_hydrography" / spec.out_filename
     logger.info("Downloading %s -> %s", spec.url, out)
     _persist_ispra_hydro(spec, out)
 
@@ -545,6 +535,7 @@ def acquire_ispra_hydrography_all(aoi_path: Path, skip_layers: tuple[str, ...]) 
 
 # --- Regione Puglia (dati.puglia.it / CKAN) ---------------------------
 
+
 @acquire.group(name="regione-puglia")
 def acquire_regione_puglia() -> None:
     """Download Regione Puglia open datasets (dati.puglia.it CKAN)."""
@@ -562,11 +553,7 @@ def acquire_regione_puglia() -> None:
 def acquire_regione_puglia_dataset(dataset_id: str, out_path: Path | None) -> None:
     """Download one Regione Puglia CKAN dataset (currently only ``sin``)."""
     spec = regione_puglia.RegionePugliaSpec(dataset_id=dataset_id)  # type: ignore[arg-type]
-    out = (
-        out_path
-        if out_path is not None
-        else DATA_RAW / spec.source_id / spec.out_filename
-    )
+    out = out_path if out_path is not None else DATA_RAW / spec.source_id / spec.out_filename
     logger.info("Downloading %s -> %s", spec.url, out)
     sha = http.download_file(
         spec.url,

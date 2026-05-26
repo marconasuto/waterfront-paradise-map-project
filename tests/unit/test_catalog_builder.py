@@ -20,6 +20,7 @@ from manfredonia_map.processing import raster as raster_module
 
 # --- tiny tree fixture -----------------------------------------------
 
+
 def _write_provenance(path: Path, **fields: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     defaults = {
@@ -129,21 +130,31 @@ def _seed_tree(tmp_path: Path) -> tuple[Path, Path, Path]:
     raster_path = processed_dir / "fake_dtm_8bit.tif"
     transform = from_bounds(15.85, 41.55, 16.0, 41.65, 50, 40)
     with rasterio.open(
-        raster_path, "w", driver="GTiff", count=4, dtype="uint8",
-        width=50, height=40, crs="EPSG:32633", transform=transform,
+        raster_path,
+        "w",
+        driver="GTiff",
+        count=4,
+        dtype="uint8",
+        width=50,
+        height=40,
+        crs="EPSG:32633",
+        transform=transform,
     ) as ds:
         ds.write(np.zeros((4, 40, 50), dtype=np.uint8))
 
     # Register a synthetic raster spec so source_id resolution finds it.
     raster_module.PROCESSORS["fake_dtm"] = raster_module.RasterProcessorSpec(
-        raster_id="fake_dtm", raw_path=raw_dir / "tinitaly" / "e46005_s10.zip",
-        source_id="tinitaly_1_1_e46005_s10", year_data=2023,
+        raster_id="fake_dtm",
+        raw_path=raw_dir / "tinitaly" / "e46005_s10.zip",
+        source_id="tinitaly_1_1_e46005_s10",
+        year_data=2023,
     )
 
     return config_dir, raw_dir, processed_dir
 
 
 # --- builder primitives ---------------------------------------------
+
 
 def test_sha256_of_file_matches_hashlib(tmp_path: Path):
     p = tmp_path / "x.bin"
@@ -209,10 +220,13 @@ def test_inspect_vector_extracts_first_value_of_each_scalar_column(tmp_path: Pat
 
 def test_raster_source_id_for_uses_processors_registry(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setitem(
-        raster_module.PROCESSORS, "tinitaly_dtm",
+        raster_module.PROCESSORS,
+        "tinitaly_dtm",
         raster_module.RasterProcessorSpec(
-            raster_id="tinitaly_dtm", raw_path=Path("/nope"),
-            source_id="tinitaly_1_1_e46005_s10", year_data=2023,
+            raster_id="tinitaly_dtm",
+            raw_path=Path("/nope"),
+            source_id="tinitaly_1_1_e46005_s10",
+            year_data=2023,
         ),
     )
     assert builder._raster_source_id_for("tinitaly_dtm_8bit") == "tinitaly_1_1_e46005_s10"
@@ -240,6 +254,7 @@ def test_read_build_settings_reads_yaml(tmp_path: Path):
 
 # --- discover_* functions -------------------------------------------
 
+
 def test_discover_sources_aggregates_all_sidecars(tmp_path: Path):
     _config_dir, raw_dir, _ = _seed_tree(tmp_path)
     sources = builder.discover_sources(raw_dir)
@@ -264,8 +279,15 @@ def test_discover_raster_layers_includes_hillshade(tmp_path: Path):
     hs_path = processed_dir / "fake_dtm_hillshade_8bit.tif"
     transform = from_bounds(15.85, 41.55, 16.0, 41.65, 50, 40)
     with rasterio.open(
-        hs_path, "w", driver="GTiff", count=4, dtype="uint8",
-        width=50, height=40, crs="EPSG:32633", transform=transform,
+        hs_path,
+        "w",
+        driver="GTiff",
+        count=4,
+        dtype="uint8",
+        width=50,
+        height=40,
+        crs="EPSG:32633",
+        transform=transform,
     ) as ds:
         ds.write(np.zeros((4, 40, 50), dtype=np.uint8))
 
@@ -279,11 +301,15 @@ def test_discover_raster_layers_includes_hillshade(tmp_path: Path):
 
 # --- assemble + write + load --------------------------------------
 
+
 def test_assemble_returns_validated_catalog(tmp_path: Path):
     config_dir, raw_dir, processed_dir = _seed_tree(tmp_path)
     cat = builder.assemble(
-        config_dir=config_dir, data_raw=raw_dir, processed_dir=processed_dir,
-        repo_root=tmp_path, now="2026-05-25T10:00:00+00:00",
+        config_dir=config_dir,
+        data_raw=raw_dir,
+        processed_dir=processed_dir,
+        repo_root=tmp_path,
+        now="2026-05-25T10:00:00+00:00",
     )
     assert cat.version == models.SCHEMA_VERSION
     assert cat.generated_at == "2026-05-25T10:00:00+00:00"
@@ -297,7 +323,9 @@ def test_assemble_raises_when_aoi_missing(tmp_path: Path):
     empty_config.mkdir()
     with pytest.raises(FileNotFoundError, match="aoi"):
         builder.assemble(
-            config_dir=empty_config, data_raw=raw_dir, processed_dir=processed_dir,
+            config_dir=empty_config,
+            data_raw=raw_dir,
+            processed_dir=processed_dir,
             repo_root=tmp_path,
         )
 
@@ -305,8 +333,11 @@ def test_assemble_raises_when_aoi_missing(tmp_path: Path):
 def test_write_and_load_roundtrip(tmp_path: Path):
     config_dir, raw_dir, processed_dir = _seed_tree(tmp_path)
     cat = builder.assemble(
-        config_dir=config_dir, data_raw=raw_dir, processed_dir=processed_dir,
-        repo_root=tmp_path, now="2026-05-25T10:00:00+00:00",
+        config_dir=config_dir,
+        data_raw=raw_dir,
+        processed_dir=processed_dir,
+        repo_root=tmp_path,
+        now="2026-05-25T10:00:00+00:00",
     )
     out = tmp_path / "data" / "catalog.yaml"
     builder.write(cat, out)
@@ -320,8 +351,11 @@ def test_write_and_load_roundtrip(tmp_path: Path):
 def test_write_is_deterministic_byte_for_byte(tmp_path: Path):
     config_dir, raw_dir, processed_dir = _seed_tree(tmp_path)
     cat = builder.assemble(
-        config_dir=config_dir, data_raw=raw_dir, processed_dir=processed_dir,
-        repo_root=tmp_path, now="2026-05-25T10:00:00+00:00",
+        config_dir=config_dir,
+        data_raw=raw_dir,
+        processed_dir=processed_dir,
+        repo_root=tmp_path,
+        now="2026-05-25T10:00:00+00:00",
     )
     a = tmp_path / "a.yaml"
     b = tmp_path / "b.yaml"
@@ -340,7 +374,9 @@ def test_load_rejects_invalid_payload(tmp_path: Path):
 def test_iter_layer_ids_includes_both_vectors_and_rasters(tmp_path: Path):
     config_dir, raw_dir, processed_dir = _seed_tree(tmp_path)
     cat = builder.assemble(
-        config_dir=config_dir, data_raw=raw_dir, processed_dir=processed_dir,
+        config_dir=config_dir,
+        data_raw=raw_dir,
+        processed_dir=processed_dir,
         repo_root=tmp_path,
     )
     ids = list(builder.iter_layer_ids(cat))
@@ -350,16 +386,21 @@ def test_iter_layer_ids_includes_both_vectors_and_rasters(tmp_path: Path):
 
 # --- CLI -------------------------------------------------------------
 
+
 def test_cli_catalog_build_writes_yaml(tmp_path: Path):
     config_dir, raw_dir, processed_dir = _seed_tree(tmp_path)
     out = tmp_path / "data" / "catalog.yaml"
     result = CliRunner().invoke(
         cat_cli.catalog_build,
         [
-            "--config-dir", str(config_dir),
-            "--data-raw", str(raw_dir),
-            "--processed-dir", str(processed_dir),
-            "--out", str(out),
+            "--config-dir",
+            str(config_dir),
+            "--data-raw",
+            str(raw_dir),
+            "--processed-dir",
+            str(processed_dir),
+            "--out",
+            str(out),
         ],
     )
     assert result.exit_code == 0, result.output
@@ -371,7 +412,9 @@ def test_cli_catalog_validate_succeeds(tmp_path: Path):
     config_dir, raw_dir, processed_dir = _seed_tree(tmp_path)
     out = tmp_path / "data" / "catalog.yaml"
     cat = builder.assemble(
-        config_dir=config_dir, data_raw=raw_dir, processed_dir=processed_dir,
+        config_dir=config_dir,
+        data_raw=raw_dir,
+        processed_dir=processed_dir,
         repo_root=tmp_path,
     )
     builder.write(cat, out)

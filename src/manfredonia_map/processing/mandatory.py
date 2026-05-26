@@ -116,8 +116,7 @@ def promote(
         gdf = _filter_by_name(gdf, spec.name_filter_substring)
         if gdf.empty:
             raise ValueError(
-                f"no features matched name_filter_substring="
-                f"{spec.name_filter_substring!r} in {src}"
+                f"no features matched name_filter_substring={spec.name_filter_substring!r} in {src}"
             )
     gdf = _buffer_metric(gdf, spec.buffer_m)
     target_dir = out_dir if out_dir is not None else processed_dir / "mandatory_for_aoi"

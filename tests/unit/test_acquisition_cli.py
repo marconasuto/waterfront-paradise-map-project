@@ -104,11 +104,13 @@ def test_acquire_osm_layer_default_out_path_uses_data_raw(
     monkeypatch.setattr(acq_cli, "DATA_RAW", tmp_path / "raw")
     _patch_layer_fetch(
         monkeypatch,
-        {"roads": gpd.GeoDataFrame(
-            {"highway": ["primary"]},
-            geometry=[LineString([(15.91, 41.62), (15.92, 41.63)])],
-            crs="EPSG:4326",
-        )},
+        {
+            "roads": gpd.GeoDataFrame(
+                {"highway": ["primary"]},
+                geometry=[LineString([(15.91, 41.62), (15.92, 41.63)])],
+                crs="EPSG:4326",
+            )
+        },
     )
     aoi = _write_aoi(tmp_path)
     result = CliRunner().invoke(acq_cli.acquire_osm_layer, ["roads", "--aoi", str(aoi)])
@@ -126,20 +128,23 @@ def test_acquire_osm_layer_writes_nested_type_columns(
     # explode and we keep the values addressable on read.
     _patch_layer_fetch(
         monkeypatch,
-        {"harbours": gpd.GeoDataFrame(
-            {
-                "name": ["Manfredonia"],
-                "tags_list": [["pier", "breakwater"]],
-                "tags_dict": [{"a": 1}],
-            },
-            geometry=[Polygon([(15.9, 41.6), (15.91, 41.6), (15.91, 41.61), (15.9, 41.61)])],
-            crs="EPSG:4326",
-        )},
+        {
+            "harbours": gpd.GeoDataFrame(
+                {
+                    "name": ["Manfredonia"],
+                    "tags_list": [["pier", "breakwater"]],
+                    "tags_dict": [{"a": 1}],
+                },
+                geometry=[Polygon([(15.9, 41.6), (15.91, 41.6), (15.91, 41.61), (15.9, 41.61)])],
+                crs="EPSG:4326",
+            )
+        },
     )
     aoi = _write_aoi(tmp_path)
     out = tmp_path / "harbours.geojson"
     result = CliRunner().invoke(
-        acq_cli.acquire_osm_layer, ["harbours", "--aoi", str(aoi), "--out", str(out)],
+        acq_cli.acquire_osm_layer,
+        ["harbours", "--aoi", str(aoi), "--out", str(out)],
     )
     assert result.exit_code == 0, result.output
     props = json.loads(out.read_text())["features"][0]["properties"]
@@ -171,7 +176,8 @@ def test_acquire_osm_all_runs_each_layer_and_collects_failures(
         if lyr not in {"coastline", "roads", "wetlands"}:  # leave wetlands → empty → fail
             skip_args.extend(["--skip", lyr])
     result = CliRunner().invoke(
-        acq_cli.acquire_osm_all, ["--aoi", str(aoi), *skip_args],
+        acq_cli.acquire_osm_all,
+        ["--aoi", str(aoi), *skip_args],
     )
     assert result.exit_code != 0
     assert "acquisitions failed: wetlands" in result.output
@@ -185,9 +191,11 @@ def test_acquire_osm_all_skips_listed_layers(
     monkeypatch.setattr(acq_cli, "DATA_RAW", tmp_path / "raw")
     _patch_layer_fetch(
         monkeypatch,
-        {"coastline": gpd.GeoDataFrame(
-            geometry=[LineString([(15.92, 41.55), (15.94, 41.65)])], crs="EPSG:4326"
-        )},
+        {
+            "coastline": gpd.GeoDataFrame(
+                geometry=[LineString([(15.92, 41.55), (15.94, 41.65)])], crs="EPSG:4326"
+            )
+        },
     )
     aoi = _write_aoi(tmp_path)
     skip_args: list[str] = []
@@ -195,11 +203,10 @@ def test_acquire_osm_all_skips_listed_layers(
         if lyr != "coastline":
             skip_args.extend(["--skip", lyr])
     result = CliRunner().invoke(
-        acq_cli.acquire_osm_all, ["--aoi", str(aoi), *skip_args],
+        acq_cli.acquire_osm_all,
+        ["--aoi", str(aoi), *skip_args],
     )
     assert result.exit_code == 0, result.output
     assert (tmp_path / "raw" / "osm_coastline" / "coastline.geojson").exists()
     # Every other layer was skipped, so no other directory was created.
     assert sorted(p.name for p in (tmp_path / "raw").iterdir()) == ["osm_coastline"]
-
-

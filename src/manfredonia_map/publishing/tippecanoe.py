@@ -56,7 +56,8 @@ class TippecanoeBuildSpec:
         """Return the argv list that runs this build."""
         return [
             tippecanoe_path,
-            "-o", str(self.output_mbtiles),
+            "-o",
+            str(self.output_mbtiles),
             "-zg",
             "--drop-densest-as-needed",
             "--extend-zooms-if-still-dropping",

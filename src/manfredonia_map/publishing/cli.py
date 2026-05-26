@@ -12,6 +12,7 @@ from manfredonia_map.catalog import builder as catalog_builder
 from manfredonia_map.paths import DATA_DIR, DATA_PROCESSED
 from manfredonia_map.publishing import manifest as manifest_mod
 from manfredonia_map.publishing import settings as settings_mod
+from manfredonia_map.publishing import styles as styles_mod
 from manfredonia_map.publishing import tippecanoe as tippecanoe_mod
 from manfredonia_map.publishing import uploads_api as uploads_mod
 
@@ -33,8 +34,13 @@ def _build_one_layer(
     """Run tippecanoe for one layer; return the MBTiles path."""
     geojson = processed_dir / f"{layer_id}.geojson"
     src = next(
-        (s for vl in catalog.vector_layers if vl.layer_id == layer_id
-         for s in catalog.sources if s.source_id == vl.source_id),
+        (
+            s
+            for vl in catalog.vector_layers
+            if vl.layer_id == layer_id
+            for s in catalog.sources
+            if s.source_id == vl.source_id
+        ),
         None,
     )
     spec = tippecanoe_mod.TippecanoeBuildSpec(
@@ -42,12 +48,8 @@ def _build_one_layer(
         output_mbtiles=mbtiles_dir / f"{layer_id}.mbtiles",
         layer_name=layer_id,
         name=f"Manfredonia coastal map — {layer_id}",
-        description=(
-            f"Source: {src.dataset} ({src.publisher})." if src else f"Layer {layer_id}."
-        ),
-        attribution=(
-            f"{src.publisher}. License: {src.license}." if src else "Manfredonia map."
-        ),
+        description=(f"Source: {src.dataset} ({src.publisher})." if src else f"Layer {layer_id}."),
+        attribution=(f"{src.publisher}. License: {src.license}." if src else "Manfredonia map."),
     )
     return tippecanoe_mod.build_mbtiles(spec)
 
@@ -101,8 +103,10 @@ def publish_prepare_mbtiles(
         click.echo(f"--- mbtiles {vl.layer_id}")
         try:
             out = _build_one_layer(
-                vl.layer_id, processed_dir=processed_dir,
-                mbtiles_dir=mb_dir, catalog=catalog,
+                vl.layer_id,
+                processed_dir=processed_dir,
+                mbtiles_dir=mb_dir,
+                catalog=catalog,
             )
             click.echo(f"  wrote {out}")
         except (FileNotFoundError, subprocess.CalledProcessError) as exc:
@@ -134,7 +138,9 @@ def publish_prepare_mbtiles(
     show_default=True,
 )
 def publish_manifest(
-    processed_dir: Path, mbtiles_dir: Path | None, out_path: Path,
+    processed_dir: Path,
+    mbtiles_dir: Path | None,
+    out_path: Path,
 ) -> None:
     """Walk the catalog + MBTiles + COGs into ``data/publish_manifest.yaml``."""
     cat = catalog_builder.assemble(processed_dir=processed_dir)
@@ -160,6 +166,7 @@ def publish_prepare(ctx: click.Context) -> None:
 
 
 # --- upload (Phase 5b) --------------------------------------------------
+
 
 def _summarise(entry: manifest_mod.ManifestEntry) -> str:
     return (
@@ -206,9 +213,9 @@ def publish_upload(
     """Upload every manifest entry to Mapbox (dry-run by default)."""
     entries = manifest_mod.load(manifest_path)
     selected = [
-        e for e in entries
-        if (not only_layers or e.layer_id in only_layers)
-        and e.layer_id not in skip_layers
+        e
+        for e in entries
+        if (not only_layers or e.layer_id in only_layers) and e.layer_id not in skip_layers
     ]
     if not selected:
         click.echo("nothing to upload (manifest filter excluded everything).")
@@ -229,7 +236,8 @@ def publish_upload(
     username = s.require_username()
     secret_token = s.require_secret_token()
     client = uploads_mod.MapboxUploadsClient(
-        username=username, secret_token=secret_token,
+        username=username,
+        secret_token=secret_token,
     )
 
     failures: list[tuple[str, str]] = []
@@ -262,3 +270,79 @@ def publish_upload(
     if failures:
         msg = "; ".join(f"{lid}: {err}" for lid, err in failures)
         raise click.ClickException(f"uploads failed for: {msg}")
+
+
+# --- style (Phase 5c) ----------------------------------------------------
+
+
+@publish.command(name="style")
+@click.option(
+    "--manifest",
+    "manifest_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=DATA_DIR / "publish_manifest.yaml",
+    show_default=True,
+)
+@click.option(
+    "--color-scheme",
+    "color_scheme_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="Defaults to config/color_scheme.yaml.",
+)
+@click.option(
+    "--out",
+    "out_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help="Defaults to data/processed/style.json.",
+)
+@click.option(
+    "--name",
+    type=str,
+    default="Manfredonia coastal map",
+    show_default=True,
+)
+@click.option("--center-lon", type=float, default=styles_mod.DEFAULT_CENTER[0], show_default=True)
+@click.option("--center-lat", type=float, default=styles_mod.DEFAULT_CENTER[1], show_default=True)
+@click.option("--zoom", type=float, default=styles_mod.DEFAULT_ZOOM, show_default=True)
+def publish_style(
+    manifest_path: Path,
+    color_scheme_path: Path | None,
+    out_path: Path | None,
+    name: str,
+    center_lon: float,
+    center_lat: float,
+    zoom: float,
+) -> None:
+    """Build a Mapbox GL JS style JSON from the publish manifest."""
+    entries = manifest_mod.load(manifest_path)
+    palette = (
+        styles_mod.load_color_scheme(color_scheme_path)
+        if color_scheme_path
+        else styles_mod.load_color_scheme()
+    )
+    s = settings_mod.MapboxSettings()
+    username = s.require_username()
+
+    style = styles_mod.build_style(
+        entries,
+        palette,
+        username=username,
+        name=name,
+        center=(center_lon, center_lat),
+        zoom=zoom,
+    )
+    out = out_path or styles_mod.default_style_path()
+    styles_mod.write_style(style, out)
+
+    sources = len(style["sources"])
+    layers = len(style["layers"])
+    click.echo(f"Wrote {out}  ({sources} sources, {layers} layers)")
+    click.echo(
+        "\nTo make it live in Mapbox Studio:\n"
+        "  1. https://studio.mapbox.com/styles\n"
+        "  2. New style → Blank → Editor view → paste the JSON\n"
+        "  3. Save; copy the assigned mapbox://styles/<user>/<id> URL\n"
+        "     and paste it into the web app config (Phase 6)."
+    )

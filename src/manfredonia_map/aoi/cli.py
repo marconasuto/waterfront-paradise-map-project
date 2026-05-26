@@ -52,7 +52,8 @@ def _load_mandatory_points(points_yaml: Path) -> list[BaseGeometry]:
             geoms.append(buffered)
             logger.info(
                 "Loaded mandatory point: %s (buffer %s m)",
-                entry["id"], entry["buffer_m"],
+                entry["id"],
+                entry["buffer_m"],
             )
     return geoms
 

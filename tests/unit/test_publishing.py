@@ -21,6 +21,7 @@ from manfredonia_map.publishing import manifest, settings, tippecanoe
 
 # --- settings --------------------------------------------------------
 
+
 def test_settings_loads_values_from_env(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("MAPBOX_SECRET_TOKEN", "sk.fake")
     monkeypatch.setenv("MAPBOX_PUBLIC_TOKEN", "pk.fake")
@@ -70,6 +71,7 @@ def test_settings_load_from_env_file_default(monkeypatch: pytest.MonkeyPatch):
 
 # --- tippecanoe -----------------------------------------------------
 
+
 def test_find_tippecanoe_raises_when_missing(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr("shutil.which", lambda _: None)
     with pytest.raises(FileNotFoundError, match="tippecanoe"):
@@ -112,7 +114,10 @@ def test_build_mbtiles_raises_when_input_missing(tmp_path: Path):
     spec = tippecanoe.TippecanoeBuildSpec(
         input_geojson=tmp_path / "nope.geojson",
         output_mbtiles=tmp_path / "out.mbtiles",
-        layer_name="x", name="x", description="x", attribution="x",
+        layer_name="x",
+        name="x",
+        description="x",
+        attribution="x",
     )
     with pytest.raises(FileNotFoundError, match="input GeoJSON"):
         tippecanoe.build_mbtiles(spec)
@@ -135,8 +140,12 @@ def test_build_mbtiles_runs_subprocess(tmp_path: Path, monkeypatch: pytest.Monke
 
     out = tmp_path / "out.mbtiles"
     spec = tippecanoe.TippecanoeBuildSpec(
-        input_geojson=geojson, output_mbtiles=out,
-        layer_name="x", name="X", description="d", attribution="a",
+        input_geojson=geojson,
+        output_mbtiles=out,
+        layer_name="x",
+        name="X",
+        description="d",
+        attribution="a",
     )
     result = tippecanoe.build_mbtiles(spec)
     assert result == out
@@ -146,6 +155,7 @@ def test_build_mbtiles_runs_subprocess(tmp_path: Path, monkeypatch: pytest.Monke
 
 
 # --- manifest -------------------------------------------------------
+
 
 def test_slugify_tileset_id_strips_disallowed_chars():
     # "Lago Salso (SIC)" lower → "lago salso (sic)", non-[a-z0-9_-] → "-",
@@ -182,32 +192,37 @@ def _seed_processed_tree(tmp_path: Path) -> tuple[Path, Path, Path]:
 
     aoi_poly = Polygon([(15.8, 41.5), (16.05, 41.5), (16.05, 41.7), (15.8, 41.7)])
     for name in (
-        "aoi_source.geojson", "aoi_buffered.geojson",
-        "aoi_near_coast.geojson", "aoi.geojson",
+        "aoi_source.geojson",
+        "aoi_buffered.geojson",
+        "aoi_near_coast.geojson",
+        "aoi.geojson",
     ):
         gpd.GeoDataFrame(geometry=[aoi_poly], crs="EPSG:4326").to_file(
-            config_dir / name, driver="GeoJSON",
+            config_dir / name,
+            driver="GeoJSON",
         )
 
     # One provenance sidecar matching the vector layer.
     sidecar = raw_dir / "osm_coastline" / "coastline.provenance.json"
     sidecar.parent.mkdir(parents=True)
     sidecar.write_text(
-        json.dumps({
-            "source_id": "osm_coastline",
-            "publisher": "OpenStreetMap contributors",
-            "dataset": "OSM natural=coastline",
-            "url": "https://example.test",
-            "access_method": "Overpass",
-            "license": "ODbL-1.0",
-            "accessed_at": "2026-05-26T08:00:00+00:00",
-            "raw_path": str(raw_dir / "osm_coastline" / "coastline.geojson"),
-            "sha256": "0" * 64,
-            "byte_count": 1,
-            "bbox": None,
-            "year_data": 2026,
-            "query": {},
-        }),
+        json.dumps(
+            {
+                "source_id": "osm_coastline",
+                "publisher": "OpenStreetMap contributors",
+                "dataset": "OSM natural=coastline",
+                "url": "https://example.test",
+                "access_method": "Overpass",
+                "license": "ODbL-1.0",
+                "accessed_at": "2026-05-26T08:00:00+00:00",
+                "raw_path": str(raw_dir / "osm_coastline" / "coastline.geojson"),
+                "sha256": "0" * 64,
+                "byte_count": 1,
+                "bbox": None,
+                "year_data": 2026,
+                "query": {},
+            }
+        ),
         encoding="utf-8",
     )
 
@@ -234,8 +249,15 @@ def _seed_processed_tree(tmp_path: Path) -> tuple[Path, Path, Path]:
     raster_path = processed_dir / "tinitaly_dtm_8bit.tif"
     transform = from_bounds(15.85, 41.55, 16.0, 41.65, 50, 40)
     with rasterio.open(
-        raster_path, "w", driver="GTiff", count=4, dtype="uint8",
-        width=50, height=40, crs="EPSG:32633", transform=transform,
+        raster_path,
+        "w",
+        driver="GTiff",
+        count=4,
+        dtype="uint8",
+        width=50,
+        height=40,
+        crs="EPSG:32633",
+        transform=transform,
     ) as ds:
         ds.write(np.zeros((4, 40, 50), dtype=np.uint8))
 
@@ -250,21 +272,23 @@ def _seed_processed_tree(tmp_path: Path) -> tuple[Path, Path, Path]:
     sidecar_t = raw_dir / "tinitaly" / "e46005_s10.zip.provenance.json"
     sidecar_t.parent.mkdir()
     sidecar_t.write_text(
-        json.dumps({
-            "source_id": "tinitaly_1_1_e46005_s10",
-            "publisher": "INGV",
-            "dataset": "TINITALY/1.1 tile",
-            "url": "https://example.test/tinitaly.zip",
-            "access_method": "HTTPS",
-            "license": "CC-BY-4.0",
-            "accessed_at": "2026-05-26T08:00:00+00:00",
-            "raw_path": str(raw_dir / "tinitaly" / "e46005_s10.zip"),
-            "sha256": "0" * 64,
-            "byte_count": 1,
-            "bbox": None,
-            "year_data": 2023,
-            "query": {},
-        }),
+        json.dumps(
+            {
+                "source_id": "tinitaly_1_1_e46005_s10",
+                "publisher": "INGV",
+                "dataset": "TINITALY/1.1 tile",
+                "url": "https://example.test/tinitaly.zip",
+                "access_method": "HTTPS",
+                "license": "CC-BY-4.0",
+                "accessed_at": "2026-05-26T08:00:00+00:00",
+                "raw_path": str(raw_dir / "tinitaly" / "e46005_s10.zip"),
+                "sha256": "0" * 64,
+                "byte_count": 1,
+                "bbox": None,
+                "year_data": 2023,
+                "query": {},
+            }
+        ),
         encoding="utf-8",
     )
     return config_dir, raw_dir, processed_dir
@@ -275,16 +299,21 @@ def test_build_entries_skips_empty_vector_layers(tmp_path: Path):
     # Override the coastline GeoJSON to be empty.
     gpd.GeoDataFrame(
         {"layer_id": [], "source_id": [], "category": [], "year_data": []},
-        geometry=[], crs="EPSG:4326",
+        geometry=[],
+        crs="EPSG:4326",
     ).to_file(processed_dir / "coastline.geojson", driver="GeoJSON")
     cat = catalog_builder.assemble(
-        config_dir=config_dir, data_raw=raw_dir, processed_dir=processed_dir,
+        config_dir=config_dir,
+        data_raw=raw_dir,
+        processed_dir=processed_dir,
         repo_root=tmp_path,
     )
     entries = manifest.build_entries(
-        cat, username="tester",
+        cat,
+        username="tester",
         mbtiles_dir=processed_dir / "mbtiles",
-        processed_dir=processed_dir, repo_root=tmp_path,
+        processed_dir=processed_dir,
+        repo_root=tmp_path,
     )
     # The vector coastline is skipped (empty); the raster still lands.
     assert {e.layer_id for e in entries if e.layer_type == "vector"} == set()
@@ -296,13 +325,17 @@ def test_build_entries_skips_vectors_without_mbtiles(tmp_path: Path):
     # Remove the pre-built MBTiles.
     (processed_dir / "mbtiles" / "coastline.mbtiles").unlink()
     cat = catalog_builder.assemble(
-        config_dir=config_dir, data_raw=raw_dir, processed_dir=processed_dir,
+        config_dir=config_dir,
+        data_raw=raw_dir,
+        processed_dir=processed_dir,
         repo_root=tmp_path,
     )
     entries = manifest.build_entries(
-        cat, username="tester",
+        cat,
+        username="tester",
         mbtiles_dir=processed_dir / "mbtiles",
-        processed_dir=processed_dir, repo_root=tmp_path,
+        processed_dir=processed_dir,
+        repo_root=tmp_path,
     )
     assert {e.layer_id for e in entries if e.layer_type == "vector"} == set()
 
@@ -310,13 +343,17 @@ def test_build_entries_skips_vectors_without_mbtiles(tmp_path: Path):
 def test_build_entries_produces_well_formed_vector_entry(tmp_path: Path):
     config_dir, raw_dir, processed_dir = _seed_processed_tree(tmp_path)
     cat = catalog_builder.assemble(
-        config_dir=config_dir, data_raw=raw_dir, processed_dir=processed_dir,
+        config_dir=config_dir,
+        data_raw=raw_dir,
+        processed_dir=processed_dir,
         repo_root=tmp_path,
     )
     entries = manifest.build_entries(
-        cat, username="tester",
+        cat,
+        username="tester",
         mbtiles_dir=processed_dir / "mbtiles",
-        processed_dir=processed_dir, repo_root=tmp_path,
+        processed_dir=processed_dir,
+        repo_root=tmp_path,
     )
     vec = next(e for e in entries if e.layer_type == "vector" and e.layer_id == "coastline")
     assert vec.mapbox_tileset_id == "manfredonia-coastline-v1"
@@ -331,13 +368,17 @@ def test_build_entries_produces_well_formed_vector_entry(tmp_path: Path):
 def test_build_entries_handles_unknown_username(tmp_path: Path):
     config_dir, raw_dir, processed_dir = _seed_processed_tree(tmp_path)
     cat = catalog_builder.assemble(
-        config_dir=config_dir, data_raw=raw_dir, processed_dir=processed_dir,
+        config_dir=config_dir,
+        data_raw=raw_dir,
+        processed_dir=processed_dir,
         repo_root=tmp_path,
     )
     entries = manifest.build_entries(
-        cat, username="",
+        cat,
+        username="",
         mbtiles_dir=processed_dir / "mbtiles",
-        processed_dir=processed_dir, repo_root=tmp_path,
+        processed_dir=processed_dir,
+        repo_root=tmp_path,
     )
     vec = next(e for e in entries if e.layer_type == "vector")
     assert vec.mapbox_tileset_url == "mapbox://tileset/<MAPBOX_USERNAME>.manfredonia-coastline-v1"
@@ -347,13 +388,17 @@ def test_build_entries_handles_unknown_username(tmp_path: Path):
 def test_manifest_write_round_trip(tmp_path: Path):
     config_dir, raw_dir, processed_dir = _seed_processed_tree(tmp_path)
     cat = catalog_builder.assemble(
-        config_dir=config_dir, data_raw=raw_dir, processed_dir=processed_dir,
+        config_dir=config_dir,
+        data_raw=raw_dir,
+        processed_dir=processed_dir,
         repo_root=tmp_path,
     )
     entries = manifest.build_entries(
-        cat, username="tester",
+        cat,
+        username="tester",
         mbtiles_dir=processed_dir / "mbtiles",
-        processed_dir=processed_dir, repo_root=tmp_path,
+        processed_dir=processed_dir,
+        repo_root=tmp_path,
     )
     out = tmp_path / "manifest.yaml"
     manifest.write(entries, out)
@@ -365,13 +410,17 @@ def test_manifest_write_round_trip(tmp_path: Path):
 def test_manifest_write_is_byte_deterministic(tmp_path: Path):
     config_dir, raw_dir, processed_dir = _seed_processed_tree(tmp_path)
     cat = catalog_builder.assemble(
-        config_dir=config_dir, data_raw=raw_dir, processed_dir=processed_dir,
+        config_dir=config_dir,
+        data_raw=raw_dir,
+        processed_dir=processed_dir,
         repo_root=tmp_path,
     )
     entries = manifest.build_entries(
-        cat, username="tester",
+        cat,
+        username="tester",
         mbtiles_dir=processed_dir / "mbtiles",
-        processed_dir=processed_dir, repo_root=tmp_path,
+        processed_dir=processed_dir,
+        repo_root=tmp_path,
     )
     a = tmp_path / "a.yaml"
     b = tmp_path / "b.yaml"
@@ -394,9 +443,8 @@ def test_manifest_default_paths_use_expected_subdirs(tmp_path: Path):
 
 # --- CLI ------------------------------------------------------------
 
-def test_cli_publish_manifest_writes_yaml(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+
+def test_cli_publish_manifest_writes_yaml(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MAPBOX_USERNAME", "tester")
     config_dir, raw_dir, processed_dir = _seed_processed_tree(tmp_path)
     out = tmp_path / "publish_manifest.yaml"
@@ -411,9 +459,12 @@ def test_cli_publish_manifest_writes_yaml(
     result = CliRunner().invoke(
         pub_cli.publish_manifest,
         [
-            "--processed-dir", str(processed_dir),
-            "--mbtiles-dir", str(processed_dir / "mbtiles"),
-            "--out", str(out),
+            "--processed-dir",
+            str(processed_dir),
+            "--mbtiles-dir",
+            str(processed_dir / "mbtiles"),
+            "--out",
+            str(out),
         ],
     )
     assert result.exit_code == 0, result.output
@@ -431,13 +482,16 @@ def test_cli_publish_prepare_mbtiles_skips_empty(
     # the CLI should skip it without running tippecanoe.
     gpd.GeoDataFrame(
         {"layer_id": [], "source_id": [], "category": [], "year_data": []},
-        geometry=[], crs="EPSG:4326",
+        geometry=[],
+        crs="EPSG:4326",
     ).to_file(processed_dir / "coastline.geojson", driver="GeoJSON")
     monkeypatch.setattr(
-        "manfredonia_map.catalog.builder.DATA_RAW", raw_dir,
+        "manfredonia_map.catalog.builder.DATA_RAW",
+        raw_dir,
     )
     monkeypatch.setattr(
-        "manfredonia_map.catalog.builder.CONFIG_DIR", config_dir,
+        "manfredonia_map.catalog.builder.CONFIG_DIR",
+        config_dir,
     )
 
     # Track that tippecanoe was *not* called.
@@ -447,8 +501,7 @@ def test_cli_publish_prepare_mbtiles_skips_empty(
     monkeypatch.setattr(tippecanoe, "build_mbtiles", _boom)
     result = CliRunner().invoke(
         pub_cli.publish_prepare_mbtiles,
-        ["--processed-dir", str(processed_dir),
-         "--mbtiles-dir", str(processed_dir / "mbtiles")],
+        ["--processed-dir", str(processed_dir), "--mbtiles-dir", str(processed_dir / "mbtiles")],
     )
     assert result.exit_code == 0, result.output
     assert "(no features)" in result.output
@@ -459,22 +512,30 @@ def test_cli_publish_prepare_mbtiles_only_filter(
 ) -> None:
     config_dir, raw_dir, processed_dir = _seed_processed_tree(tmp_path)
     monkeypatch.setattr(
-        "manfredonia_map.catalog.builder.DATA_RAW", raw_dir,
+        "manfredonia_map.catalog.builder.DATA_RAW",
+        raw_dir,
     )
     monkeypatch.setattr(
-        "manfredonia_map.catalog.builder.CONFIG_DIR", config_dir,
+        "manfredonia_map.catalog.builder.CONFIG_DIR",
+        config_dir,
     )
     captured: list[str] = []
     monkeypatch.setattr(
-        tippecanoe, "build_mbtiles",
-        lambda spec, *_, **__: (captured.append(spec.layer_name) or spec.output_mbtiles),
+        tippecanoe,
+        "build_mbtiles",
+        lambda spec, *_, **__: captured.append(spec.layer_name) or spec.output_mbtiles,
     )
 
     result = CliRunner().invoke(
         pub_cli.publish_prepare_mbtiles,
-        ["--processed-dir", str(processed_dir),
-         "--mbtiles-dir", str(processed_dir / "mbtiles"),
-         "--only", "nothing-matches"],
+        [
+            "--processed-dir",
+            str(processed_dir),
+            "--mbtiles-dir",
+            str(processed_dir / "mbtiles"),
+            "--only",
+            "nothing-matches",
+        ],
     )
     assert result.exit_code == 0, result.output
     assert captured == []  # filter excluded the only candidate

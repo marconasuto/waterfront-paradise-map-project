@@ -16,6 +16,6 @@ tilesets. It is split into two slices:
   (raster). Will reuse the same manifest as its input.
 """
 
-from manfredonia_map.publishing import manifest, settings, tippecanoe, uploads_api
+from manfredonia_map.publishing import manifest, settings, styles, tippecanoe, uploads_api
 
-__all__ = ["manifest", "settings", "tippecanoe", "uploads_api"]
+__all__ = ["manifest", "settings", "styles", "tippecanoe", "uploads_api"]

@@ -45,9 +45,7 @@ def catalog() -> None:
     default=DATA_DIR / "catalog.yaml",
     show_default=True,
 )
-def catalog_build(
-    config_dir: Path, data_raw: Path, processed_dir: Path, out_path: Path
-) -> None:
+def catalog_build(config_dir: Path, data_raw: Path, processed_dir: Path, out_path: Path) -> None:
     """Walk raw provenance + processed outputs into ``data/catalog.yaml``."""
     cat = builder.assemble(
         config_dir=config_dir,

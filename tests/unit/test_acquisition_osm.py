@@ -16,13 +16,21 @@ def _fake_fetcher(rows: list[tuple[str, object]]) -> Callable:
             geometry=[g for _, g in rows],
             crs="EPSG:4326",
         )
+
     return _fn
 
 
 def test_layers_registry_has_expected_ids():
     expected = {
-        "coastline", "roads", "cycle_paths", "cycle_routes", "harbours",
-        "beaches", "wetlands", "industrial", "archaeology",
+        "coastline",
+        "roads",
+        "cycle_paths",
+        "cycle_routes",
+        "harbours",
+        "beaches",
+        "wetlands",
+        "industrial",
+        "archaeology",
     }
     assert expected <= set(osm.LAYERS)
 

@@ -44,11 +44,16 @@ def test_build_aoi_without_coastline_writes_all_three_files(tmp_path: Path):
     result = CliRunner().invoke(
         build_aoi,
         [
-            "--source", str(src),
-            "--coastline", str(tmp_path / "missing.geojson"),
-            "--mandatory-dir", str(tmp_path / "missing_dir"),
-            "--mandatory-points", str(tmp_path / "missing.yaml"),
-            "--out-dir", str(out_dir),
+            "--source",
+            str(src),
+            "--coastline",
+            str(tmp_path / "missing.geojson"),
+            "--mandatory-dir",
+            str(tmp_path / "missing_dir"),
+            "--mandatory-points",
+            str(tmp_path / "missing.yaml"),
+            "--out-dir",
+            str(out_dir),
         ],
     )
     assert result.exit_code == 0, result.output
@@ -62,12 +67,18 @@ def test_build_aoi_alias_buffered_writes_buffered_under_alias(tmp_path: Path):
     result = CliRunner().invoke(
         build_aoi,
         [
-            "--source", str(src),
-            "--coastline", str(tmp_path / "missing.geojson"),
-            "--mandatory-dir", str(tmp_path / "missing_dir"),
-            "--mandatory-points", str(tmp_path / "missing.yaml"),
-            "--out-dir", str(out_dir),
-            "--alias", "buffered",
+            "--source",
+            str(src),
+            "--coastline",
+            str(tmp_path / "missing.geojson"),
+            "--mandatory-dir",
+            str(tmp_path / "missing_dir"),
+            "--mandatory-points",
+            str(tmp_path / "missing.yaml"),
+            "--out-dir",
+            str(out_dir),
+            "--alias",
+            "buffered",
         ],
     )
     assert result.exit_code == 0, result.output
@@ -101,10 +112,14 @@ def test_build_aoi_with_coastline_includes_band(tmp_path: Path):
     result = CliRunner().invoke(
         build_aoi,
         [
-            "--source", str(src),
-            "--coastline", str(coastline),
-            "--mandatory-dir", str(tmp_path / "missing_dir"),
-            "--out-dir", str(out_dir),
+            "--source",
+            str(src),
+            "--coastline",
+            str(coastline),
+            "--mandatory-dir",
+            str(tmp_path / "missing_dir"),
+            "--out-dir",
+            str(out_dir),
         ],
     )
     # Either passes (coastal-band sanity met) or fails with our diagnostic.
@@ -137,11 +152,16 @@ def test_build_aoi_loads_mandatory_points_from_yaml(tmp_path: Path):
     result = CliRunner().invoke(
         build_aoi,
         [
-            "--source", str(src),
-            "--coastline", str(tmp_path / "missing.geojson"),
-            "--mandatory-dir", str(tmp_path / "missing_dir"),
-            "--mandatory-points", str(points_yaml),
-            "--out-dir", str(out_dir),
+            "--source",
+            str(src),
+            "--coastline",
+            str(tmp_path / "missing.geojson"),
+            "--mandatory-dir",
+            str(tmp_path / "missing_dir"),
+            "--mandatory-points",
+            str(points_yaml),
+            "--out-dir",
+            str(out_dir),
         ],
     )
     if result.exit_code != 0:
@@ -157,11 +177,16 @@ def test_build_aoi_handles_missing_mandatory_points_gracefully(tmp_path: Path):
     result = CliRunner().invoke(
         build_aoi,
         [
-            "--source", str(src),
-            "--coastline", str(tmp_path / "missing.geojson"),
-            "--mandatory-dir", str(tmp_path / "missing_dir"),
-            "--mandatory-points", str(tmp_path / "no_such_file.yaml"),
-            "--out-dir", str(out_dir),
+            "--source",
+            str(src),
+            "--coastline",
+            str(tmp_path / "missing.geojson"),
+            "--mandatory-dir",
+            str(tmp_path / "missing_dir"),
+            "--mandatory-points",
+            str(tmp_path / "no_such_file.yaml"),
+            "--out-dir",
+            str(out_dir),
         ],
     )
     assert result.exit_code == 0, result.output
@@ -202,11 +227,16 @@ def test_build_aoi_loads_mandatory_features_from_dir(tmp_path: Path):
     result = CliRunner().invoke(
         build_aoi,
         [
-            "--source", str(src),
-            "--coastline", str(tmp_path / "missing.geojson"),
-            "--mandatory-dir", str(mandatory_dir),
-            "--mandatory-points", str(tmp_path / "missing.yaml"),
-            "--out-dir", str(out_dir),
+            "--source",
+            str(src),
+            "--coastline",
+            str(tmp_path / "missing.geojson"),
+            "--mandatory-dir",
+            str(mandatory_dir),
+            "--mandatory-points",
+            str(tmp_path / "missing.yaml"),
+            "--out-dir",
+            str(out_dir),
         ],
     )
     # mandatory present → enough_inputs True; with no coastal band the

@@ -264,10 +264,28 @@ Phase 2 is unblocked.
       defaults to `--dry-run` so a re-run cannot accidentally upload
       until the user passes `--no-dry-run`. boto3 added as a
       conda-forge dep for the S3 SigV4 step.
-- [ ] **5c — Style management** — one custom style declaring every
-      uploaded tileset, layer paint props sourced from
-      `config/color_scheme.yaml`, runtime visibility toggles in the
-      web app via `setLayoutProperty`.
+- [x] **5c-1 — Style JSON generator.**
+      `src/manfredonia_map/publishing/styles.py` builds a Mapbox GL JS
+      style document from `data/publish_manifest.yaml` + the palette in
+      `config/color_scheme.yaml`. One `sources` entry per uploaded
+      tileset (vector `mapbox://<user>.<id>` or raster `tileSize=256`);
+      a deterministic layer stack — `background` → rasters
+      (bathymetry, DTM, hillshade) → polygon fills (Natura2000,
+      wetlands, industrial, SIN, harbours, beaches) → lines (admin,
+      hydrography, roads, coastline) → circles (archeological points).
+      Paint props per layer come from `LAYER_COLOR_TOKEN` +
+      `LAYER_PAINT_TYPE` mappings, so editing the palette is a
+      one-file change. Atomic + `sort_keys=True` write to
+      `data/processed/style.json` keeps the diff git-friendly. CLI:
+      `mfd-map publish style` (also as `pixi run publish-style`). Real
+      run produced 14 sources + 15 layers. To go live: paste the JSON
+      into Mapbox Studio (New style → Blank → Editor view) and copy
+      back the assigned `mapbox://styles/<user>/<id>` URL for the
+      web app config (Phase 6). 18 new unit tests; coverage 96.42%.
+- [ ] **5c-2 — Programmatic style upload** (optional follow-up):
+      `POST /styles/v1/<user>` so re-deploying the style is a single
+      CLI command rather than a Studio paste. Deferred until the web
+      app needs faster style iteration.
 
 ## Phase 6 — Web app + storymap
 

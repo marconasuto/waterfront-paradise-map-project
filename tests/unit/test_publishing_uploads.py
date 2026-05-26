@@ -15,8 +15,11 @@ from manfredonia_map.publishing import uploads_api
 
 # --- low-level client steps -----------------------------------------
 
+
 def _client(
-    *, http: httpx.Client | None = None, s3_put: uploads_api.S3Putter | None = None,
+    *,
+    http: httpx.Client | None = None,
+    s3_put: uploads_api.S3Putter | None = None,
 ) -> uploads_api.MapboxUploadsClient:
     return uploads_api.MapboxUploadsClient(
         username="tester",
@@ -41,14 +44,17 @@ def test_client_requires_secret_token():
 def test_get_s3_credentials_parses_payload(respx_mock: respx.Router):
     url = "https://api.mapbox.com/uploads/v1/tester/credentials"
     respx_mock.post(url).mock(
-        return_value=httpx.Response(200, json={
-            "bucket": "tilestream-uploads",
-            "key": "abc/def.mbtiles",
-            "url": "http://s3.example/tilestream-uploads/abc/def.mbtiles",
-            "accessKeyId": "AKIA",
-            "secretAccessKey": "SECRET",
-            "sessionToken": "TOKEN",
-        }),
+        return_value=httpx.Response(
+            200,
+            json={
+                "bucket": "tilestream-uploads",
+                "key": "abc/def.mbtiles",
+                "url": "http://s3.example/tilestream-uploads/abc/def.mbtiles",
+                "accessKeyId": "AKIA",
+                "secretAccessKey": "SECRET",
+                "sessionToken": "TOKEN",
+            },
+        ),
     )
     c = _client()
     creds = c.get_s3_credentials()
@@ -75,8 +81,12 @@ def test_upload_to_s3_delegates_to_s3_put(tmp_path: Path):
 
     c = _client(s3_put=_capture)
     creds = uploads_api.S3Credentials(
-        bucket="b", key="k", url="u",
-        access_key_id="a", secret_access_key="s", session_token="t",
+        bucket="b",
+        key="k",
+        url="u",
+        access_key_id="a",
+        secret_access_key="s",
+        session_token="t",
     )
     c.upload_to_s3(payload, creds)
     assert captured["file_path"] == payload
@@ -86,8 +96,12 @@ def test_upload_to_s3_delegates_to_s3_put(tmp_path: Path):
 def test_upload_to_s3_raises_when_file_missing(tmp_path: Path):
     c = _client()
     creds = uploads_api.S3Credentials(
-        bucket="b", key="k", url="u",
-        access_key_id="a", secret_access_key="s", session_token="t",
+        bucket="b",
+        key="k",
+        url="u",
+        access_key_id="a",
+        secret_access_key="s",
+        session_token="t",
     )
     with pytest.raises(FileNotFoundError):
         c.upload_to_s3(tmp_path / "missing.bin", creds)
@@ -98,7 +112,8 @@ def test_create_upload_sends_expected_body(respx_mock: respx.Router):
     route = respx_mock.post(url).mock(return_value=httpx.Response(201, json={"id": "u1"}))
     c = _client()
     result = c.create_upload(
-        s3_url="https://s3/tilestream/abc", tileset_id="manfredonia-roads-v1",
+        s3_url="https://s3/tilestream/abc",
+        tileset_id="manfredonia-roads-v1",
         name="roads",
     )
     assert result == {"id": "u1"}
@@ -137,6 +152,7 @@ def test_get_upload_status_raises_on_http_error(respx_mock: respx.Router):
 
 # --- publish() orchestration ---------------------------------------
 
+
 def _seed_publish_endpoints(
     respx_mock: respx.Router,
     *,
@@ -145,24 +161,29 @@ def _seed_publish_endpoints(
     """Wire credentials + create + status routes for a happy-path publish."""
     respx_mock.post(
         "https://api.mapbox.com/uploads/v1/tester/credentials",
-    ).mock(return_value=httpx.Response(200, json={
-        "bucket": "b", "key": "k", "url": "https://s3/abc",
-        "accessKeyId": "A", "secretAccessKey": "S", "sessionToken": "T",
-    }))
+    ).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "bucket": "b",
+                "key": "k",
+                "url": "https://s3/abc",
+                "accessKeyId": "A",
+                "secretAccessKey": "S",
+                "sessionToken": "T",
+            },
+        )
+    )
     respx_mock.post(
         "https://api.mapbox.com/uploads/v1/tester",
     ).mock(return_value=httpx.Response(201, json={"id": "u1"}))
     status_route = respx_mock.get(
         "https://api.mapbox.com/uploads/v1/tester/u1",
     )
-    status_route.side_effect = [
-        httpx.Response(200, json=payload) for payload in statuses
-    ]
+    status_route.side_effect = [httpx.Response(200, json=payload) for payload in statuses]
 
 
-def test_publish_happy_path_returns_complete_result(
-    tmp_path: Path, respx_mock: respx.Router
-):
+def test_publish_happy_path_returns_complete_result(tmp_path: Path, respx_mock: respx.Router):
     payload = tmp_path / "roads.mbtiles"
     payload.write_bytes(b"PK\x03\x04")
     s3_calls: list[Path] = []
@@ -182,9 +203,7 @@ def test_publish_happy_path_returns_complete_result(
     assert s3_calls == [payload]
 
 
-def test_publish_surface_error_from_status(
-    tmp_path: Path, respx_mock: respx.Router
-):
+def test_publish_surface_error_from_status(tmp_path: Path, respx_mock: respx.Router):
     payload = tmp_path / "x.mbtiles"
     payload.write_bytes(b"x")
     _seed_publish_endpoints(
@@ -199,9 +218,7 @@ def test_publish_surface_error_from_status(
     assert result.error == "invalid tileset id"
 
 
-def test_publish_times_out_when_never_complete(
-    tmp_path: Path, respx_mock: respx.Router
-):
+def test_publish_times_out_when_never_complete(tmp_path: Path, respx_mock: respx.Router):
     payload = tmp_path / "x.mbtiles"
     payload.write_bytes(b"x")
     _seed_publish_endpoints(
@@ -217,13 +234,19 @@ def test_publish_times_out_when_never_complete(
         return fake_clock["t"]
 
     c = uploads_api.MapboxUploadsClient(
-        username="tester", secret_token="sk.x",
+        username="tester",
+        secret_token="sk.x",
         s3_put=lambda **_: None,
-        poll_interval_s=10.0, poll_timeout_s=15.0,
+        poll_interval_s=10.0,
+        poll_timeout_s=15.0,
     )
     with pytest.raises(uploads_api.MapboxUploadError, match="did not complete"):
         c.publish(
-            payload, tileset_id="t", name="x", sleep=_sleep, now=_now,
+            payload,
+            tileset_id="t",
+            name="x",
+            sleep=_sleep,
+            now=_now,
         )
 
 
@@ -233,9 +256,7 @@ def test_publish_raises_when_file_missing(tmp_path: Path):
         c.publish(tmp_path / "nope.bin", tileset_id="t", name="x")
 
 
-def test_publish_handles_non_numeric_progress(
-    tmp_path: Path, respx_mock: respx.Router
-):
+def test_publish_handles_non_numeric_progress(tmp_path: Path, respx_mock: respx.Router):
     payload = tmp_path / "x.bin"
     payload.write_bytes(b"x")
     _seed_publish_endpoints(
@@ -249,25 +270,31 @@ def test_publish_handles_non_numeric_progress(
 
 # --- CLI dry-run ----------------------------------------------------
 
+
 def _seed_manifest_file(tmp_path: Path) -> Path:
     entries = [
         manifest_mod.ManifestEntry(
-            layer_id="coastline", layer_type="vector",
+            layer_id="coastline",
+            layer_type="vector",
             source_id="osm_coastline",
             mapbox_tileset_id="manfredonia-coastline-v1",
             mapbox_tileset_url="mapbox://tileset/tester.manfredonia-coastline-v1",
             input_path=str(tmp_path / "coastline.mbtiles"),
             input_sha256="0" * 64,
-            description="d", attribution="a",
+            description="d",
+            attribution="a",
             mapbox_studio_url="https://studio.mapbox.com/x",
         ),
         manifest_mod.ManifestEntry(
-            layer_id="dtm", layer_type="raster", source_id="t",
+            layer_id="dtm",
+            layer_type="raster",
+            source_id="t",
             mapbox_tileset_id="manfredonia-dtm-v1",
             mapbox_tileset_url="mapbox://tileset/tester.manfredonia-dtm-v1",
             input_path=str(tmp_path / "dtm.tif"),
             input_sha256="0" * 64,
-            description="d", attribution="a",
+            description="d",
+            attribution="a",
             mapbox_studio_url="https://studio.mapbox.com/y",
         ),
     ]
@@ -292,7 +319,7 @@ def test_cli_publish_upload_dry_run_makes_no_api_calls(
 
     result = CliRunner().invoke(
         pub_cli.publish_upload,
-        ["--manifest", str(manifest_path)],   # default is --dry-run
+        ["--manifest", str(manifest_path)],  # default is --dry-run
     )
     assert result.exit_code == 0, result.output
     assert "DRY RUN" in result.output
@@ -300,9 +327,7 @@ def test_cli_publish_upload_dry_run_makes_no_api_calls(
     assert "dtm" in result.output
 
 
-def test_cli_publish_upload_only_and_skip_filters(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-):
+def test_cli_publish_upload_only_and_skip_filters(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("MAPBOX_USERNAME", "tester")
     monkeypatch.setenv("MAPBOX_SECRET_TOKEN", "sk.x")
     manifest_path = _seed_manifest_file(tmp_path)
@@ -335,7 +360,11 @@ def test_cli_publish_upload_no_dry_run_invokes_client(
     class _FakeClient:
         def __init__(self, **_kwargs: object) -> None: ...
         def publish(
-            self, file_path: Path, *, tileset_id: str, name: str,
+            self,
+            file_path: Path,
+            *,
+            tileset_id: str,
+            name: str,
             **_: object,
         ) -> uploads_api.UploadResult:
             publish_calls.append(
@@ -361,9 +390,7 @@ def test_cli_publish_upload_no_dry_run_invokes_client(
     assert "uploaded 2/2 successfully" in result.output
 
 
-def test_cli_publish_upload_reports_failures(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-):
+def test_cli_publish_upload_reports_failures(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("MAPBOX_USERNAME", "tester")
     monkeypatch.setenv("MAPBOX_SECRET_TOKEN", "sk.x")
     manifest_path = _seed_manifest_file(tmp_path)
@@ -371,7 +398,11 @@ def test_cli_publish_upload_reports_failures(
     class _BoomClient:
         def __init__(self, **_kwargs: object) -> None: ...
         def publish(
-            self, file_path: Path, *, tileset_id: str, name: str,
+            self,
+            file_path: Path,
+            *,
+            tileset_id: str,
+            name: str,
             **_: object,
         ) -> uploads_api.UploadResult:
             raise uploads_api.MapboxUploadError("kaboom")

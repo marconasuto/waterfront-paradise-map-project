@@ -45,7 +45,7 @@ class IspraHydrographySpec:
     """Spec for one ISPRA hydrography WFS GetFeature request."""
 
     layer: HydroLayer
-    bbox: tuple[float, float, float, float]   # (west, south, east, north) in EPSG:4326
+    bbox: tuple[float, float, float, float]  # (west, south, east, north) in EPSG:4326
     base_url: str = "https://sdi.isprambiente.it/geoserver/hy/wfs"
 
     @property

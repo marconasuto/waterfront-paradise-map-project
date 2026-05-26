@@ -35,7 +35,7 @@ MAPBOX_HOST = "https://api.mapbox.com"
 
 #: Polling cadence + ceiling for the upload status check (per call).
 _POLL_INTERVAL_S = 5.0
-_POLL_TIMEOUT_S = 30 * 60.0   # 30 min — generous; small layers finish in seconds
+_POLL_TIMEOUT_S = 30 * 60.0  # 30 min — generous; small layers finish in seconds
 
 #: Any HTTP status at this threshold or above is treated as an API error.
 _HTTP_ERROR_STATUS = 400
@@ -148,9 +148,7 @@ class MapboxUploadsClient:
             raise FileNotFoundError(file_path)
         self.s3_put(file_path=file_path, creds=creds)
 
-    def create_upload(
-        self, *, s3_url: str, tileset_id: str, name: str
-    ) -> dict[str, Any]:
+    def create_upload(self, *, s3_url: str, tileset_id: str, name: str) -> dict[str, Any]:
         """Step 3 — tell Mapbox which S3 URL to ingest and where to publish."""
         body = {
             "tileset": f"{self.username}.{tileset_id}",
@@ -163,9 +161,7 @@ class MapboxUploadsClient:
             json=body,
         )
         if resp.status_code >= _HTTP_ERROR_STATUS:
-            raise MapboxUploadError(
-                f"upload create failed: HTTP {resp.status_code} {resp.text!r}"
-            )
+            raise MapboxUploadError(f"upload create failed: HTTP {resp.status_code} {resp.text!r}")
         return resp.json()
 
     def get_upload_status(self, upload_id: str) -> dict[str, Any]:
@@ -175,9 +171,7 @@ class MapboxUploadsClient:
             params={"access_token": self.secret_token},
         )
         if resp.status_code >= _HTTP_ERROR_STATUS:
-            raise MapboxUploadError(
-                f"status request failed: HTTP {resp.status_code} {resp.text!r}"
-            )
+            raise MapboxUploadError(f"status request failed: HTTP {resp.status_code} {resp.text!r}")
         return resp.json()
 
     # --- orchestration ------------------------------------------------

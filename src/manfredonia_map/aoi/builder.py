@@ -25,9 +25,7 @@ def _reproject(geom: BaseGeometry, src_crs: str, dst_crs: str) -> BaseGeometry:
     return series.iloc[0]
 
 
-def build_buffered_aoi(
-    source: BaseGeometry, source_crs: str, buffer_m: float
-) -> BaseGeometry:
+def build_buffered_aoi(source: BaseGeometry, source_crs: str, buffer_m: float) -> BaseGeometry:
     """Expand a source polygon by ``buffer_m`` metres on every side.
 
     Args:

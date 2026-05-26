@@ -32,9 +32,7 @@ class DownloadError(RuntimeError):
 
 
 @retry(
-    retry=retry_if_exception_type(
-        (httpx.TransportError, httpx.HTTPStatusError, DownloadError)
-    ),
+    retry=retry_if_exception_type((httpx.TransportError, httpx.HTTPStatusError, DownloadError)),
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=1, max=30),
     reraise=True,
@@ -79,14 +77,17 @@ def download_file(
     digest = hashlib.sha256()
     fd, tmp = tempfile.mkstemp(prefix=out_path.name + ".", dir=out_path.parent)
     try:
-        with os.fdopen(fd, "wb") as f, httpx.stream(
-            "GET",
-            url,
-            timeout=timeout_s,
-            follow_redirects=True,
-            headers=headers,
-            verify=verify_ssl,
-        ) as resp:
+        with (
+            os.fdopen(fd, "wb") as f,
+            httpx.stream(
+                "GET",
+                url,
+                timeout=timeout_s,
+                follow_redirects=True,
+                headers=headers,
+                verify=verify_ssl,
+            ) as resp,
+        ):
             if resp.status_code >= _HTTP_ERROR_THRESHOLD:
                 # Drain the body so connections can be re-used.
                 resp.read()

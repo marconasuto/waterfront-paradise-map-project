@@ -12,6 +12,7 @@ from manfredonia_map.processing import base, normalize
 
 # --- coastline --------------------------------------------------------
 
+
 def _write_osm_coastline(path: Path) -> None:
     # osmnx 2.x writes the OSM id as a column named ``id`` (not ``osmid``).
     gdf = gpd.GeoDataFrame(
@@ -33,9 +34,7 @@ def test_normalize_coastline_conforms_to_schema(tmp_path: Path):
     raw = tmp_path / "coastline.geojson"
     _write_osm_coastline(raw)
     out = normalize.normalize_coastline(raw_path=raw)
-    assert list(base.SCHEMA_COLUMNS) == [
-        c for c in out.columns if c in base.SCHEMA_COLUMNS
-    ]
+    assert list(base.SCHEMA_COLUMNS) == [c for c in out.columns if c in base.SCHEMA_COLUMNS]
     assert out["layer_id"].iloc[0] == "coastline"
     assert out["source_id"].iloc[0] == "osm_coastline"
     assert out["category"].iloc[0] == "coastline"
@@ -55,6 +54,7 @@ def test_normalize_coastline_synthesises_id_when_missing(tmp_path: Path):
 
 
 # --- admin_boundaries (zipped shapefile) ------------------------------
+
 
 def _write_istat_zip(zip_path: Path) -> None:
     """Create a minimal zip mimicking the ISTAT bundle layout."""
@@ -101,6 +101,7 @@ def test_normalize_admin_boundaries_target_comuni_overridable(tmp_path: Path):
 
 # --- hydrography_surface (ISPRA WFS GeoJSON) --------------------------
 
+
 def _write_ispra_reticolo(path: Path) -> None:
     gpd.GeoDataFrame(
         {
@@ -134,13 +135,22 @@ def test_normalize_hydrography_surface_keeps_layer_fields(tmp_path: Path):
 
 # --- registry --------------------------------------------------------
 
+
 def test_normalizers_registry_contains_expected_layer_ids():
     expected = {
-        "coastline", "admin_boundaries", "hydrography_surface",
-        "roads", "cycle_paths", "cycle_routes",
-        "harbours", "beaches", "wetlands",
-        "industrial_areas", "archeological_areas",
-        "natura2000", "sin_manfredonia",
+        "coastline",
+        "admin_boundaries",
+        "hydrography_surface",
+        "roads",
+        "cycle_paths",
+        "cycle_routes",
+        "harbours",
+        "beaches",
+        "wetlands",
+        "industrial_areas",
+        "archeological_areas",
+        "natura2000",
+        "sin_manfredonia",
     }
     assert expected <= set(normalize.NORMALIZERS)
     for lid, spec in normalize.NORMALIZERS.items():
@@ -150,10 +160,9 @@ def test_normalizers_registry_contains_expected_layer_ids():
 
 # --- OSM helper + per-OSM-layer normalizers ----------------------------
 
+
 def _write_osm_geojson(path: Path, rows: dict, geometry: list) -> None:
-    gpd.GeoDataFrame(rows, geometry=geometry, crs="EPSG:4326").to_file(
-        path, driver="GeoJSON"
-    )
+    gpd.GeoDataFrame(rows, geometry=geometry, crs="EPSG:4326").to_file(path, driver="GeoJSON")
 
 
 def test_normalize_osm_layer_helper_handles_minimal_columns(tmp_path: Path):
@@ -182,10 +191,14 @@ def test_normalize_roads_keeps_extras(tmp_path: Path):
     raw = tmp_path / "roads.geojson"
     _write_osm_geojson(
         raw,
-        {"id": [1, 2], "name": ["SS89", None], "highway": ["primary", "residential"],
-         "surface": ["asphalt", None], "maxspeed": [90, 50]},
-        [LineString([(15.9, 41.6), (15.95, 41.65)]),
-         LineString([(15.95, 41.65), (16.0, 41.7)])],
+        {
+            "id": [1, 2],
+            "name": ["SS89", None],
+            "highway": ["primary", "residential"],
+            "surface": ["asphalt", None],
+            "maxspeed": [90, 50],
+        },
+        [LineString([(15.9, 41.6), (15.95, 41.65)]), LineString([(15.95, 41.65), (16.0, 41.7)])],
     )
     out = normalize.normalize_roads(raw_path=raw)
     assert out["id"].tolist() == ["1", "2"]
@@ -206,10 +219,18 @@ def test_normalize_harbours_handles_mixed_geom_types(tmp_path: Path):
     raw = tmp_path / "harbours.geojson"
     _write_osm_geojson(
         raw,
-        {"id": [1, 2], "name": ["Porto", "Pier"], "man_made": [None, "pier"],
-         "harbour": ["yes", None], "mooring": [None, "private"], "material": ["concrete", "wood"]},
-        [Polygon([(15.9, 41.6), (15.95, 41.6), (15.95, 41.65), (15.9, 41.65)]),
-         LineString([(15.92, 41.62), (15.93, 41.63)])],
+        {
+            "id": [1, 2],
+            "name": ["Porto", "Pier"],
+            "man_made": [None, "pier"],
+            "harbour": ["yes", None],
+            "mooring": [None, "private"],
+            "material": ["concrete", "wood"],
+        },
+        [
+            Polygon([(15.9, 41.6), (15.95, 41.6), (15.95, 41.65), (15.9, 41.65)]),
+            LineString([(15.92, 41.62), (15.93, 41.63)]),
+        ],
     )
     out = normalize.normalize_harbours(raw_path=raw)
     assert out["category"].iloc[0] == "harbour"
@@ -220,8 +241,13 @@ def test_normalize_wetlands_keeps_wetland_subtype(tmp_path: Path):
     raw = tmp_path / "wet.geojson"
     _write_osm_geojson(
         raw,
-        {"id": [1], "name": ["Lago Salso"], "natural": ["wetland"],
-         "wetland": ["marsh"], "wikidata": ["Q123"]},
+        {
+            "id": [1],
+            "name": ["Lago Salso"],
+            "natural": ["wetland"],
+            "wetland": ["marsh"],
+            "wikidata": ["Q123"],
+        },
         [Polygon([(15.91, 41.60), (15.93, 41.60), (15.93, 41.62), (15.91, 41.62)])],
     )
     out = normalize.normalize_wetlands(raw_path=raw)
@@ -245,12 +271,17 @@ def test_normalize_archeological_areas_keeps_historic_extras(tmp_path: Path):
     raw = tmp_path / "arc.geojson"
     _write_osm_geojson(
         raw,
-        {"id": [1, 2], "name": ["Grotta Scaloria", "Siponto"],
-         "historic": ["archaeological_site", "archaeological_site"],
-         "wikidata": ["Q1", "Q2"],
-         "historic:civilization": ["neolithic", "roman"]},
-        [Polygon([(15.90, 41.64), (15.92, 41.64), (15.92, 41.66), (15.90, 41.66)]),
-         Polygon([(15.86, 41.58), (15.88, 41.58), (15.88, 41.60), (15.86, 41.60)])],
+        {
+            "id": [1, 2],
+            "name": ["Grotta Scaloria", "Siponto"],
+            "historic": ["archaeological_site", "archaeological_site"],
+            "wikidata": ["Q1", "Q2"],
+            "historic:civilization": ["neolithic", "roman"],
+        },
+        [
+            Polygon([(15.90, 41.64), (15.92, 41.64), (15.92, 41.66), (15.90, 41.66)]),
+            Polygon([(15.86, 41.58), (15.88, 41.58), (15.88, 41.60), (15.86, 41.60)]),
+        ],
     )
     out = normalize.normalize_archeological_areas(raw_path=raw)
     assert sorted(out["name_it"].tolist()) == ["Grotta Scaloria", "Siponto"]
@@ -258,6 +289,7 @@ def test_normalize_archeological_areas_keeps_historic_extras(tmp_path: Path):
 
 
 # --- MASE Natura 2000 ------------------------------------------------
+
 
 def _write_natura2000_zip(zip_path: Path) -> None:
     """Build a minimal MASE-like zip with a single shapefile.
@@ -290,22 +322,34 @@ def _write_natura2000_zip(zip_path: Path) -> None:
             # Two polygons in the Manfredonia AOI. Extended UTM 32N:
             # easting ~1.07 M, northing ~4.63 M → lat/lon ≈ 41.6°N, 15.9°E
             # (derived empirically from the TINITALY e46005_s10 bbox).
-            Polygon([
-                (1_070_000, 4_625_000), (1_080_000, 4_625_000),
-                (1_080_000, 4_635_000), (1_070_000, 4_635_000),
-                (1_070_000, 4_625_000),
-            ]),
-            Polygon([
-                (1_080_000, 4_625_000), (1_090_000, 4_625_000),
-                (1_090_000, 4_635_000), (1_080_000, 4_635_000),
-                (1_080_000, 4_625_000),
-            ]),
+            Polygon(
+                [
+                    (1_070_000, 4_625_000),
+                    (1_080_000, 4_625_000),
+                    (1_080_000, 4_635_000),
+                    (1_070_000, 4_635_000),
+                    (1_070_000, 4_625_000),
+                ]
+            ),
+            Polygon(
+                [
+                    (1_080_000, 4_625_000),
+                    (1_090_000, 4_625_000),
+                    (1_090_000, 4_635_000),
+                    (1_080_000, 4_635_000),
+                    (1_080_000, 4_625_000),
+                ]
+            ),
             # Valle d'Aosta — far from our AOI.
-            Polygon([
-                (400_000, 5_050_000), (410_000, 5_050_000),
-                (410_000, 5_060_000), (400_000, 5_060_000),
-                (400_000, 5_050_000),
-            ]),
+            Polygon(
+                [
+                    (400_000, 5_050_000),
+                    (410_000, 5_050_000),
+                    (410_000, 5_060_000),
+                    (400_000, 5_060_000),
+                    (400_000, 5_050_000),
+                ]
+            ),
         ],
         crs="EPSG:32632",
     ).to_file(shp, driver="ESRI Shapefile")
@@ -361,6 +405,7 @@ def test_normalize_natura2000_filters_by_aoi_bbox(tmp_path: Path):
 
 # --- sin_manfredonia (Regione Puglia open-data perimeter) ------------
 
+
 def _write_sin_zip(tmp_path: Path) -> Path:
     """Build a minimal Regione-Puglia-like zip with a SIN shapefile inside."""
     inner_dir = tmp_path / "sin_src" / "sin"
@@ -373,32 +418,52 @@ def _write_sin_zip(tmp_path: Path) -> Path:
         },
         geometry=[
             # Three Manfredonia polygons in EPSG:32633 (UTM 33N).
-            Polygon([
-                (572_000, 4_605_000), (575_000, 4_605_000),
-                (575_000, 4_608_000), (572_000, 4_608_000),
-                (572_000, 4_605_000),
-            ]),
-            Polygon([
-                (575_000, 4_605_000), (578_000, 4_605_000),
-                (578_000, 4_608_000), (575_000, 4_608_000),
-                (575_000, 4_605_000),
-            ]),
-            Polygon([
-                (570_000, 4_600_000), (573_000, 4_600_000),
-                (573_000, 4_603_000), (570_000, 4_603_000),
-                (570_000, 4_600_000),
-            ]),
+            Polygon(
+                [
+                    (572_000, 4_605_000),
+                    (575_000, 4_605_000),
+                    (575_000, 4_608_000),
+                    (572_000, 4_608_000),
+                    (572_000, 4_605_000),
+                ]
+            ),
+            Polygon(
+                [
+                    (575_000, 4_605_000),
+                    (578_000, 4_605_000),
+                    (578_000, 4_608_000),
+                    (575_000, 4_608_000),
+                    (575_000, 4_605_000),
+                ]
+            ),
+            Polygon(
+                [
+                    (570_000, 4_600_000),
+                    (573_000, 4_600_000),
+                    (573_000, 4_603_000),
+                    (570_000, 4_603_000),
+                    (570_000, 4_600_000),
+                ]
+            ),
             # Other Puglia SINs — must be filtered out.
-            Polygon([
-                (680_000, 4_480_000), (682_000, 4_480_000),
-                (682_000, 4_482_000), (680_000, 4_482_000),
-                (680_000, 4_480_000),
-            ]),
-            Polygon([
-                (620_000, 4_550_000), (622_000, 4_550_000),
-                (622_000, 4_552_000), (620_000, 4_552_000),
-                (620_000, 4_550_000),
-            ]),
+            Polygon(
+                [
+                    (680_000, 4_480_000),
+                    (682_000, 4_480_000),
+                    (682_000, 4_482_000),
+                    (680_000, 4_482_000),
+                    (680_000, 4_480_000),
+                ]
+            ),
+            Polygon(
+                [
+                    (620_000, 4_550_000),
+                    (622_000, 4_550_000),
+                    (622_000, 4_552_000),
+                    (620_000, 4_552_000),
+                    (620_000, 4_550_000),
+                ]
+            ),
         ],
         crs="EPSG:32633",
     ).to_file(shp, driver="ESRI Shapefile")
@@ -412,7 +477,7 @@ def _write_sin_zip(tmp_path: Path) -> Path:
 def test_normalize_sin_manfredonia_filters_to_manfredonia_only(tmp_path: Path):
     z = _write_sin_zip(tmp_path)
     out = normalize.normalize_sin_manfredonia(raw_path=z)
-    assert len(out) == 3   # only the three MANFREDONIA rows
+    assert len(out) == 3  # only the three MANFREDONIA rows
     assert (out["layer_id"] == "sin_manfredonia").all()
     assert (out["source_id"] == "regione_puglia_sin").all()
     assert (out["category"] == "sin").all()

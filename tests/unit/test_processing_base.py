@@ -101,8 +101,14 @@ def test_conform_to_schema_produces_canonical_columns():
         extra_columns=["extra"],
     )
     assert list(out.columns) == [
-        "id", "layer_id", "name_it", "category", "year_data", "source_id",
-        "extra", "geometry",
+        "id",
+        "layer_id",
+        "name_it",
+        "category",
+        "year_data",
+        "source_id",
+        "extra",
+        "geometry",
     ]
     assert out["id"].tolist() == ["a", "b"]
     assert out["layer_id"].iloc[0] == "foo"
@@ -115,7 +121,11 @@ def test_conform_to_schema_produces_canonical_columns():
 def test_conform_to_schema_synthesizes_id_when_missing():
     gdf = gpd.GeoDataFrame(geometry=[Point(0, 0), Point(1, 1)], crs="EPSG:4326")
     out = base.conform_to_schema(
-        gdf, layer_id="foo", source_id="x", year_data=None, category="bar",
+        gdf,
+        layer_id="foo",
+        source_id="x",
+        year_data=None,
+        category="bar",
     )
     assert out["id"].tolist() == ["foo_0", "foo_1"]
     assert out["name_it"].isna().all()
@@ -128,10 +138,15 @@ def test_conform_to_schema_preserves_input_crs_for_reprojection_later():
     # Now conform_to_schema must preserve the input CRS so the downstream
     # `to_storage_crs` step can reproject correctly.
     gdf = gpd.GeoDataFrame(
-        geometry=[Point(575000, 4607000)], crs="EPSG:32633",
+        geometry=[Point(575000, 4607000)],
+        crs="EPSG:32633",
     )
     out = base.conform_to_schema(
-        gdf, layer_id="x", source_id="s", year_data=2024, category="c",
+        gdf,
+        layer_id="x",
+        source_id="s",
+        year_data=2024,
+        category="c",
     )
     assert out.crs.to_epsg() == 32633
     # And the coordinates are untouched (still metric).
@@ -141,17 +156,23 @@ def test_conform_to_schema_preserves_input_crs_for_reprojection_later():
 def test_conform_to_schema_defaults_to_storage_crs_when_input_has_none():
     gdf = gpd.GeoDataFrame(geometry=[Point(0, 0)], crs=None)
     out = base.conform_to_schema(
-        gdf, layer_id="x", source_id="s", year_data=None, category="c",
+        gdf,
+        layer_id="x",
+        source_id="s",
+        year_data=None,
+        category="c",
     )
     assert out.crs.to_epsg() == 4326
 
 
 def test_conform_to_schema_drops_unknown_extras():
-    gdf = gpd.GeoDataFrame(
-        {"some_field": [1]}, geometry=[Point(0, 0)], crs="EPSG:4326"
-    )
+    gdf = gpd.GeoDataFrame({"some_field": [1]}, geometry=[Point(0, 0)], crs="EPSG:4326")
     out = base.conform_to_schema(
-        gdf, layer_id="foo", source_id="x", year_data=None, category="bar",
+        gdf,
+        layer_id="foo",
+        source_id="x",
+        year_data=None,
+        category="bar",
         extra_columns=["not_there"],
     )
     # extra_columns that don't exist in the input are silently skipped
@@ -192,9 +213,7 @@ def test_write_layer_geojson_is_byte_deterministic(tmp_path: Path):
 
 def test_write_layer_geojson_rounds_coordinates(tmp_path: Path):
     gdf = gpd.GeoDataFrame(
-        geometry=[
-            LineString([(15.900000000001, 41.600000000001), (16.0, 41.7)])
-        ],
+        geometry=[LineString([(15.900000000001, 41.600000000001), (16.0, 41.7)])],
         crs="EPSG:4326",
     )
     out = tmp_path / "x.geojson"
@@ -207,7 +226,8 @@ def test_write_layer_geojson_reprojects_non_4326(tmp_path: Path):
     # A GeoDataFrame in UTM-33N must be re-projected before serialisation
     # (GeoJSON RFC 7946 only permits EPSG:4326).
     gdf = gpd.GeoDataFrame(
-        geometry=[Point(575000, 4607000)], crs="EPSG:32633",
+        geometry=[Point(575000, 4607000)],
+        crs="EPSG:32633",
     )
     out = tmp_path / "x.geojson"
     base.write_layer_geojson(gdf, out)
@@ -252,9 +272,7 @@ def test_read_aoi_polygon_returns_first_feature(tmp_path: Path):
                         "properties": {},
                         "geometry": {
                             "type": "Polygon",
-                            "coordinates": [
-                                [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]
-                            ],
+                            "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
                         },
                     }
                 ],
@@ -294,9 +312,7 @@ def test_summarize_handles_empty():
 
 
 def test_summarize_json_is_valid_and_stable():
-    gdf = gpd.GeoDataFrame(
-        geometry=[Point(0, 0), Point(1, 1)], crs="EPSG:4326"
-    )
+    gdf = gpd.GeoDataFrame(geometry=[Point(0, 0), Point(1, 1)], crs="EPSG:4326")
     s = json.loads(base.summarize_json(gdf))
     assert s["features"] == 2
     assert s["geom_types"] == ["Point"]

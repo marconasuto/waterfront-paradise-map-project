@@ -142,18 +142,15 @@ def test_acquire_ispra_hydrography_all_runs_each_layer(
     bbox = (15.79, 41.49, 16.06, 41.69)
     for layer in ispra.LAYERS:
         spec = ispra.IspraHydrographySpec(layer=layer, bbox=bbox)
-        respx_mock.get(spec.url).mock(
-            return_value=httpx.Response(200, content=_GEOJSON_FIXTURE)
-        )
+        respx_mock.get(spec.url).mock(return_value=httpx.Response(200, content=_GEOJSON_FIXTURE))
 
     result = CliRunner().invoke(
-        acq_cli.acquire_ispra_hydrography_all, ["--aoi", str(aoi)],
+        acq_cli.acquire_ispra_hydrography_all,
+        ["--aoi", str(aoi)],
     )
     assert result.exit_code == 0, result.output
     for layer in ispra.LAYERS:
-        assert (
-            tmp_path / "raw" / "ispra_hydrography" / f"hy_{layer}_aoi.geojson"
-        ).exists()
+        assert (tmp_path / "raw" / "ispra_hydrography" / f"hy_{layer}_aoi.geojson").exists()
 
 
 def test_acquire_ispra_hydrography_all_collects_failures(
@@ -174,7 +171,8 @@ def test_acquire_ispra_hydrography_all_collects_failures(
             )
 
     result = CliRunner().invoke(
-        acq_cli.acquire_ispra_hydrography_all, ["--aoi", str(aoi)],
+        acq_cli.acquire_ispra_hydrography_all,
+        ["--aoi", str(aoi)],
     )
     assert result.exit_code != 0
     assert "autorita_bacino" in result.output
@@ -195,7 +193,8 @@ def test_acquire_ispra_hydrography_all_honours_skip(
         if layer != only:
             skip_args.extend(["--skip", layer])
     result = CliRunner().invoke(
-        acq_cli.acquire_ispra_hydrography_all, ["--aoi", str(aoi), *skip_args],
+        acq_cli.acquire_ispra_hydrography_all,
+        ["--aoi", str(aoi), *skip_args],
     )
     assert result.exit_code == 0, result.output
     out_dir = tmp_path / "raw" / "ispra_hydrography"

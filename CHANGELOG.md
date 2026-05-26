@@ -6,6 +6,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
 ## [Unreleased]
 
 ### Added
+- 2026-05-26 — Phase 5c: Mapbox GL JS style JSON generator.
+  - `src/manfredonia_map/publishing/styles.py` builds a complete style
+    document (sources + ordered layer stack + sprite/glyphs metadata)
+    from `data/publish_manifest.yaml` + `config/color_scheme.yaml`. One
+    `vector` or `raster` source per uploaded tileset; layers stacked as
+    background -> rasters -> polygon fills -> lines -> circles. Paint
+    props per layer come from `LAYER_COLOR_TOKEN` + `LAYER_PAINT_TYPE`
+    mappings, so editing the palette is a one-file change. Atomic +
+    `sort_keys=True` writer keeps the file git-diff friendly.
+  - CLI: `mfd-map publish style` (also `pixi run publish-style`) with
+    `--manifest --color-scheme --out --name --center-lon --center-lat
+    --zoom`. First real run wrote `data/processed/style.json` with 14
+    sources + 15 layers; CLI prints Studio import instructions.
+  - 18 new unit tests covering palette loading, source generation,
+    paint-type dispatch, render order, deterministic write, and CLI.
+    Suite at 271 passed, coverage 96.42% (gate 95%).
 - 2026-05-23 — Initial project skeleton, `SPECIFICATIONS.md` v0.1
   (single source of truth), plan + subplan files under `plans/`,
   `.gitignore`, `pyproject.toml`, `.env.example`, AOI source polygon at

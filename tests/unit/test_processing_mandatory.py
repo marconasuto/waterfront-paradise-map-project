@@ -48,7 +48,8 @@ def test_buffer_metric_produces_polygon_from_point():
 
 def test_promote_raises_when_upstream_layer_missing(tmp_path: Path):
     spec = mandatory.MandatoryPromotionSpec(
-        feature_id="x", layer_id="not_there",
+        feature_id="x",
+        layer_id="not_there",
     )
     with pytest.raises(FileNotFoundError, match="not_there"):
         mandatory.promote(spec, processed_dir=tmp_path, out_dir=tmp_path / "out")
@@ -65,7 +66,8 @@ def test_promote_raises_when_filter_matches_nothing(tmp_path: Path):
         ),
     )
     spec = mandatory.MandatoryPromotionSpec(
-        feature_id="lago_salso", layer_id="wetlands",
+        feature_id="lago_salso",
+        layer_id="wetlands",
         name_filter_substring="lago salso",
     )
     with pytest.raises(ValueError, match="no features matched"):
@@ -87,7 +89,8 @@ def test_promote_writes_filtered_polygons(tmp_path: Path):
         ),
     )
     spec = mandatory.MandatoryPromotionSpec(
-        feature_id="lago_salso", layer_id="wetlands",
+        feature_id="lago_salso",
+        layer_id="wetlands",
         name_filter_substring="lago salso",
     )
     out_dir = tmp_path / "mandatory_for_aoi"
@@ -108,7 +111,8 @@ def test_promote_buffers_when_buffer_m_set(tmp_path: Path):
         ),
     )
     spec = mandatory.MandatoryPromotionSpec(
-        feature_id="grotta_scaloria", layer_id="archeological_areas",
+        feature_id="grotta_scaloria",
+        layer_id="archeological_areas",
         name_filter_substring="grotta scaloria",
         buffer_m=300.0,
     )
@@ -130,7 +134,8 @@ def test_promote_default_out_dir_under_processed(tmp_path: Path):
         ),
     )
     spec = mandatory.MandatoryPromotionSpec(
-        feature_id="sin_manfredonia", layer_id="sin_manfredonia",
+        feature_id="sin_manfredonia",
+        layer_id="sin_manfredonia",
     )
     out = mandatory.promote(spec, processed_dir=tmp_path)
     assert out == tmp_path / "mandatory_for_aoi" / "sin_manfredonia.geojson"
@@ -138,14 +143,13 @@ def test_promote_default_out_dir_under_processed(tmp_path: Path):
 
 
 def test_promotions_registry_has_expected_entries():
-    assert {"lago_salso", "sin_manfredonia", "grotta_scaloria"} <= set(
-        mandatory.PROMOTIONS
-    )
+    assert {"lago_salso", "sin_manfredonia", "grotta_scaloria"} <= set(mandatory.PROMOTIONS)
     for fid, spec in mandatory.PROMOTIONS.items():
         assert spec.feature_id == fid
 
 
 # --- CLI -----------------------------------------------------------
+
 
 def _seed_processed_layers(processed_dir: Path) -> None:
     """Drop minimal processed layers in place for an end-to-end CLI test."""

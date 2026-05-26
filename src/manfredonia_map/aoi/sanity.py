@@ -52,6 +52,5 @@ def run_checks(
         the assertion holds).
     """
     return {
-        check.name: near_coast.contains(check.point()) == check.must_be_inside
-        for check in checks
+        check.name: near_coast.contains(check.point()) == check.must_be_inside for check in checks
     }

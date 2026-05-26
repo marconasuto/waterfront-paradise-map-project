@@ -152,9 +152,7 @@ def _round_coords(obj: object, ndigits: int) -> object:
     return obj
 
 
-def _gdf_to_geojson_dict(
-    gdf: gpd.GeoDataFrame, *, coord_precision: int
-) -> dict[str, object]:
+def _gdf_to_geojson_dict(gdf: gpd.GeoDataFrame, *, coord_precision: int) -> dict[str, object]:
     """Serialize a GeoDataFrame to a deterministic GeoJSON ``dict``."""
     import pandas as pd  # noqa: PLC0415  # heavy import, scope it
     from shapely.geometry import mapping  # noqa: PLC0415

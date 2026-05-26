@@ -7,9 +7,7 @@ from manfredonia_map.aoi import builder
 
 
 def test_buffered_aoi_grows_in_every_direction():
-    src = Polygon(
-        [(15.90, 41.60), (15.91, 41.60), (15.91, 41.61), (15.90, 41.61), (15.90, 41.60)]
-    )
+    src = Polygon([(15.90, 41.60), (15.91, 41.60), (15.91, 41.61), (15.90, 41.61), (15.90, 41.60)])
     out = builder.build_buffered_aoi(src, "EPSG:4326", buffer_m=1000.0)
     src_b, out_b = src.bounds, out.bounds
     assert out_b[0] < src_b[0]
@@ -72,8 +70,8 @@ def test_near_coast_mandatory_extends_beyond_buffered():
     src = Polygon([(0, 0), (5, 0), (5, 5), (0, 5), (0, 0)])
     mandatory = [Polygon([(3, 3), (10, 3), (10, 10), (3, 10), (3, 3)])]
     out = builder.build_near_coast_aoi(src, coastal_band=None, mandatory_features=mandatory)
-    assert out.contains(Point(4, 4))   # inside src
-    assert out.contains(Point(8, 8))   # outside src but inside mandatory → included
+    assert out.contains(Point(4, 4))  # inside src
+    assert out.contains(Point(8, 8))  # outside src but inside mandatory → included
     assert out.contains(Point(0.5, 0.5))  # original src corner still included
 
 
@@ -84,8 +82,8 @@ def test_near_coast_mandatory_included_even_when_band_intersects_to_empty():
     mandatory = [Polygon([(20, 20), (21, 20), (21, 21), (20, 21), (20, 20)])]
     out = builder.build_near_coast_aoi(src, coastal_band=band, mandatory_features=mandatory)
     assert out.contains(Point(20.5, 20.5))
-    assert not out.contains(Point(10.5, 10.5))   # band missed → not included
-    assert not out.contains(Point(0.5, 0.5))     # src not in band → dropped
+    assert not out.contains(Point(10.5, 10.5))  # band missed → not included
+    assert not out.contains(Point(0.5, 0.5))  # src not in band → dropped
 
 
 def test_near_coast_ignores_empty_geometries():

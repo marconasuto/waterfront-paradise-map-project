@@ -67,8 +67,7 @@ def compute_hillshade(
     """
     if cellsize_x <= 0 or cellsize_y <= 0:
         raise ValueError(
-            f"cellsize_x and cellsize_y must be positive (got "
-            f"{cellsize_x}, {cellsize_y})"
+            f"cellsize_x and cellsize_y must be positive (got {cellsize_x}, {cellsize_y})"
         )
 
     zenith_rad = math.radians(90.0 - altitude_deg)
@@ -80,9 +79,8 @@ def compute_hillshade(
     slope = np.arctan(z_factor * np.hypot(dx, dy))
     aspect = np.arctan2(dy, -dx)
 
-    shaded = (
-        math.cos(zenith_rad) * np.cos(slope)
-        + math.sin(zenith_rad) * np.sin(slope) * np.cos(azimuth_rad - aspect)
+    shaded = math.cos(zenith_rad) * np.cos(slope) + math.sin(zenith_rad) * np.sin(slope) * np.cos(
+        azimuth_rad - aspect
     )
     hs = np.clip(shaded * 255.0, 0.0, 255.0)
     # NaN does *not* propagate through central-difference gradient when the

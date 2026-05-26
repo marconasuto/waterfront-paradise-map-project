@@ -56,6 +56,7 @@ def _normalize_osm_layer(
 
 # --- coastline (OSM) ---------------------------------------------------
 
+
 def normalize_coastline(
     raw_path: Path = DATA_RAW / "osm_coastline" / "coastline.geojson",
 ) -> gpd.GeoDataFrame:
@@ -104,6 +105,7 @@ def normalize_admin_boundaries(
 
 # --- hydrography_surface (ISPRA WFS) -----------------------------------
 
+
 def normalize_hydrography_surface(
     raw_path: Path = DATA_RAW / "ispra_hydrography" / "hy_reticolo_idrografico_aoi.geojson",
 ) -> gpd.GeoDataFrame:
@@ -127,6 +129,7 @@ def normalize_hydrography_surface(
 
 # --- roads (OSM) -------------------------------------------------------
 
+
 def normalize_roads(
     raw_path: Path = DATA_RAW / "osm_roads" / "roads.geojson",
 ) -> gpd.GeoDataFrame:
@@ -143,6 +146,7 @@ def normalize_roads(
 
 # --- cycle_paths (OSM) -------------------------------------------------
 
+
 def normalize_cycle_paths(
     raw_path: Path = DATA_RAW / "osm_cycle_paths" / "cycle_paths.geojson",
 ) -> gpd.GeoDataFrame:
@@ -158,6 +162,7 @@ def normalize_cycle_paths(
 
 
 # --- cycle_routes (OSM relations — may be empty for our AOI) ----------
+
 
 def normalize_cycle_routes(
     raw_path: Path = DATA_RAW / "osm_cycle_routes" / "cycle_routes.geojson",
@@ -182,6 +187,7 @@ def normalize_cycle_routes(
 
 # --- harbours (OSM) ---------------------------------------------------
 
+
 def normalize_harbours(
     raw_path: Path = DATA_RAW / "osm_harbours" / "harbours.geojson",
 ) -> gpd.GeoDataFrame:
@@ -198,6 +204,7 @@ def normalize_harbours(
 
 # --- beaches (OSM) ----------------------------------------------------
 
+
 def normalize_beaches(
     raw_path: Path = DATA_RAW / "osm_beaches" / "beaches.geojson",
 ) -> gpd.GeoDataFrame:
@@ -213,6 +220,7 @@ def normalize_beaches(
 
 
 # --- wetlands (OSM `natural=wetland`) --------------------------------
+
 
 def normalize_wetlands(
     raw_path: Path = DATA_RAW / "osm_wetlands" / "wetlands.geojson",
@@ -235,6 +243,7 @@ def normalize_wetlands(
 
 # --- industrial_areas (OSM `landuse=industrial|brownfield`) ----------
 
+
 def normalize_industrial_areas(
     raw_path: Path = DATA_RAW / "osm_industrial" / "industrial.geojson",
 ) -> gpd.GeoDataFrame:
@@ -255,6 +264,7 @@ def normalize_industrial_areas(
 
 
 # --- archeological_areas (OSM `historic=archaeological_site`) --------
+
 
 def normalize_archeological_areas(
     raw_path: Path = DATA_RAW / "osm_archaeology" / "archaeology.geojson",
@@ -357,6 +367,7 @@ def normalize_natura2000(
 
 # --- registry ---------------------------------------------------------
 
+
 #: One row per supported layer_id. Functions take no arguments so the
 #: CLI dispatcher is trivial; per-layer raw paths are baked in as
 #: defaults but tests can pass alternative paths.
@@ -370,9 +381,7 @@ class NormalizerSpec:
 
 NORMALIZERS: dict[str, NormalizerSpec] = {
     "coastline": NormalizerSpec(layer_id="coastline", fn=normalize_coastline),
-    "admin_boundaries": NormalizerSpec(
-        layer_id="admin_boundaries", fn=normalize_admin_boundaries
-    ),
+    "admin_boundaries": NormalizerSpec(layer_id="admin_boundaries", fn=normalize_admin_boundaries),
     "hydrography_surface": NormalizerSpec(
         layer_id="hydrography_surface", fn=normalize_hydrography_surface
     ),
@@ -382,14 +391,10 @@ NORMALIZERS: dict[str, NormalizerSpec] = {
     "harbours": NormalizerSpec(layer_id="harbours", fn=normalize_harbours),
     "beaches": NormalizerSpec(layer_id="beaches", fn=normalize_beaches),
     "wetlands": NormalizerSpec(layer_id="wetlands", fn=normalize_wetlands),
-    "industrial_areas": NormalizerSpec(
-        layer_id="industrial_areas", fn=normalize_industrial_areas
-    ),
+    "industrial_areas": NormalizerSpec(layer_id="industrial_areas", fn=normalize_industrial_areas),
     "archeological_areas": NormalizerSpec(
         layer_id="archeological_areas", fn=normalize_archeological_areas
     ),
     "natura2000": NormalizerSpec(layer_id="natura2000", fn=normalize_natura2000),
-    "sin_manfredonia": NormalizerSpec(
-        layer_id="sin_manfredonia", fn=normalize_sin_manfredonia
-    ),
+    "sin_manfredonia": NormalizerSpec(layer_id="sin_manfredonia", fn=normalize_sin_manfredonia),
 }

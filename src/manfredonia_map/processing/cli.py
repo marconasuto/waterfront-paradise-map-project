@@ -81,9 +81,7 @@ def process_vector(layer_id: str, aoi_path: Path, out_dir: Path) -> None:
     type=str,
     help="Layer ids to skip (may be repeated).",
 )
-def process_vectors_all(
-    aoi_path: Path, out_dir: Path, skip_layers: tuple[str, ...]
-) -> None:
+def process_vectors_all(aoi_path: Path, out_dir: Path, skip_layers: tuple[str, ...]) -> None:
     """Process every registered vector layer."""
     failures: list[tuple[str, str]] = []
     for layer_id in sorted(normalize.NORMALIZERS):
@@ -132,6 +130,7 @@ def process_mandatory_features(processed_dir: Path, out_dir: Path | None) -> Non
 
 # --- rasters ----------------------------------------------------------
 
+
 def _run_raster(
     raster_id: str, aoi_path: Path, interim_dir: Path, processed_dir: Path
 ) -> tuple[Path, Path]:
@@ -143,7 +142,10 @@ def _run_raster(
     spec = raster.PROCESSORS[raster_id]
     aoi = base.read_aoi_polygon(aoi_path)
     zarr_path, cog_path = raster.process_raster(
-        spec, aoi, interim_dir=interim_dir, processed_dir=processed_dir,
+        spec,
+        aoi,
+        interim_dir=interim_dir,
+        processed_dir=processed_dir,
     )
     click.echo(f"Wrote {zarr_path}  (analytical Zarr)")
     click.echo(f"Wrote {cog_path}  (8-bit hypsometric COG)")
@@ -245,16 +247,22 @@ def process_rasters_all(
     show_default=True,
 )
 @click.option(
-    "--azimuth-deg", type=float,
-    default=hillshade.DEFAULT_AZIMUTH_DEG, show_default=True,
+    "--azimuth-deg",
+    type=float,
+    default=hillshade.DEFAULT_AZIMUTH_DEG,
+    show_default=True,
 )
 @click.option(
-    "--altitude-deg", type=float,
-    default=hillshade.DEFAULT_ALTITUDE_DEG, show_default=True,
+    "--altitude-deg",
+    type=float,
+    default=hillshade.DEFAULT_ALTITUDE_DEG,
+    show_default=True,
 )
 @click.option(
-    "--z-factor", type=float,
-    default=hillshade.DEFAULT_Z_FACTOR, show_default=True,
+    "--z-factor",
+    type=float,
+    default=hillshade.DEFAULT_Z_FACTOR,
+    show_default=True,
 )
 def process_hillshade_cmd(
     raster_id: str,
@@ -271,7 +279,8 @@ def process_hillshade_cmd(
         )
     aoi = base.read_aoi_polygon(aoi_path)
     out = hillshade.process_hillshade(
-        raster_id, aoi,
+        raster_id,
+        aoi,
         processed_dir=processed_dir,
         azimuth_deg=azimuth_deg,
         altitude_deg=altitude_deg,

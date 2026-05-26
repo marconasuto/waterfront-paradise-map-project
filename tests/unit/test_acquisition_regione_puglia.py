@@ -25,9 +25,7 @@ def test_spec_sin_url_and_metadata():
     assert "Siti di Interesse Nazionale" in spec.dataset
 
 
-def test_acquire_sin_writes_zip_and_provenance(
-    tmp_path: Path, respx_mock: respx.Router
-) -> None:
+def test_acquire_sin_writes_zip_and_provenance(tmp_path: Path, respx_mock: respx.Router) -> None:
     payload = b"PK\x03\x04" + b"x" * 8192
     spec = regione_puglia.RegionePugliaSpec(dataset_id="sin")
     respx_mock.get(spec.url).mock(return_value=httpx.Response(200, content=payload))

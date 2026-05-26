@@ -65,6 +65,7 @@ def test_acquire_tinitaly_tile_propagates_download_error(
 
     out = tmp_path / "out.zip"
     result = CliRunner().invoke(
-        acq_cli.acquire_tinitaly_tile, ["zzz_nope", "--out", str(out)],
+        acq_cli.acquire_tinitaly_tile,
+        ["zzz_nope", "--out", str(out)],
     )
     assert result.exit_code != 0

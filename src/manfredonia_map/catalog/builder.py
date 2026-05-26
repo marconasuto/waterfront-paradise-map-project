@@ -64,9 +64,11 @@ def discover_sources(data_raw: Path = DATA_RAW) -> list[models.Source]:
                 access_method=prov["access_method"],
                 license=prov["license"],
                 accessed_at=prov["accessed_at"],
-                raw_path=str(Path(prov["raw_path"]).relative_to(_repo_root(data_raw))
-                             if Path(prov["raw_path"]).is_absolute()
-                             else prov["raw_path"]),
+                raw_path=str(
+                    Path(prov["raw_path"]).relative_to(_repo_root(data_raw))
+                    if Path(prov["raw_path"]).is_absolute()
+                    else prov["raw_path"]
+                ),
                 sha256=prov["sha256"],
                 byte_count=int(prov["byte_count"]),
                 bbox=(tuple(prov["bbox"]) if prov.get("bbox") else None),  # type: ignore[arg-type]
@@ -122,7 +124,8 @@ def _inspect_vector(
 
 
 def discover_vector_layers(
-    processed_dir: Path = DATA_PROCESSED, repo_root: Path | None = None,
+    processed_dir: Path = DATA_PROCESSED,
+    repo_root: Path | None = None,
 ) -> list[models.VectorLayer]:
     """One :class:`VectorLayer` per ``*.geojson`` directly under ``processed_dir``."""
     root = repo_root or _repo_root(processed_dir)
@@ -163,7 +166,8 @@ def _inspect_raster(tif_path: Path) -> tuple[int, int, int, str]:
 
 
 def discover_raster_layers(
-    processed_dir: Path = DATA_PROCESSED, repo_root: Path | None = None,
+    processed_dir: Path = DATA_PROCESSED,
+    repo_root: Path | None = None,
 ) -> list[models.RasterLayer]:
     """One :class:`RasterLayer` per published 8-bit COG under ``processed_dir``."""
     root = repo_root or _repo_root(processed_dir)
@@ -209,7 +213,8 @@ def _read_build_settings(config_dir: Path) -> tuple[float, float, str]:
 
 
 def build_aoi_info(
-    config_dir: Path = CONFIG_DIR, repo_root: Path | None = None,
+    config_dir: Path = CONFIG_DIR,
+    repo_root: Path | None = None,
 ) -> models.AoiInfo:
     """Snapshot the AOI shapes + the build settings as an :class:`AoiInfo`."""
     root = repo_root or _repo_root(config_dir)
@@ -220,9 +225,7 @@ def build_aoi_info(
     alias = config_dir / "aoi.geojson"
     missing = [p for p in (source, buffered, near_coast, alias) if not p.exists()]
     if missing:
-        raise FileNotFoundError(
-            f"missing AOI files in {config_dir}: {[str(p) for p in missing]}"
-        )
+        raise FileNotFoundError(f"missing AOI files in {config_dir}: {[str(p) for p in missing]}")
     return models.AoiInfo(
         source_path=_rel(source, root),
         buffered_path=_rel(buffered, root),
