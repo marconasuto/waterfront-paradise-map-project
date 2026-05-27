@@ -23,7 +23,9 @@ export function initMap({ container, style, env }: InitMapOptions): MapboxMap {
     style,
     attributionControl: true,
     cooperativeGestures: false,
-    hash: true,
+    // The storymap engine drives the camera via flyTo; the URL hash is
+    // reserved for `#slide-<id>` deep links (see ui/story-panel.ts).
+    hash: false,
   });
   map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), "top-right");
   map.addControl(new mapboxgl.ScaleControl({ unit: "metric" }), "bottom-left");

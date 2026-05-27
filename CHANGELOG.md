@@ -6,6 +6,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
 ## [Unreleased]
 
 ### Added
+- 2026-05-27 — Phase 6e: custom storymap slide engine.
+  - `webapp/scripts/sync-config.mjs` now scans `content/it/slides/*.md`
+    at build time, parses YAML frontmatter from each file and emits
+    `public/slides.json` (ordered by filename).
+  - `webapp/src/content/slides.ts` validates + loads the index;
+    `webapp/src/ui/story-panel.ts` renders one `<li>` section per
+    slide in a left-docked scrollable column and wires an
+    IntersectionObserver to fire `onActivate(slide)` when a section
+    reaches 50 % visibility.
+  - `webapp/src/state/story-controller.ts` derives a layer state from
+    the slide's `layers_visible` (others hidden, opacity preserved)
+    and calls `map.flyTo({center, zoom, bearing, pitch})`. The layer
+    panel UI updates to mirror what the slide showed, so manual
+    toggles remain coherent.
+  - URL hash `#slide-<id>` is honoured on boot for deep links and
+    updated via `history.replaceState` on activation. Mapbox's own
+    `hash: true` is now disabled so the two don't collide.
+  - Two placeholder slides shipped (`content/it/slides/00_intro.md`
+    and `01_wetlands.md`) plus `content/it/README.md` documenting the
+    frontmatter schema for Phase 7 authors.
+  - Layout: app grid is now `380px 1fr 320px` (story / map / layer
+    panel). Below 720 px the three regions stack vertically.
+  - 21 new vitest tests (slides 6, story-controller 5, story-panel
+    7); suite at 94 passed. Build 543 KB gzipped.
 - 2026-05-26 — Phase 6d: highlights markers + popups.
   - `mapboxgl.Marker` per `config/highlights.yaml` entry, color
     sourced from `config/color_scheme.yaml` via the entry's

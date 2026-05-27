@@ -352,10 +352,24 @@ Phase 2 is unblocked.
       mirrors `content/it/` recursively into `public/`. 14 new vitest
       tests (content-loader 7, highlights 7); suite at 75 passed.
       Build 542 KB gzipped.
-- [ ] **6e — Slide engine.** IntersectionObserver scroll triggers
-      drive `map.flyTo()`; per-slide frontmatter controls camera +
-      `layers_visible` + highlights. Markdown lives under
-      `content/it/slides/`.
+- [x] **6e — Slide engine.** `webapp/scripts/sync-config.mjs` scans
+      `content/it/slides/*.md` at build time, parses each
+      file's YAML frontmatter and writes `public/slides.json` (ordered
+      by filename). At runtime `src/content/slides.ts` loads the index,
+      `src/ui/story-panel.ts` renders one section per slide and wires
+      an IntersectionObserver to fire `onActivate(slide)` when the
+      section reaches 50 % visibility. `src/state/story-controller.ts`
+      converts a slide's `layers_visible` list to a derived layer
+      state (others hidden, opacity preserved) and calls
+      `map.flyTo(camera)`. The layer panel mirrors the slide's state
+      so user toggles remain consistent. URL hash
+      `#slide-<id>` is honoured on boot for deep-links and updated on
+      activation via `history.replaceState`. Two placeholder slides
+      shipped (`00_intro.md`, `01_wetlands.md`) plus
+      `content/it/README.md` documenting the frontmatter schema for
+      Phase 7 authors. 21 new vitest tests (slides 6, story-controller
+      5, story-panel 7, +sync-config plumbing); suite at 94 passed.
+      Build 543 KB gzipped (mapbox dominates).
 - [ ] **6f — Drag-and-drop overlay.** Ephemeral client-side
       `.geojson` overlay; shapefile / GeoPackage support is a stretch
       goal.

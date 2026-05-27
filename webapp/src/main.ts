@@ -1,5 +1,6 @@
 import { indexLayerMeta, loadCatalog } from "./config/catalog";
 import { loadBasemaps, loadColorScheme, loadHighlights } from "./config/loader";
+import { loadSlideIndex } from "./content/slides";
 import { loadEnv } from "./env";
 import { initMap } from "./map/init";
 import { loadStyle, styleLayerCount, styleSourceCount } from "./map/style-loader";
@@ -16,27 +17,31 @@ import {
   saveLayerState,
   type LayerState,
 } from "./state/layer-state";
+import { applySlide } from "./state/story-controller";
 import { BasemapControl } from "./ui/basemap-control";
 import { attachHighlights } from "./ui/highlights";
 import { LayerPanel, defaultLayerLabel } from "./ui/layer-panel";
+import { StoryPanel } from "./ui/story-panel";
 
 async function main(): Promise<void> {
   const mapContainer = document.getElementById("map");
-  const panelContainer = document.getElementById("layer-panel");
-  if (!mapContainer || !panelContainer) {
-    throw new Error("required #map / #layer-panel containers not found");
+  const layerPanelContainer = document.getElementById("layer-panel");
+  const storyContainer = document.getElementById("story-panel");
+  if (!mapContainer || !layerPanelContainer || !storyContainer) {
+    throw new Error("required #map / #layer-panel / #story-panel containers not found");
   }
   const env = loadEnv();
 
-  const [overlay, basemapsCfg, catalog, highlightsCfg, colorScheme] = await Promise.all([
+  const [overlay, basemapsCfg, catalog, highlightsCfg, colorScheme, slides] = await Promise.all([
     loadStyle("/style.json"),
     loadBasemaps("/basemaps.yaml"),
     loadCatalog("/catalog.yaml"),
     loadHighlights("/highlights.yaml"),
     loadColorScheme("/color_scheme.yaml"),
+    loadSlideIndex("/slides.json"),
   ]);
   console.info(
-    `[manfredonia-map] overlay: ${styleSourceCount(overlay)} sources, ${styleLayerCount(overlay)} layers; ${basemapsCfg.basemaps.length} basemaps; ${catalog.sources.length} catalog sources; ${highlightsCfg.highlights.length} highlights`,
+    `[manfredonia-map] overlay: ${styleSourceCount(overlay)} sources, ${styleLayerCount(overlay)} layers; ${basemapsCfg.basemaps.length} basemaps; ${catalog.sources.length} catalog sources; ${highlightsCfg.highlights.length} highlights; ${slides.length} slides`,
   );
 
   const layerIds = extractManfredoniaLayerIds(overlay);
@@ -78,8 +83,8 @@ async function main(): Promise<void> {
     applyLayerState(map, next);
   };
 
-  new LayerPanel({
-    container: panelContainer,
+  const layerPanel = new LayerPanel({
+    container: layerPanelContainer,
     state: layerState,
     meta,
     label: defaultLayerLabel,
@@ -92,6 +97,21 @@ async function main(): Promise<void> {
       palette: colorScheme.palette,
     });
   });
+
+  if (slides.length > 0) {
+    new StoryPanel({
+      container: storyContainer,
+      slides,
+      onActivate: (slide) => {
+        const next = applySlide({ map, baseline: layerState, slide });
+        layerState = next;
+        layerPanel.setState(next);
+      },
+    });
+  } else {
+    storyContainer.innerHTML =
+      '<p class="story-panel__empty">Nessuna slide ancora pubblicata.</p>';
+  }
 }
 
 main().catch((err: unknown) => {
