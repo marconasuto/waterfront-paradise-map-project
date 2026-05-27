@@ -2,6 +2,7 @@ import { indexLayerMeta, loadCatalog } from "./config/catalog";
 import { loadBasemaps, loadColorScheme, loadHighlights } from "./config/loader";
 import { loadSlideIndex } from "./content/slides";
 import { loadEnv } from "./env";
+import { readGeoJsonFile } from "./io/geojson-file";
 import { initMap } from "./map/init";
 import { loadStyle, styleLayerCount, styleSourceCount } from "./map/style-loader";
 import {
@@ -17,18 +18,24 @@ import {
   saveLayerState,
   type LayerState,
 } from "./state/layer-state";
+import { OverlayManager } from "./state/overlays";
 import { applySlide } from "./state/story-controller";
 import { BasemapControl } from "./ui/basemap-control";
+import { attachDropZone } from "./ui/drop-zone";
 import { attachHighlights } from "./ui/highlights";
 import { LayerPanel, defaultLayerLabel } from "./ui/layer-panel";
+import { OverlayList } from "./ui/overlay-list";
 import { StoryPanel } from "./ui/story-panel";
 
 async function main(): Promise<void> {
   const mapContainer = document.getElementById("map");
-  const layerPanelContainer = document.getElementById("layer-panel");
+  const layerListContainer = document.getElementById("layer-panel-list");
+  const overlayListContainer = document.getElementById("overlay-list");
   const storyContainer = document.getElementById("story-panel");
-  if (!mapContainer || !layerPanelContainer || !storyContainer) {
-    throw new Error("required #map / #layer-panel / #story-panel containers not found");
+  if (!mapContainer || !layerListContainer || !overlayListContainer || !storyContainer) {
+    throw new Error(
+      "required #map / #layer-panel-list / #overlay-list / #story-panel containers not found",
+    );
   }
   const env = loadEnv();
 
@@ -84,11 +91,33 @@ async function main(): Promise<void> {
   };
 
   const layerPanel = new LayerPanel({
-    container: layerPanelContainer,
+    container: layerListContainer,
     state: layerState,
     meta,
     label: defaultLayerLabel,
     onChange: persist,
+  });
+
+  const overlays = new OverlayManager(map);
+  const overlayList = new OverlayList({
+    container: overlayListContainer,
+    onRemove: (id) => {
+      overlays.remove(id);
+      overlayList.setOverlays(overlays.list());
+    },
+  });
+  attachDropZone({
+    element: mapContainer,
+    onDrop: async (file) => {
+      try {
+        const parsed = await readGeoJsonFile(file);
+        overlays.add(parsed.name, parsed.collection);
+        overlayList.setOverlays(overlays.list());
+      } catch (err) {
+        console.warn("[manfredonia-map] dropped file rejected:", err);
+        alert((err as Error).message);
+      }
+    },
   });
 
   map.on("load", () => {

@@ -156,6 +156,82 @@ body {
   color: var(--panel-accent);
 }
 
+/* --- Overlay list (ephemeral drag-and-drop) ------------------------- */
+
+#overlay-list {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--row-divider);
+}
+
+.overlay-list__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--panel-muted);
+  line-height: 1.4;
+}
+
+.overlay-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.overlay-list__row {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 12px;
+}
+
+.overlay-list__swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid var(--row-divider);
+}
+
+.overlay-list__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overlay-list__remove {
+  background: transparent;
+  border: none;
+  color: var(--panel-muted);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.overlay-list__remove:hover {
+  color: #ff8080;
+}
+
+/* Drop-zone visual feedback. */
+.drop-zone--active::after {
+  content: "Rilascia per aggiungere l'overlay";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(248, 208, 48, 0.18);
+  color: #1c2a33;
+  font-size: 18px;
+  font-weight: 600;
+  pointer-events: none;
+  border: 3px dashed var(--panel-accent);
+}
+
+#map {
+  position: relative;
+}
+
 /* --- Highlight popups ---------------------------------------------- */
 
 .highlight-popup__head {

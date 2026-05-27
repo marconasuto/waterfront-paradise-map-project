@@ -370,9 +370,23 @@ Phase 2 is unblocked.
       Phase 7 authors. 21 new vitest tests (slides 6, story-controller
       5, story-panel 7, +sync-config plumbing); suite at 94 passed.
       Build 543 KB gzipped (mapbox dominates).
-- [ ] **6f — Drag-and-drop overlay.** Ephemeral client-side
-      `.geojson` overlay; shapefile / GeoPackage support is a stretch
-      goal.
+- [x] **6f — Drag-and-drop GeoJSON overlay.**
+      `src/io/geojson-file.ts` reads + validates a dropped File (25 MB
+      cap, `.geojson`/`.json` only, accepts `Feature` or
+      `FeatureCollection`). `src/state/overlays.ts` adds one geojson
+      source + three filtered layers per drop (Polygon → fill,
+      Polygon/LineString → line, Point → circle); colours cycle
+      through a six-entry palette. `src/ui/drop-zone.ts` is a tiny
+      depth-balanced enter/leave handler so child-element hovers
+      don't flicker the active state. `src/ui/overlay-list.ts` shows
+      one chip per overlay in the layer panel with an `✕` remove
+      button. Italian error messages surface via `alert()` for
+      rejected files (too big, wrong extension, invalid JSON).
+      Overlays are intentionally **not** persisted — refresh clears
+      them. **Shapefile / GeoPackage support deferred** (would need
+      `shpjs` and/or `wa-sqlite`, ~150 KB each — wait for a real ask).
+      19 new vitest tests (geojson-file 10, overlays 8, drop-zone 5,
+      overlay-list 4); suite at 121 passed. Build 545 KB gzipped.
 - [ ] **6g — A11y + Lighthouse.** Keyboard nav, focus rings, palette
       contrast checks; Lighthouse ≥ 90 perf / ≥ 95 a11y on a fresh
       load.

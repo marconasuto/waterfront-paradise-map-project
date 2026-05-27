@@ -6,6 +6,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
 ## [Unreleased]
 
 ### Added
+- 2026-05-27 — Phase 6f: drag-and-drop GeoJSON overlay.
+  - `webapp/src/io/geojson-file.ts` reads + validates a dropped File
+    (25 MB cap, `.geojson` / `.json` extensions, accepts `Feature` or
+    `FeatureCollection`). Uses FileReader (jsdom-safe) with `Blob.text()`
+    fast-path in the browser.
+  - `webapp/src/state/overlays.ts` adds one geojson source + three
+    geometry-filtered layers per drop (Polygon → fill,
+    Polygon/LineString → line, Point → circle); colours cycle through
+    a six-entry palette so concurrent overlays stay visually distinct.
+  - `webapp/src/ui/drop-zone.ts` attaches depth-balanced
+    dragenter/leave listeners so the "active" CSS class doesn't
+    flicker as the pointer crosses child elements.
+  - `webapp/src/ui/overlay-list.ts` lists every active overlay in
+    the layer panel with an `✕` remove button; empty state shows an
+    Italian hint.
+  - Italian error messages surface via `alert()` when a drop is
+    rejected (too big, wrong extension, invalid JSON).
+  - Overlays are deliberately not persisted — refresh clears them.
+    Shapefile / GeoPackage support deferred (would need `shpjs` and/or
+    `wa-sqlite`, ~150 KB each).
+  - 19 new vitest tests (geojson-file 10, overlays 8, drop-zone 5,
+    overlay-list 4); suite at 121 passed. Build 545 KB gzipped.
 - 2026-05-27 — Phase 6e: custom storymap slide engine.
   - `webapp/scripts/sync-config.mjs` now scans `content/it/slides/*.md`
     at build time, parses YAML frontmatter from each file and emits
