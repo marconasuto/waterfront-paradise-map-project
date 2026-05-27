@@ -1,29 +1,46 @@
-# Editable color palette.
+# Editable color palette — DARK MODE.
 # Map styles reference these token names, never raw hex codes. Changing the
 # palette is therefore a one-file edit. See SPECIFICATIONS.md §13.
+#
+# Six source palettes (user-provided 2026-05-27):
+#   - Blues:        #00aeff #0043ff #0029bb #000f5c #020021
+#   - Reds:         #f43605 #e32d2a #d12339 #c11743 #b0054b
+#   - Lime:         #b0dd16 #b4e642 #b9ee5e #bdf774 #c2ff89
+#   - Sage/Teal:    #719f91 #6c9894 #679098 #62899a #5e819d
+#   - Mauve:        #887191 #987892 #a87f93 #b88694 #c88d94
+#   - Cream:        #fffee0 #fffec8 #fffdaf #fffd8d #fdfa72
 
-version: 1
+version: 2
+mode: dark
 
 palette:
 
-  sea:            { fill: "#a8d8e8", line: "#76b9d4", label: "#0e3a5a" }
-  water:          { fill: "#1e7fb3", line: "#0e5e8a", label: "#ffffff" }
-  groundwater:    { fill: "#5a4fcf", line: "#3e34a0", label: "#ffffff" }
+  # --- Water family (Blues) ----------------------------------------
+  sea:            { fill: "#0029bb", line: "#0043ff", label: "#cfe9ff" }
+  water:          { fill: "#0043ff", line: "#00aeff", label: "#cfe9ff" }
+  groundwater:    { fill: "#000f5c", line: "#0029bb", label: "#9bb8ff" }
+  coastline:      { fill: "transparent", line: "#00aeff", label: "#cfe9ff" }
+  harbour:        { fill: "#887191", line: "#c88d94", label: "#ffe6f5" }
 
-  wetland:        { fill: "#3aa860", line: "#22713f", label: "#ffffff" }
-  beach:          { fill: "#f4d488", line: "#c8a85e", label: "#3a2e10" }
-  archeological:  { fill: "#a33b3b", line: "#702424", label: "#ffffff" }
+  # --- Living systems (Sage + Lime) --------------------------------
+  wetland:        { fill: "#679098", line: "#719f91", label: "#cfece6" }
+  natura2000:     { fill: "#b9ee5e", line: "#b4e642", label: "#1c2a33" }
+  beach:          { fill: "#fffd8d", line: "#fdfa72", label: "#3a2e10" }
 
-  industrial:     { fill: "#6b6b6b", line: "#3d3d3d", label: "#ffffff" }
-  sin:            { fill: "#c45c1a", line: "#8a3f10", label: "#ffffff" }
-  harbour:        { fill: "#2c3e50", line: "#1a2733", label: "#ffffff" }
+  # --- Heritage + warning (Reds) -----------------------------------
+  archeological:  { fill: "#b0054b", line: "#d12339", label: "#ffd0e0" }
+  sin:            { fill: "#f43605", line: "#e32d2a", label: "#ffd6c8" }
 
-  road_primary:   { fill: "#222222", line: "#000000", label: "#ffffff" }
-  road_minor:     { fill: "#555555", line: "#333333", label: "#ffffff" }
-  cycle:          { fill: "#8b1cb3", line: "#5e0f7e", label: "#ffffff" }
-  walkable:       { fill: "#9c7c2e", line: "#6d5719", label: "#ffffff" }
+  # --- Built / industrial (Mauve) ----------------------------------
+  industrial:     { fill: "#987892", line: "#a87f93", label: "#ffe6f5" }
+  admin:          { fill: "transparent", line: "#c88d94", label: "#ffe6f5" }
 
-  admin:          { fill: "transparent", line: "#999999", label: "#444444" }
-  coastline:      { fill: "transparent", line: "#0e3a5a", label: "#0e3a5a" }
-  aoi:            { fill: "transparent", line: "#e63946", label: "#e63946" }
-  highlight:      { fill: "#f8d030", line: "#b09c10", label: "#3a2e10" }
+  # --- Mobility (Cream + Lime) -------------------------------------
+  road_primary:   { fill: "#fffec8", line: "#fffdaf", label: "#3a2e10" }
+  road_minor:     { fill: "#fffee0", line: "#fffec8", label: "#3a2e10" }
+  cycle:          { fill: "#b4e642", line: "#b0dd16", label: "#1c2a33" }
+  walkable:       { fill: "#c2ff89", line: "#bdf774", label: "#1c2a33" }
+
+  # --- UI accents --------------------------------------------------
+  aoi:            { fill: "transparent", line: "#fdfa72", label: "#fdfa72" }
+  highlight:      { fill: "#fdfa72", line: "#fdfa72", label: "#3a2e10" }

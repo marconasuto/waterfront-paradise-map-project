@@ -16,11 +16,22 @@
       <aside id="story-panel" aria-label="Storymap della costa"></aside>
       <div id="map" aria-label="Mappa interattiva della costa di Manfredonia"></div>
       <aside id="layer-panel" aria-label="Pannello dei livelli">
-        <section id="layer-panel-list"></section>
-        <section
-          id="overlay-list"
-          aria-label="Overlay temporanei trascinati dall'utente"
-        ></section>
+        <button
+          id="layer-panel-toggle"
+          class="layer-panel__toggle"
+          type="button"
+          aria-label="Chiudi pannello dei livelli"
+          title="Chiudi / apri il pannello dei livelli"
+        >
+          ›
+        </button>
+        <div class="layer-panel__inner">
+          <section id="layer-panel-list"></section>
+          <section
+            id="overlay-list"
+            aria-label="Overlay temporanei trascinati dall'utente"
+          ></section>
+        </div>
       </aside>
       <noscript>
         Questa applicazione richiede JavaScript per visualizzare la mappa.

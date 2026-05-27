@@ -52,7 +52,7 @@ LAYER_COLOR_TOKEN: dict[str, str] = {
     "harbours": "harbour",
     "beaches": "beach",
     "wetlands": "wetland",
-    "natura2000": "wetland",
+    "natura2000": "natura2000",
     "industrial_areas": "industrial",
     "sin_manfredonia": "sin",
     "archeological_areas": "archeological",

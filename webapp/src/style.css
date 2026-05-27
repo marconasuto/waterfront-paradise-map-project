@@ -1,10 +1,26 @@
+/* === Dark-mode design tokens ====================================== */
+
 :root {
-  --bg: #0e1a23;
-  --panel-bg: #142028;
-  --panel-fg: #e9eef2;
-  --panel-muted: #9aa9b2;
-  --panel-accent: #f8d030;
-  --row-divider: #25333c;
+  /* From the user's palette set — deep navies + accents */
+  --bg-base: #020021;
+  --bg-deep: #000f5c;
+  --fg: #e6f0ff;
+  --fg-muted: #8e9bb8;
+  --accent: #fdfa72;
+  --accent-soft: #c2ff89;
+  --water: #00aeff;
+  --row-divider: rgba(255, 255, 255, 0.08);
+
+  /* Glassy panel surface */
+  --panel-bg: rgba(2, 0, 33, 0.55);
+  --panel-bg-strong: rgba(2, 0, 33, 0.78);
+  --panel-border: rgba(255, 255, 255, 0.1);
+  --panel-blur: blur(24px) saturate(160%);
+
+  /* Layout */
+  --story-w: 380px;
+  --panel-w: 320px;
+  --panel-w-collapsed: 48px;
 }
 
 * {
@@ -16,44 +32,262 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: var(--bg);
-  color: var(--panel-fg);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg-base);
+  color: var(--fg);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 #app {
   display: grid;
-  grid-template-columns: 380px 1fr 320px;
+  grid-template-columns: var(--story-w) 1fr var(--panel-w);
   grid-template-rows: 1fr;
   height: 100vh;
   width: 100vw;
+  transition: grid-template-columns 240ms ease;
+}
+
+#app.layer-panel-collapsed {
+  grid-template-columns: var(--story-w) 1fr var(--panel-w-collapsed);
 }
 
 #map {
+  position: relative;
   width: 100%;
   height: 100%;
+  background: var(--bg-base);
 }
+
+/* --- Mapbox controls (dark theme override) ------------------------- */
 
 .mapboxgl-ctrl-attrib {
   font-size: 11px;
+  background: var(--panel-bg-strong) !important;
+  color: var(--fg-muted) !important;
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
 }
 
-/* --- Layer panel ---------------------------------------------------- */
+.mapboxgl-ctrl-attrib a {
+  color: var(--water) !important;
+}
+
+.mapboxgl-ctrl-group {
+  background: var(--panel-bg-strong) !important;
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
+  border: 1px solid var(--panel-border) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.mapboxgl-ctrl-group button {
+  background: transparent !important;
+}
+
+.mapboxgl-ctrl-group button + button {
+  border-top-color: var(--panel-border) !important;
+}
+
+.mapboxgl-ctrl-group button .mapboxgl-ctrl-icon {
+  filter: invert(0.92);
+}
+
+.mapboxgl-popup-content {
+  background: var(--panel-bg-strong) !important;
+  color: var(--fg) !important;
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  padding: 14px 16px !important;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: rgba(2, 0, 33, 0.78) !important;
+  border-bottom-color: rgba(2, 0, 33, 0.78) !important;
+  border-left-color: rgba(2, 0, 33, 0.78) !important;
+  border-right-color: rgba(2, 0, 33, 0.78) !important;
+}
+
+.mapboxgl-popup-close-button {
+  color: var(--fg-muted) !important;
+  font-size: 18px;
+}
+
+.basemap-control {
+  background: var(--panel-bg-strong) !important;
+  color: var(--fg) !important;
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
+  border: 1px solid var(--panel-border) !important;
+}
+
+.basemap-control label {
+  color: var(--fg-muted);
+}
+
+.basemap-control select {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--fg);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  margin-left: 4px;
+  padding: 2px 4px;
+}
+
+/* --- Story panel ---------------------------------------------------- */
+
+#story-panel {
+  background: var(--panel-bg);
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
+  color: var(--fg);
+  overflow-y: auto;
+  border-right: 1px solid var(--panel-border);
+  scroll-behavior: smooth;
+}
+
+.story-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.story-panel__slide {
+  min-height: 90vh;
+  padding: 32px 24px;
+  border-bottom: 1px solid var(--row-divider);
+}
+
+.story-panel__slide:last-child {
+  border-bottom: none;
+}
+
+.story-panel__title {
+  font-size: 22px;
+  margin: 0 0 14px;
+  color: var(--accent);
+  line-height: 1.2;
+  text-shadow: 0 2px 12px rgba(2, 0, 33, 0.8);
+}
+
+.story-panel__body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--fg);
+}
+
+.story-panel__body h1,
+.story-panel__body h2,
+.story-panel__body h3 {
+  margin: 1.2em 0 0.4em;
+  color: var(--accent-soft);
+}
+
+.story-panel__body p {
+  margin: 0 0 0.8em;
+}
+
+.story-panel__body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 10px 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.story-panel__body a {
+  color: var(--water);
+}
+
+.story-panel__body blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
+  color: var(--fg-muted);
+  margin: 1em 0;
+}
+
+.story-panel__empty {
+  padding: 24px;
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+/* --- Layer panel (foldable) ---------------------------------------- */
 
 #layer-panel {
+  position: relative;
   background: var(--panel-bg);
-  color: var(--panel-fg);
-  padding: 12px 14px;
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
+  color: var(--fg);
+  overflow: hidden;
+  border-left: 1px solid var(--panel-border);
+  display: flex;
+  flex-direction: column;
+  transition: width 240ms ease;
+}
+
+.layer-panel__inner {
+  flex: 1;
+  padding: 50px 14px 14px;
   overflow-y: auto;
-  border-left: 1px solid var(--row-divider);
+}
+
+#app.layer-panel-collapsed #layer-panel-list,
+#app.layer-panel-collapsed #overlay-list {
+  display: none;
+}
+
+#app.layer-panel-collapsed .layer-panel__inner {
+  padding: 50px 6px 14px;
+}
+
+.layer-panel__toggle {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--fg);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 160ms ease,
+    transform 240ms ease;
+}
+
+.layer-panel__toggle:hover {
+  background: rgba(253, 250, 114, 0.15);
+}
+
+.layer-panel__toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+#app.layer-panel-collapsed .layer-panel__toggle {
+  transform: rotate(180deg);
 }
 
 .layer-panel__title {
-  font-size: 14px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--panel-muted);
-  margin: 4px 0 12px;
+  letter-spacing: 0.12em;
+  color: var(--fg-muted);
+  margin: 0 0 12px;
 }
 
 .layer-panel__list {
@@ -69,106 +303,58 @@ body {
   gap: 8px;
   padding: 8px 0;
   border-bottom: 1px solid var(--row-divider);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .layer-panel__row:last-child {
   border-bottom: none;
 }
 
+.layer-panel__row input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
 .layer-panel__label {
   font-weight: 500;
   cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .layer-panel__row input[type="range"] {
   width: 80px;
-  accent-color: var(--panel-accent);
+  accent-color: var(--accent);
 }
 
 .layer-panel__info {
   background: transparent;
   border: none;
-  color: var(--panel-muted);
+  color: var(--fg-muted);
   cursor: help;
-  font-size: 14px;
+  font-size: 13px;
   padding: 0 2px;
 }
 
 .layer-panel__info:hover,
 .layer-panel__info:focus-visible {
-  color: var(--panel-accent);
+  color: var(--accent);
+  outline: none;
 }
 
-/* --- Story panel ---------------------------------------------------- */
-
-#story-panel {
-  background: var(--panel-bg);
-  color: var(--panel-fg);
-  overflow-y: auto;
-  border-right: 1px solid var(--row-divider);
-  scroll-behavior: smooth;
-}
-
-.story-panel__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.story-panel__slide {
-  min-height: 90vh;
-  padding: 24px 22px;
-  border-bottom: 1px solid var(--row-divider);
-}
-
-.story-panel__slide:last-child {
-  border-bottom: none;
-}
-
-.story-panel__title {
-  font-size: 22px;
-  margin: 0 0 12px;
-  color: var(--panel-accent);
-  line-height: 1.2;
-}
-
-.story-panel__body {
-  font-size: 14px;
-  line-height: 1.55;
-  color: var(--panel-fg);
-}
-
-.story-panel__body h1,
-.story-panel__body h2,
-.story-panel__body h3 {
-  margin: 1em 0 0.4em;
-}
-
-.story-panel__body img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 4px;
-  margin: 10px 0;
-}
-
-.story-panel__body a {
-  color: var(--panel-accent);
-}
-
-/* --- Overlay list (ephemeral drag-and-drop) ------------------------- */
+/* --- Overlay list (ephemeral drag-and-drop) ------------------------ */
 
 #overlay-list {
-  margin-top: 20px;
+  margin-top: 18px;
   padding-top: 12px;
   border-top: 1px solid var(--row-divider);
 }
 
 .overlay-list__hint {
   margin: 0;
-  font-size: 12px;
-  color: var(--panel-muted);
-  line-height: 1.4;
+  font-size: 11px;
+  color: var(--fg-muted);
+  line-height: 1.5;
 }
 
 .overlay-list {
@@ -183,7 +369,7 @@ body {
   gap: 8px;
   align-items: center;
   padding: 6px 0;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .overlay-list__swatch {
@@ -191,7 +377,7 @@ body {
   width: 12px;
   height: 12px;
   border-radius: 2px;
-  border: 1px solid var(--row-divider);
+  border: 1px solid var(--panel-border);
 }
 
 .overlay-list__name {
@@ -203,16 +389,16 @@ body {
 .overlay-list__remove {
   background: transparent;
   border: none;
-  color: var(--panel-muted);
+  color: var(--fg-muted);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .overlay-list__remove:hover {
   color: #ff8080;
 }
 
-/* Drop-zone visual feedback. */
+/* Drop-zone visual feedback over the map. */
 .drop-zone--active::after {
   content: "Rilascia per aggiungere l'overlay";
   position: absolute;
@@ -220,16 +406,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(248, 208, 48, 0.18);
-  color: #1c2a33;
+  background: rgba(253, 250, 114, 0.12);
+  color: var(--fg);
   font-size: 18px;
   font-weight: 600;
   pointer-events: none;
-  border: 3px dashed var(--panel-accent);
-}
-
-#map {
-  position: relative;
+  border: 3px dashed var(--accent);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
 }
 
 /* --- Highlight popups ---------------------------------------------- */
@@ -237,54 +420,69 @@ body {
 .highlight-popup__head {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-bottom: 6px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .highlight-popup__chip {
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: var(--panel-bg);
-  color: var(--panel-fg);
-  padding: 2px 8px;
+  letter-spacing: 0.08em;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--fg-muted);
+  padding: 3px 9px;
   border-radius: 999px;
   align-self: flex-start;
+  border: 1px solid var(--panel-border);
 }
 
 .highlight-popup__title {
   font-size: 16px;
   margin: 0;
-  color: #1c2a33;
+  color: var(--accent);
 }
 
 .highlight-popup__body {
   font-size: 13px;
-  color: #1c2a33;
-  line-height: 1.4;
+  color: var(--fg);
+  line-height: 1.5;
 }
 
 .highlight-popup__body p:first-child {
   margin-top: 0;
 }
 
+.highlight-popup__body a {
+  color: var(--water);
+}
+
+/* --- Mobile -------------------------------------------------------- */
+
 @media (max-width: 720px) {
-  #app {
+  #app,
+  #app.layer-panel-collapsed {
     grid-template-columns: 1fr;
     grid-template-rows: 50vh 1fr auto;
   }
+
   #story-panel {
     order: 3;
     border-right: none;
-    border-top: 1px solid var(--row-divider);
+    border-top: 1px solid var(--panel-border);
   }
+
   #map {
     order: 1;
   }
+
   #layer-panel {
     order: 2;
     max-height: 28vh;
     border-left: none;
-    border-top: 1px solid var(--row-divider);
+    border-top: 1px solid var(--panel-border);
+  }
+
+  #app.layer-panel-collapsed #layer-panel {
+    max-height: 42px;
   }
 }

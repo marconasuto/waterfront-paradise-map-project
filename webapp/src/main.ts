@@ -142,6 +142,19 @@ async function main(): Promise<void> {
     storyContainer.innerHTML =
       '<p class="story-panel__empty">Nessuna slide ancora pubblicata.</p>';
   }
+
+  const appRoot = document.getElementById("app");
+  const toggleBtn = document.getElementById("layer-panel-toggle");
+  if (appRoot && toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const collapsed = appRoot.classList.toggle("layer-panel-collapsed");
+      toggleBtn.setAttribute(
+        "aria-label",
+        collapsed ? "Apri pannello dei livelli" : "Chiudi pannello dei livelli",
+      );
+      map.resize();
+    });
+  }
 }
 
 main().catch((err: unknown) => {

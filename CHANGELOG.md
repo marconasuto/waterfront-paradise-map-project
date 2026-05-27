@@ -6,6 +6,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
 ## [Unreleased]
 
 ### Added
+- 2026-05-27 — Phase 6g: dark mode redesign, new palette, glossy
+  panels, foldable layer panel.
+  - `config/color_scheme.yaml` rewritten around six user-provided
+    palettes (Blues / Reds / Lime / Sage-Teal / Mauve / Cream). Token
+    mapping documented inline. natura2000 now has its own lime token
+    (was sharing with wetland). Bumped to `version: 2`,
+    `mode: dark`.
+  - `config/basemaps.yaml` reordered so `mapbox/dark-v11` is the
+    default; `streets-v12` removed (rarely chosen vs satellite).
+  - `LAYER_COLOR_TOKEN["natura2000"]` updated in
+    `src/manfredonia_map/publishing/styles.py`. Re-ran
+    `pixi run publish-style` to regenerate `data/processed/style.json`
+    with the new colors.
+  - `webapp/src/style.css` rewritten for dark mode: deep-navy
+    background, glassy semi-transparent panels (`backdrop-filter:
+    blur(24px) saturate(160%)`), accent-yellow titles, Mapbox controls
+    re-themed (navigation, scale, attribution, popup).
+  - **Foldable layer panel**: new toggle button at the top-left of
+    `#layer-panel`. Click collapses the panel to a 48 px slim strip
+    via CSS grid transition; rotates the chevron; calls
+    `map.resize()` so the map fills the freed space. Aria-label
+    updates between "Apri/Chiudi pannello dei livelli".
+  - 271 Python + 121 webapp tests still green; webapp build 547 KB
+    gzipped.
 - 2026-05-27 — Phase 9: GitHub Pages deploy wiring.
   - `.github/workflows/deploy.yml`: on push to main affecting
     `webapp/ | config/ | content/ | data/catalog.yaml |
