@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  applyLayerOrder,
   applyLayerState,
   defaultLayerState,
   extractManfredoniaLayerIds,
   loadLayerState,
+  moveLayerStateEntry,
   opacityPaintProperty,
   reconcileLayerState,
   saveLayerState,
@@ -144,6 +146,72 @@ describe("opacityPaintProperty", () => {
     ["raster", "raster-opacity"],
   ])("%s -> %s", (input, expected) => {
     expect(opacityPaintProperty(input)).toBe(expected);
+  });
+});
+
+describe("moveLayerStateEntry", () => {
+  const S: LayerState[] = [
+    { layerId: "a", visible: true, opacity: 1 },
+    { layerId: "b", visible: true, opacity: 0.5 },
+    { layerId: "c", visible: false, opacity: 0.8 },
+  ];
+
+  it("returns the same array reference when no-op (from == to)", () => {
+    expect(moveLayerStateEntry(S, 1, 1)).toBe(S);
+  });
+
+  it("moves down by one", () => {
+    const out = moveLayerStateEntry(S, 0, 1);
+    expect(out.map((s) => s.layerId)).toEqual(["b", "a", "c"]);
+  });
+
+  it("moves up by one", () => {
+    const out = moveLayerStateEntry(S, 2, 0);
+    expect(out.map((s) => s.layerId)).toEqual(["c", "a", "b"]);
+  });
+
+  it("clamps target into range", () => {
+    expect(moveLayerStateEntry(S, 0, 99).map((s) => s.layerId)).toEqual(["b", "c", "a"]);
+    expect(moveLayerStateEntry(S, 2, -5).map((s) => s.layerId)).toEqual(["c", "a", "b"]);
+  });
+
+  it("returns the same array when from is out of range", () => {
+    expect(moveLayerStateEntry(S, 99, 0)).toBe(S);
+    expect(moveLayerStateEntry(S, -1, 0)).toBe(S);
+  });
+});
+
+describe("applyLayerOrder", () => {
+  it("calls moveLayer for every known layer, in state order", () => {
+    const known = new Set(["manfredonia-a", "manfredonia-b"]);
+    const moveLayer = vi.fn();
+    const map = {
+      getLayer: (id: string) => (known.has(id) ? { id } : undefined),
+      moveLayer,
+    } as never;
+    applyLayerOrder(map, [
+      { layerId: "manfredonia-a", visible: true, opacity: 1 },
+      { layerId: "manfredonia-b", visible: true, opacity: 1 },
+      { layerId: "manfredonia-missing", visible: true, opacity: 1 },
+    ]);
+    expect(moveLayer).toHaveBeenCalledTimes(2);
+    expect(moveLayer.mock.calls.map((c) => c[0])).toEqual([
+      "manfredonia-a",
+      "manfredonia-b",
+    ]);
+  });
+
+  it("swallows moveLayer errors so style.load races don't crash", () => {
+    const moveLayer = vi.fn().mockImplementation(() => {
+      throw new Error("not ready");
+    });
+    const map = {
+      getLayer: () => ({ id: "x" }),
+      moveLayer,
+    } as never;
+    expect(() =>
+      applyLayerOrder(map, [{ layerId: "manfredonia-x", visible: true, opacity: 1 }]),
+    ).not.toThrow();
   });
 });
 

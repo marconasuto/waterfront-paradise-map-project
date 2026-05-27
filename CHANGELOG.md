@@ -6,6 +6,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), SemVer.
 ## [Unreleased]
 
 ### Added
+- 2026-05-27 — Phase 6h: drag-reorder + keyboard a11y on the layer
+  panel.
+  - `webapp/src/state/layer-state.ts` adds `moveLayerStateEntry(from,
+    to)` (immutable, clamps target) and `applyLayerOrder(map, state)`
+    which walks the state array calling `map.moveLayer(id)` (which
+    moves to top) so the final stack order matches the state: state[0]
+    at the bottom, state[N-1] at the top.
+  - `webapp/src/ui/layer-panel.ts` adds a draggable `⋮⋮` handle on
+    each row with HTML5 drag-and-drop wiring + ArrowUp/ArrowDown
+    keyboard reorder. Drop targets get a yellow inset shadow; the
+    dragged row drops to 50 % opacity; focus auto-jumps to the moved
+    row's handle after a keyboard reorder so chained Up/Down works.
+  - `main.ts` calls `applyLayerOrder` after both `applyLayerState`
+    on `style.load` and on every `persist()` (visibility, opacity, or
+    order change) so the rendered stack always matches the panel.
+  - CSS: `:focus-visible` outlines on the handle, basemap select,
+    info chip, and panel toggle. Drop-target row + dragging row
+    visual feedback.
+  - 11 new vitest tests (layer-state +7, layer-panel +4); suite at
+    132 passed. Build 547 KB gzipped.
+  - Lighthouse pass deferred to Phase 8 (will integrate
+    lighthouse-ci into the deploy workflow).
 - 2026-05-27 — Phase 6g: dark mode redesign, new palette, glossy
   panels, foldable layer panel.
   - `config/color_scheme.yaml` rewritten around six user-provided

@@ -123,4 +123,46 @@ describe("LayerPanel", () => {
   it("defaultLayerLabel strips the manfredonia- prefix and underscores", () => {
     expect(defaultLayerLabel("manfredonia-hydrography_surface")).toBe("hydrography surface");
   });
+
+  // --- drag + keyboard reorder -------------------------------------
+
+  it("ArrowDown on a handle moves the entry down by one", () => {
+    new LayerPanel({ container, state: STATE, meta: META, label: defaultLayerLabel, onChange });
+    const handle = container.querySelector(
+      '.layer-panel__row[data-index="0"] .layer-panel__handle',
+    ) as HTMLButtonElement;
+    handle.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const arg = onChange.mock.calls[0]![0] as LayerState[];
+    expect(arg.map((e) => e.layerId)).toEqual([
+      "manfredonia-coastline",
+      "manfredonia-wetlands",
+    ]);
+  });
+
+  it("ArrowUp on the first handle is a no-op", () => {
+    new LayerPanel({ container, state: STATE, meta: META, label: defaultLayerLabel, onChange });
+    const handle = container.querySelector(
+      '.layer-panel__row[data-index="0"] .layer-panel__handle',
+    ) as HTMLButtonElement;
+    handle.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }));
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("ArrowDown on the last handle is a no-op", () => {
+    new LayerPanel({ container, state: STATE, meta: META, label: defaultLayerLabel, onChange });
+    const handle = container.querySelector(
+      '.layer-panel__row[data-index="1"] .layer-panel__handle',
+    ) as HTMLButtonElement;
+    handle.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("renders draggable handles with an aria-label", () => {
+    new LayerPanel({ container, state: STATE, meta: META, label: defaultLayerLabel, onChange });
+    const handles = container.querySelectorAll<HTMLButtonElement>(".layer-panel__handle");
+    expect(handles).toHaveLength(STATE.length);
+    expect(handles[0]!.draggable).toBe(true);
+    expect(handles[0]!.getAttribute("aria-label")).toMatch(/Trascina/);
+  });
 });

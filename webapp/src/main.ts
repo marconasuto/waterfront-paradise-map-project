@@ -12,6 +12,7 @@ import {
 } from "./map/style-merge";
 import { assetUrl } from "./paths";
 import {
+  applyLayerOrder,
   applyLayerState,
   extractManfredoniaLayerIds,
   loadLayerState,
@@ -65,6 +66,7 @@ async function main(): Promise<void> {
   });
   map.on("style.load", () => {
     applyLayerState(map, layerState);
+    applyLayerOrder(map, layerState);
   });
 
   const switcher = new BasemapControl({
@@ -89,6 +91,7 @@ async function main(): Promise<void> {
       console.warn("[manfredonia-map] could not persist layer state:", err);
     }
     applyLayerState(map, next);
+    applyLayerOrder(map, next);
   };
 
   const layerPanel = new LayerPanel({

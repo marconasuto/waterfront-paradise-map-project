@@ -94,6 +94,47 @@ export function opacityPaintProperty(layerType: string): string {
 }
 
 /**
+ * Move element at `from` to position `to`. Returns a new array; the
+ * input is untouched. `to` is clamped into range so out-of-range
+ * indices are a no-op instead of an exception.
+ */
+export function moveLayerStateEntry(
+  state: LayerState[],
+  from: number,
+  to: number,
+): LayerState[] {
+  if (from < 0 || from >= state.length) return state;
+  const clamped = Math.max(0, Math.min(state.length - 1, to));
+  if (from === clamped) return state;
+  const next = state.slice();
+  const [item] = next.splice(from, 1);
+  if (item) next.splice(clamped, 0, item);
+  return next;
+}
+
+/**
+ * Push the current render order to the map.
+ *
+ * Mapbox layer ordering: layers later in the array render on top.
+ * `moveLayer(id)` without a `before` argument moves the layer to the
+ * top of the stack. By walking `state` first → last and moving each
+ * id to the top in turn, the final order matches the state array
+ * (state[0] at the bottom, state[N-1] at the top). Unknown ids are
+ * skipped — happens during the brief window after `setStyle()` while
+ * the new style is still loading.
+ */
+export function applyLayerOrder(map: MapboxMap, state: LayerState[]): void {
+  for (const entry of state) {
+    if (!map.getLayer(entry.layerId)) continue;
+    try {
+      map.moveLayer(entry.layerId);
+    } catch {
+      // Some basemap layouts can race the moveLayer call; ignore.
+    }
+  }
+}
+
+/**
  * Push the entire state into the map: visibility via `setLayoutProperty`,
  * opacity via `setPaintProperty`. Layers we don't recognise are skipped
  * silently (this happens during the brief window after `setStyle` while

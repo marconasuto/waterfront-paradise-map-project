@@ -1,5 +1,5 @@
 import type { LayerMeta } from "../config/catalog";
-import type { LayerState } from "../state/layer-state";
+import { moveLayerStateEntry, type LayerState } from "../state/layer-state";
 
 export interface LayerPanelOptions {
   container: HTMLElement;
@@ -7,18 +7,19 @@ export interface LayerPanelOptions {
   meta: Map<string, LayerMeta>;
   /** Display label for a layer id. */
   label: (layerId: string) => string;
-  /** Fired on visibility or opacity change. Caller decides how to persist + apply. */
+  /** Fired on visibility / opacity / order change. */
   onChange: (next: LayerState[]) => void;
 }
+
+const DATA_KEY = "application/x-mfd-layer";
 
 /**
  * Right-docked panel listing every overlay layer.
  *
- * Each row: checkbox (visibility) + opacity slider + small "info"
- * disclosure showing publisher / dataset / license / year from the
- * catalog. The panel owns the DOM; state is held by the caller and
- * pushed back in via `setState()` (e.g. after a basemap swap reapplies
- * the saved state).
+ * Each row: drag handle (mouse + keyboard reorder), visibility checkbox,
+ * label, opacity slider, attribution chip. The panel owns the DOM;
+ * state is held by the caller and pushed back in via `setState()`
+ * (e.g. after a basemap swap reapplies the saved state).
  */
 export class LayerPanel {
   private container: HTMLElement;
@@ -26,6 +27,7 @@ export class LayerPanel {
   private readonly meta: Map<string, LayerMeta>;
   private readonly label: (layerId: string) => string;
   private readonly onChange: (next: LayerState[]) => void;
+  private dragFromIndex: number | null = null;
 
   constructor(opts: LayerPanelOptions) {
     this.container = opts.container;
@@ -36,7 +38,7 @@ export class LayerPanel {
     this.render();
   }
 
-  /** Replace state and re-render. Use after basemap swap or external mutation. */
+  /** Replace state and re-render. */
   setState(state: LayerState[]): void {
     this.state = state;
     this.render();
@@ -65,9 +67,29 @@ export class LayerPanel {
     const li = document.createElement("li");
     li.className = "layer-panel__row";
     li.dataset["layerId"] = entry.layerId;
+    li.dataset["index"] = String(index);
 
     const checkboxId = `layer-vis-${entry.layerId}`;
     const sliderId = `layer-op-${entry.layerId}`;
+
+    // --- drag handle (also keyboard target) ---
+    const handle = document.createElement("button");
+    handle.type = "button";
+    handle.className = "layer-panel__handle";
+    handle.setAttribute(
+      "aria-label",
+      `Trascina per riordinare il livello ${this.label(entry.layerId)} (frecce su e giù)`,
+    );
+    handle.draggable = true;
+    handle.textContent = "⋮⋮";
+    handle.addEventListener("dragstart", (ev) => this.onDragStart(ev, index));
+    handle.addEventListener("dragend", () => this.onDragEnd());
+    handle.addEventListener("keydown", (ev) => this.onHandleKey(ev, index));
+
+    // The row itself accepts drops so the user can drop anywhere over it.
+    li.addEventListener("dragover", (ev) => this.onRowDragOver(ev, li));
+    li.addEventListener("dragleave", () => li.classList.remove("layer-panel__row--drop-target"));
+    li.addEventListener("drop", (ev) => this.onRowDrop(ev, index, li));
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -103,6 +125,7 @@ export class LayerPanel {
     info.textContent = "ⓘ";
     info.title = this.attributionTooltip(entry.layerId);
 
+    li.appendChild(handle);
     li.appendChild(checkbox);
     li.appendChild(label);
     li.appendChild(slider);
@@ -117,12 +140,75 @@ export class LayerPanel {
     return `${m.dataset} — ${m.publisher}${yr}. Licenza: ${m.license}`;
   }
 
+  // --- mutations -----------------------------------------------------
+
   private updateEntry(index: number, patch: Partial<LayerState>): void {
     const prev = this.state[index];
     if (!prev) return;
     const updated: LayerState = { ...prev, ...patch };
     this.state = this.state.map((e, i) => (i === index ? updated : e));
     this.onChange(this.state);
+  }
+
+  private moveEntry(from: number, to: number): void {
+    const next = moveLayerStateEntry(this.state, from, to);
+    if (next === this.state) return;
+    this.state = next;
+    this.onChange(this.state);
+    // Focus the moved row's handle after re-render so keyboard nav can continue.
+    queueMicrotask(() => {
+      const moved = this.container.querySelector<HTMLElement>(
+        `.layer-panel__row[data-index="${Math.max(0, Math.min(this.state.length - 1, to))}"] .layer-panel__handle`,
+      );
+      moved?.focus();
+    });
+  }
+
+  // --- drag handlers -------------------------------------------------
+
+  private onDragStart(ev: DragEvent, index: number): void {
+    this.dragFromIndex = index;
+    ev.dataTransfer?.setData(DATA_KEY, String(index));
+    if (ev.dataTransfer) ev.dataTransfer.effectAllowed = "move";
+    (ev.currentTarget as HTMLElement)?.closest(".layer-panel__row")?.classList.add(
+      "layer-panel__row--dragging",
+    );
+  }
+
+  private onDragEnd(): void {
+    this.dragFromIndex = null;
+    this.container
+      .querySelectorAll(".layer-panel__row--dragging, .layer-panel__row--drop-target")
+      .forEach((el) => {
+        el.classList.remove("layer-panel__row--dragging");
+        el.classList.remove("layer-panel__row--drop-target");
+      });
+  }
+
+  private onRowDragOver(ev: DragEvent, row: HTMLElement): void {
+    if (this.dragFromIndex === null) return;
+    ev.preventDefault();
+    if (ev.dataTransfer) ev.dataTransfer.dropEffect = "move";
+    row.classList.add("layer-panel__row--drop-target");
+  }
+
+  private onRowDrop(ev: DragEvent, dropIndex: number, row: HTMLElement): void {
+    ev.preventDefault();
+    row.classList.remove("layer-panel__row--drop-target");
+    const fromStr = ev.dataTransfer?.getData(DATA_KEY) ?? "";
+    const from = fromStr === "" ? this.dragFromIndex : Number.parseInt(fromStr, 10);
+    if (from === null || Number.isNaN(from)) return;
+    this.moveEntry(from, dropIndex);
+  }
+
+  private onHandleKey(ev: KeyboardEvent, index: number): void {
+    if (ev.key === "ArrowUp") {
+      ev.preventDefault();
+      this.moveEntry(index, index - 1);
+    } else if (ev.key === "ArrowDown") {
+      ev.preventDefault();
+      this.moveEntry(index, index + 1);
+    }
   }
 }
 
