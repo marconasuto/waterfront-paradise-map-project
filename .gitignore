@@ -72,6 +72,10 @@ data/processed/**
 !data/processed/.gitkeep
 !data/catalog.yaml
 !data/publish_manifest.yaml
+# Mapbox GL JS style document consumed by the webapp at build time.
+# Deterministic, small (~6 KB); CI would need the Python pipeline
+# otherwise. Regenerate with `pixi run publish-style`.
+!data/processed/style.json
 
 # common geo binaries
 *.tif

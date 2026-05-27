@@ -10,6 +10,7 @@ import {
   mergeOverlay,
   pickDefaultBasemap,
 } from "./map/style-merge";
+import { assetUrl } from "./paths";
 import {
   applyLayerState,
   extractManfredoniaLayerIds,
@@ -40,12 +41,12 @@ async function main(): Promise<void> {
   const env = loadEnv();
 
   const [overlay, basemapsCfg, catalog, highlightsCfg, colorScheme, slides] = await Promise.all([
-    loadStyle("/style.json"),
-    loadBasemaps("/basemaps.yaml"),
-    loadCatalog("/catalog.yaml"),
-    loadHighlights("/highlights.yaml"),
-    loadColorScheme("/color_scheme.yaml"),
-    loadSlideIndex("/slides.json"),
+    loadStyle(assetUrl("style.json")),
+    loadBasemaps(assetUrl("basemaps.yaml")),
+    loadCatalog(assetUrl("catalog.yaml")),
+    loadHighlights(assetUrl("highlights.yaml")),
+    loadColorScheme(assetUrl("color_scheme.yaml")),
+    loadSlideIndex(assetUrl("slides.json")),
   ]);
   console.info(
     `[manfredonia-map] overlay: ${styleSourceCount(overlay)} sources, ${styleLayerCount(overlay)} layers; ${basemapsCfg.basemaps.length} basemaps; ${catalog.sources.length} catalog sources; ${highlightsCfg.highlights.length} highlights; ${slides.length} slides`,

@@ -9,12 +9,14 @@ import { marked } from "marked";
  * gracefully degrade to the "Contenuto in arrivo" placeholder rather
  * than crash the popup.
  */
+import { assetUrl } from "../paths";
+
 export async function loadContent(
   ref: string,
   fetchFn: typeof fetch = fetch,
-  baseDir = "/content/it/",
+  baseDir = "content/it/",
 ): Promise<string | null> {
-  const url = baseDir + ref.replace(/^\/+/, "");
+  const url = assetUrl(baseDir + ref.replace(/^\/+/, ""));
   let res: Response;
   try {
     res = await fetchFn(url);

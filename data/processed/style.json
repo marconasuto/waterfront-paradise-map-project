@@ -1,0 +1,227 @@
+{
+  "center": [
+    15.92,
+    41.62
+  ],
+  "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "background",
+      "paint": {
+        "background-color": "transparent"
+      },
+      "type": "background"
+    },
+    {
+      "id": "manfredonia-emodnet_bathymetry",
+      "paint": {
+        "raster-opacity": 0.7
+      },
+      "source": "manfredonia-emodnet_bathymetry",
+      "type": "raster"
+    },
+    {
+      "id": "manfredonia-tinitaly_dtm",
+      "paint": {
+        "raster-opacity": 0.6
+      },
+      "source": "manfredonia-tinitaly_dtm",
+      "type": "raster"
+    },
+    {
+      "id": "manfredonia-tinitaly_dtm_hillshade",
+      "paint": {
+        "raster-opacity": 0.4
+      },
+      "source": "manfredonia-tinitaly_dtm_hillshade",
+      "type": "raster"
+    },
+    {
+      "id": "manfredonia-natura2000",
+      "paint": {
+        "fill-color": "#3aa860",
+        "fill-opacity": 0.25,
+        "fill-outline-color": "#22713f"
+      },
+      "source": "manfredonia-natura2000",
+      "source-layer": "natura2000",
+      "type": "fill"
+    },
+    {
+      "id": "manfredonia-wetlands",
+      "paint": {
+        "fill-color": "#3aa860",
+        "fill-opacity": 0.5,
+        "fill-outline-color": "#22713f"
+      },
+      "source": "manfredonia-wetlands",
+      "source-layer": "wetlands",
+      "type": "fill"
+    },
+    {
+      "id": "manfredonia-industrial_areas",
+      "paint": {
+        "fill-color": "#6b6b6b",
+        "fill-opacity": 0.4,
+        "fill-outline-color": "#3d3d3d"
+      },
+      "source": "manfredonia-industrial_areas",
+      "source-layer": "industrial_areas",
+      "type": "fill"
+    },
+    {
+      "id": "manfredonia-sin_manfredonia",
+      "paint": {
+        "fill-color": "#c45c1a",
+        "fill-opacity": 0.45,
+        "fill-outline-color": "#8a3f10"
+      },
+      "source": "manfredonia-sin_manfredonia",
+      "source-layer": "sin_manfredonia",
+      "type": "fill"
+    },
+    {
+      "id": "manfredonia-harbours",
+      "paint": {
+        "fill-color": "#2c3e50",
+        "fill-opacity": 0.5,
+        "fill-outline-color": "#1a2733"
+      },
+      "source": "manfredonia-harbours",
+      "source-layer": "harbours",
+      "type": "fill"
+    },
+    {
+      "id": "manfredonia-beaches",
+      "paint": {
+        "fill-color": "#f4d488",
+        "fill-opacity": 0.6,
+        "fill-outline-color": "#c8a85e"
+      },
+      "source": "manfredonia-beaches",
+      "source-layer": "beaches",
+      "type": "fill"
+    },
+    {
+      "id": "manfredonia-admin_boundaries",
+      "paint": {
+        "line-color": "#999999",
+        "line-width": 1.2
+      },
+      "source": "manfredonia-admin_boundaries",
+      "source-layer": "admin_boundaries",
+      "type": "line"
+    },
+    {
+      "id": "manfredonia-hydrography_surface",
+      "paint": {
+        "line-color": "#0e5e8a",
+        "line-width": 1.0
+      },
+      "source": "manfredonia-hydrography_surface",
+      "source-layer": "hydrography_surface",
+      "type": "line"
+    },
+    {
+      "id": "manfredonia-roads",
+      "paint": {
+        "line-color": "#000000",
+        "line-width": 0.8
+      },
+      "source": "manfredonia-roads",
+      "source-layer": "roads",
+      "type": "line"
+    },
+    {
+      "id": "manfredonia-coastline",
+      "paint": {
+        "line-color": "#0e3a5a",
+        "line-width": 1.6
+      },
+      "source": "manfredonia-coastline",
+      "source-layer": "coastline",
+      "type": "line"
+    },
+    {
+      "id": "manfredonia-archeological_areas",
+      "paint": {
+        "circle-color": "#a33b3b",
+        "circle-radius": 5,
+        "circle-stroke-color": "#702424",
+        "circle-stroke-width": 1.5
+      },
+      "source": "manfredonia-archeological_areas",
+      "source-layer": "archeological_areas",
+      "type": "circle"
+    }
+  ],
+  "metadata": {
+    "manfredonia-map:owner": "marconasuto",
+    "manfredonia-map:version": "0.0.1"
+  },
+  "name": "Manfredonia coastal map",
+  "sources": {
+    "manfredonia-admin_boundaries": {
+      "type": "vector",
+      "url": "mapbox://marconasuto.manfredonia-admin_boundaries-v1"
+    },
+    "manfredonia-archeological_areas": {
+      "type": "vector",
+      "url": "mapbox://marconasuto.manfredonia-archeological_are-v1"
+    },
+    "manfredonia-beaches": {
+      "type": "vector",
+      "url": "mapbox://marconasuto.manfredonia-beaches-v1"
+    },
+    "manfredonia-coastline": {
+      "type": "vector",
+      "url": "mapbox://marconasuto.manfredonia-coastline-v1"
+    },
+    "manfredonia-emodnet_bathymetry": {
+      "tileSize": 256,
+      "type": "raster",
+      "url": "mapbox://marconasuto.manfredonia-emodnet_bathymetr-v1"
+    },
+    "manfredonia-harbours": {
+      "type": "vector",
+      "url": "mapbox://marconasuto.manfredonia-harbours-v1"
+    },
+    "manfredonia-hydrography_surface": {
+      "type": "vector",
+      "url": "mapbox://marconasuto.manfredonia-hydrography_surfa-v1"
+    },
+    "manfredonia-industrial_areas": {
+      "type": "vector",
+      "url": "mapbox://marconasuto.manfredonia-industrial_areas-v1"
+    },
+    "manfredonia-natura2000": {
+      "type": "vector",
+      "url": "mapbox://marconasuto.manfredonia-natura2000-v1"
+    },
+    "manfredonia-roads": {
+      "type": "vector",
+      "url": "mapbox://marconasuto.manfredonia-roads-v1"
+    },
+    "manfredonia-sin_manfredonia": {
+      "type": "vector",
+      "url": "mapbox://marconasuto.manfredonia-sin_manfredonia-v1"
+    },
+    "manfredonia-tinitaly_dtm": {
+      "tileSize": 256,
+      "type": "raster",
+      "url": "mapbox://marconasuto.manfredonia-tinitaly_dtm-v1"
+    },
+    "manfredonia-tinitaly_dtm_hillshade": {
+      "tileSize": 256,
+      "type": "raster",
+      "url": "mapbox://marconasuto.manfredonia-tinitaly_dtm_hill-v1"
+    },
+    "manfredonia-wetlands": {
+      "type": "vector",
+      "url": "mapbox://marconasuto.manfredonia-wetlands-v1"
+    }
+  },
+  "sprite": "mapbox://sprites/mapbox/light-v11",
+  "version": 8,
+  "zoom": 10.5
+}

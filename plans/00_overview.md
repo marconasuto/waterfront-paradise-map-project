@@ -399,9 +399,30 @@ Phase 2 is unblocked.
 
 - See `plans/08_testing.md`.
 
-## Phase 9 — Deployment
+## Phase 9 — Deployment (in flight)
 
-- See `plans/09_deployment.md`.
+- See `plans/09_deployment.md` for the step-by-step.
+- **Target locked 2026-05-27**: GitHub Pages. Private repo needs a
+  paid plan; same `webapp/dist/` artifact works on Vercel / Netlify /
+  Cloudflare Pages as a fallback.
+- [x] `.github/workflows/deploy.yml`: pnpm + Node 22, typecheck +
+      vitest + build under `webapp/`, deploys `dist/` via
+      `actions/deploy-pages`. Triggers on pushes to `main` that touch
+      `webapp/ | config/ | content/ | data/catalog.yaml |
+      data/processed/style.json`, plus manual dispatch.
+- [x] **Vite base path** — `vite.config.ts` honours
+      `VITE_BASE_PATH` so GH Pages subpath works. `src/paths.ts`
+      composes asset URLs via `import.meta.env.BASE_URL`; all
+      fetches in `main.ts` + `content/loader.ts` route through it.
+      Verified locally: `VITE_BASE_PATH=/manfredonia-map/ pnpm
+      build` produces `<script src="/manfredonia-map/assets/…">`.
+- [x] **`data/processed/style.json` committed** so CI does not
+      need the Python pipeline. The deterministic writer keeps
+      diffs minimal; regenerate with `pixi run publish-style`.
+- [ ] Push repo to GitHub, add `MAPBOX_PUBLIC_TOKEN` secret,
+      enable Pages → "Source: GitHub Actions", first deploy.
+- [ ] URL-restrict the public token in the Mapbox dashboard
+      once the live URL is known.
 
 ## Phase 10 — Optional: MCP server (post-v1)
 
