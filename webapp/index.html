@@ -3,28 +3,85 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Manfredonia — Mappa della costa</title>
+    <title>Frontemare Paradiso — Manfredonia</title>
     <meta
       name="description"
       content="Mappa multi-livello e storymap della costa di Manfredonia (Puglia)."
     />
     <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,400;1,700&family=B612:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <main id="app">
-      <aside id="story-panel" aria-label="Storymap della costa"></aside>
-      <div id="map" aria-label="Mappa interattiva della costa di Manfredonia"></div>
-      <aside id="layer-panel" aria-label="Pannello dei livelli">
+      <button
+        id="menu-toggle"
+        class="menu-button"
+        type="button"
+        aria-label="Apri il menu"
+        aria-controls="menu-drawer"
+        aria-expanded="false"
+      >
+        <span class="menu-button__bar"></span>
+        <span class="menu-button__bar"></span>
+        <span class="menu-button__bar"></span>
+      </button>
+      <h1 id="brand-logo" class="brand-logo">Frontemare Paradiso</h1>
+
+      <nav
+        id="menu-drawer"
+        class="menu-drawer"
+        aria-label="Menu principale"
+        aria-hidden="true"
+      >
         <button
-          id="layer-panel-toggle"
-          class="layer-panel__toggle"
+          id="menu-close"
+          class="menu-drawer__close"
           type="button"
-          aria-label="Chiudi pannello dei livelli"
-          title="Chiudi / apri il pannello dei livelli"
+          aria-label="Chiudi il menu"
         >
-          ›
+          ×
         </button>
+        <ul class="menu-drawer__list">
+          <li><a href="#progetto" class="menu-drawer__link">Il progetto</a></li>
+          <li><a href="#about" class="menu-drawer__link">About</a></li>
+        </ul>
+      </nav>
+
+      <button
+        id="story-panel-toggle"
+        class="story-panel__toggle"
+        type="button"
+        aria-label="Chiudi pannello della storia"
+        aria-controls="story-panel"
+        aria-expanded="true"
+        title="Chiudi / apri il pannello della storia"
+      >
+        ‹
+      </button>
+
+      <aside id="story-panel" aria-label="Storymap della costa"></aside>
+
+      <div id="map" aria-label="Mappa interattiva della costa di Manfredonia"></div>
+
+      <button
+        id="layer-panel-toggle"
+        class="layer-panel__toggle"
+        type="button"
+        aria-label="Chiudi pannello dei livelli"
+        aria-controls="layer-panel"
+        aria-expanded="true"
+        title="Chiudi / apri il pannello dei livelli"
+      >
+        ›
+      </button>
+
+      <aside id="layer-panel" aria-label="Pannello dei livelli">
         <div class="layer-panel__inner">
           <section id="layer-panel-list"></section>
           <section
@@ -33,10 +90,45 @@
           ></section>
         </div>
       </aside>
+
       <noscript>
         Questa applicazione richiede JavaScript per visualizzare la mappa.
       </noscript>
     </main>
+
+    <section
+      id="intro-curtain"
+      class="intro-curtain"
+      aria-label="Introduzione al progetto"
+    >
+      <button
+        id="intro-curtain-close"
+        class="intro-curtain__close"
+        type="button"
+        aria-label="Chiudi la presentazione e vai alla mappa"
+      >
+        ×
+      </button>
+      <div class="intro-curtain__inner">
+        <header class="intro-curtain__head">
+          <h1 class="intro-curtain__title">Frontemare<br />Paradiso</h1>
+          <p class="intro-curtain__tagline">Il futuro della città parte dall'acqua.</p>
+        </header>
+        <div class="intro-curtain__body">
+          <p>Benvenuto nella mappa interattiva della costa di Manfredonia.</p>
+          <p>
+            Scorri verso il basso per esplorare i siti chiave: dalle aree umide
+            del Lago Salso alle grotte preistoriche di Scaloria, passando per
+            l'area SIN ex-Enichem e le spiagge dell'Acqua di Cristo.
+          </p>
+          <p>
+            Suggerimento: usa il pannello a destra per attivare o disattivare
+            i singoli livelli in qualsiasi momento.
+          </p>
+        </div>
+      </div>
+    </section>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

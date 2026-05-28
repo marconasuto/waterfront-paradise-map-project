@@ -31,5 +31,10 @@ export async function loadContent(
 /** Synchronous render. Exported for tests + the placeholder fallback. */
 export function renderMarkdown(md: string): string {
   // `marked.parse()` returns a string when called without async option.
-  return marked.parse(md, { async: false }) as string;
+  return marked.parse(stripFrontmatter(md), { async: false }) as string;
+}
+
+/** Strip a leading `---\n...\n---` YAML frontmatter block, if present. */
+export function stripFrontmatter(md: string): string {
+  return md.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, "");
 }
