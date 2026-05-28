@@ -5,8 +5,11 @@ import type { MapboxStyle } from "../types";
 
 export interface InitMapOptions {
   container: HTMLElement;
-  style: MapboxStyle;
+  /** A full style document or a `mapbox://styles/...` URL. */
+  style: MapboxStyle | string;
   env: AppEnv;
+  /** Initial camera pitch (deg, 0–85). Defaults to flat (0). */
+  pitch?: number;
 }
 
 /**
@@ -16,7 +19,7 @@ export interface InitMapOptions {
  * sprite and glyph fetches carry it. The URL hash drives the camera so
  * deep links survive reloads.
  */
-export function initMap({ container, style, env }: InitMapOptions): MapboxMap {
+export function initMap({ container, style, env, pitch }: InitMapOptions): MapboxMap {
   mapboxgl.accessToken = env.mapboxPublicToken;
   const map = new MapboxMap({
     container,
@@ -26,6 +29,7 @@ export function initMap({ container, style, env }: InitMapOptions): MapboxMap {
     // The storymap engine drives the camera via flyTo; the URL hash is
     // reserved for `#slide-<id>` deep links (see ui/story-panel.ts).
     hash: false,
+    pitch: typeof pitch === "number" ? pitch : 0,
   });
   map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), "top-right");
   map.addControl(new mapboxgl.ScaleControl({ unit: "metric" }), "bottom-left");

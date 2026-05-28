@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  addOverlayLayers,
   fetchBasemapStyle,
   mapboxStyleApiUrl,
   mergeOverlay,
@@ -137,5 +138,71 @@ describe("pickDefaultBasemap", () => {
 
   it("throws on an empty list", () => {
     expect(() => pickDefaultBasemap([])).toThrow(/no basemaps/);
+  });
+});
+
+describe("addOverlayLayers", () => {
+  function fakeMap(): {
+    sources: Map<string, unknown>;
+    layers: Set<string>;
+    getSource: (id: string) => unknown;
+    addSource: (id: string, s: unknown) => void;
+    getLayer: (id: string) => unknown;
+    addLayer: (l: { id: string }) => void;
+    addedLayerOrder: string[];
+  } {
+    const sources = new Map<string, unknown>();
+    const layers = new Set<string>();
+    const addedLayerOrder: string[] = [];
+    return {
+      sources,
+      layers,
+      addedLayerOrder,
+      getSource: (id) => sources.get(id),
+      addSource: (id, s) => void sources.set(id, s),
+      getLayer: (id) => (layers.has(id) ? { id } : undefined),
+      addLayer: (l) => {
+        layers.add(l.id);
+        addedLayerOrder.push(l.id);
+      },
+    };
+  }
+
+  it("adds overlay sources and non-background layers", () => {
+    const map = fakeMap();
+    addOverlayLayers(map, OVERLAY);
+    expect(map.sources.has("manfredonia-wetlands")).toBe(true);
+    expect(map.layers.has("manfredonia-wetlands")).toBe(true);
+    // The overlay's own background layer must NOT be added.
+    expect(map.layers.has("background")).toBe(false);
+  });
+
+  it("is idempotent — re-running does not double-add", () => {
+    const map = fakeMap();
+    addOverlayLayers(map, OVERLAY);
+    const sourceCountAfterFirst = map.sources.size;
+    const layerCountAfterFirst = map.addedLayerOrder.length;
+    addOverlayLayers(map, OVERLAY);
+    expect(map.sources.size).toBe(sourceCountAfterFirst);
+    expect(map.addedLayerOrder.length).toBe(layerCountAfterFirst);
+  });
+
+  it("preserves layers' slot field for Mapbox Standard positioning", () => {
+    const slotted = {
+      ...OVERLAY,
+      layers: [
+        {
+          id: "manfredonia-x",
+          type: "fill",
+          slot: "middle",
+          source: "manfredonia-wetlands",
+          paint: {},
+        },
+      ],
+    } as unknown as MapboxStyle;
+    const added: Array<{ id: string; slot?: string }> = [];
+    const m = { ...fakeMap(), addLayer: (l: { id: string; slot?: string }) => added.push(l) };
+    addOverlayLayers(m, slotted);
+    expect(added[0]?.slot).toBe("middle");
   });
 });

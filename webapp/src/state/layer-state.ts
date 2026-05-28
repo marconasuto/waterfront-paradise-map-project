@@ -11,8 +11,8 @@ export interface LayerState {
   opacity: number;
 }
 
-const STORAGE_KEY = "manfredonia-map:layer-state:v1";
-const DEFAULT_OPACITY = 1;
+const STORAGE_KEY = "manfredonia-map:layer-state:v2";
+const DEFAULT_OPACITY = 0.5;
 
 /**
  * Extract the manfredonia-* layer ids from a built style. We exclude
@@ -122,16 +122,30 @@ export function moveLayerStateEntry(
  * (state[0] at the bottom, state[N-1] at the top). Unknown ids are
  * skipped — happens during the brief window after `setStyle()` while
  * the new style is still loading.
+ *
+ * Slotted layers (Mapbox Standard + GL JS v3) are positioned by their
+ * `slot` field, not by the top-level layer array. Calling `moveLayer`
+ * on a slotted layer either no-ops or evicts it from its slot, which
+ * desynchronises the layer state from the rendered map — visibility
+ * toggles silently stop working. We skip them here on purpose.
  */
 export function applyLayerOrder(map: MapboxMap, state: LayerState[]): void {
   for (const entry of state) {
-    if (!map.getLayer(entry.layerId)) continue;
+    const layer = map.getLayer(entry.layerId);
+    if (!layer) continue;
+    if (layerHasSlot(layer)) continue;
     try {
       map.moveLayer(entry.layerId);
     } catch {
       // Some basemap layouts can race the moveLayer call; ignore.
     }
   }
+}
+
+function layerHasSlot(layer: unknown): boolean {
+  if (typeof layer !== "object" || layer === null) return false;
+  const slot = (layer as { slot?: unknown }).slot;
+  return typeof slot === "string" && slot.length > 0;
 }
 
 /**

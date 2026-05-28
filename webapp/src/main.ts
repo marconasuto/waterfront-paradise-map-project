@@ -3,13 +3,10 @@ import { loadBasemaps, loadColorScheme, loadHighlights } from "./config/loader";
 import { loadSlideIndex } from "./content/slides";
 import { loadEnv } from "./env";
 import { readGeoJsonFile } from "./io/geojson-file";
+import { applyBasemap } from "./map/basemap-apply";
 import { initMap } from "./map/init";
 import { loadStyle, styleLayerCount, styleSourceCount } from "./map/style-loader";
-import {
-  fetchBasemapStyle,
-  mergeOverlay,
-  pickDefaultBasemap,
-} from "./map/style-merge";
+import { addOverlayLayers, pickDefaultBasemap } from "./map/style-merge";
 import { assetUrl } from "./paths";
 import {
   applyLayerOrder,
@@ -23,6 +20,11 @@ import {
 import { OverlayManager } from "./state/overlays";
 import { applySlide } from "./state/story-controller";
 import { BasemapControl } from "./ui/basemap-control";
+import {
+  attachIntroCurtain,
+  attachMenuDrawer,
+  attachPanelToggle,
+} from "./ui/chrome";
 import { attachDropZone } from "./ui/drop-zone";
 import { attachHighlights } from "./ui/highlights";
 import { LayerPanel, defaultLayerLabel } from "./ui/layer-panel";
@@ -58,30 +60,44 @@ async function main(): Promise<void> {
   let layerState = reconcileLayerState(layerIds, loadLayerState());
 
   const initialBasemap = pickDefaultBasemap(basemapsCfg.basemaps);
-  const initialBase = await fetchBasemapStyle(initialBasemap, env.mapboxPublicToken);
+  // Set the style by URL so Mapbox resolves it natively — crucial for
+  // Standard, whose `imports`-based document does not survive a manual
+  // JSON merge. Overlay sources + layers are added after `style.load`.
   const map = initMap({
     container: mapContainer,
-    style: mergeOverlay(initialBase, overlay),
+    style: initialBasemap.style_url,
     env,
+    ...(typeof initialBasemap.pitch === "number" ? { pitch: initialBasemap.pitch } : {}),
   });
+  let currentBasemap = initialBasemap;
+  // Debug hook: lets a headless browser inspect terrain/layer state.
+  // Debug hook: lets a headless browser / devtools inspect map state.
+  (window as unknown as { __mfdMap?: unknown }).__mfdMap = map;
   map.on("style.load", () => {
-    applyLayerState(map, layerState);
-    applyLayerOrder(map, layerState);
+    // style.load fires on boot and after every setStyle — re-add the
+    // overlay, then re-apply per-layer state + camera/terrain for the
+    // active basemap (a swap, e.g. dark → standard_3d, resets all of it).
+    // Guard so one failing step can't silently abort the rest.
+    try {
+      addOverlayLayers(map, overlay);
+      applyLayerState(map, layerState);
+      applyLayerOrder(map, layerState);
+      applyBasemap(map, currentBasemap, { accessToken: env.mapboxPublicToken });
+    } catch (err) {
+      console.error("[manfredonia-map] style.load setup failed:", err);
+    }
   });
 
   const switcher = new BasemapControl({
     basemaps: basemapsCfg.basemaps,
     initialId: initialBasemap.id,
-    onChange: async (next) => {
-      try {
-        const base = await fetchBasemapStyle(next, env.mapboxPublicToken);
-        map.setStyle(mergeOverlay(base, overlay));
-      } catch (err) {
-        console.error("[manfredonia-map] basemap swap failed:", err);
-      }
+    onChange: (next) => {
+      currentBasemap = next;
+      // setStyle by URL; the `style.load` handler re-adds the overlay.
+      map.setStyle(next.style_url);
     },
   });
-  map.addControl(switcher, "top-left");
+  map.addControl(switcher, "bottom-left");
 
   const persist = (next: LayerState[]): void => {
     layerState = next;
@@ -147,15 +163,48 @@ async function main(): Promise<void> {
   }
 
   const appRoot = document.getElementById("app");
-  const toggleBtn = document.getElementById("layer-panel-toggle");
-  if (appRoot && toggleBtn) {
-    toggleBtn.addEventListener("click", () => {
-      const collapsed = appRoot.classList.toggle("layer-panel-collapsed");
-      toggleBtn.setAttribute(
-        "aria-label",
-        collapsed ? "Apri pannello dei livelli" : "Chiudi pannello dei livelli",
-      );
-      map.resize();
+  const layerToggleBtn = document.getElementById("layer-panel-toggle");
+  if (appRoot && layerToggleBtn) {
+    attachPanelToggle({
+      root: appRoot,
+      button: layerToggleBtn,
+      collapsedClass: "layer-panel-collapsed",
+      expandedLabel: "Chiudi pannello dei livelli",
+      collapsedLabel: "Apri pannello dei livelli",
+      onResize: () => map.resize(),
+    });
+  }
+
+  const storyToggleBtn = document.getElementById("story-panel-toggle");
+  if (appRoot && storyToggleBtn) {
+    attachPanelToggle({
+      root: appRoot,
+      button: storyToggleBtn,
+      collapsedClass: "story-panel-collapsed",
+      expandedLabel: "Chiudi pannello della storia",
+      collapsedLabel: "Apri pannello della storia",
+      onResize: () => map.resize(),
+    });
+  }
+
+  const introCurtain = document.getElementById("intro-curtain");
+  const introCloseBtn = document.getElementById("intro-curtain-close");
+  if (introCurtain && introCloseBtn) {
+    attachIntroCurtain({
+      curtain: introCurtain,
+      closeBtn: introCloseBtn,
+      onDismissed: () => map.resize(),
+    });
+  }
+
+  const menuToggleBtn = document.getElementById("menu-toggle");
+  const menuCloseBtn = document.getElementById("menu-close");
+  const menuDrawer = document.getElementById("menu-drawer");
+  if (menuToggleBtn && menuCloseBtn && menuDrawer) {
+    attachMenuDrawer({
+      toggleBtn: menuToggleBtn,
+      closeBtn: menuCloseBtn,
+      drawer: menuDrawer,
     });
   }
 }

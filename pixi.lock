@@ -1054,6 +1054,9 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.2-h25fd6f3_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-ng-2.3.3-hceb46e0_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.7-hb78ec9c_6.conda
+      - pypi: https://files.pythonhosted.org/packages/b2/d6/de0cc74f8d36976aeca0dd2e9cbf711882ff8e177495115fd82459afdc4d/mercantile-1.2.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/8a/ba/e9a23efc6a8ffe6b2340c9f1040cd26a730754c75a58061c9302c66156fa/rio_mucho-1.0.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/99/5b/53107a991279957763ff877d3228ac9268d3e301a2572114424403016a1f/rio_rgbify-0.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/06/a2/c01db32be2ae7d6a1689972f3c492b149ee4e164b12fdfd9f64b50888215/types_pyyaml-6.0.12.20260518-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1c/bc/b139710a3b6018f7fb2b9508b35c8af564e61bf2bf4fa619d088f3e16f85/types_requests-2.33.0.20260518-py3-none-any.whl
       - pypi: .
@@ -1336,6 +1339,9 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-1.3.2-hbb4bfdb_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h8bce59a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-h3eecb57_6.conda
+      - pypi: https://files.pythonhosted.org/packages/b2/d6/de0cc74f8d36976aeca0dd2e9cbf711882ff8e177495115fd82459afdc4d/mercantile-1.2.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/8a/ba/e9a23efc6a8ffe6b2340c9f1040cd26a730754c75a58061c9302c66156fa/rio_mucho-1.0.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/99/5b/53107a991279957763ff877d3228ac9268d3e301a2572114424403016a1f/rio_rgbify-0.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/06/a2/c01db32be2ae7d6a1689972f3c492b149ee4e164b12fdfd9f64b50888215/types_pyyaml-6.0.12.20260518-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1c/bc/b139710a3b6018f7fb2b9508b35c8af564e61bf2bf4fa619d088f3e16f85/types_requests-2.33.0.20260518-py3-none-any.whl
       - pypi: .
@@ -1618,6 +1624,9 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.2-h8088a28_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-ng-2.3.3-hed4e4f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-hbf9d68e_6.conda
+      - pypi: https://files.pythonhosted.org/packages/b2/d6/de0cc74f8d36976aeca0dd2e9cbf711882ff8e177495115fd82459afdc4d/mercantile-1.2.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/8a/ba/e9a23efc6a8ffe6b2340c9f1040cd26a730754c75a58061c9302c66156fa/rio_mucho-1.0.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/99/5b/53107a991279957763ff877d3228ac9268d3e301a2572114424403016a1f/rio_rgbify-0.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/06/a2/c01db32be2ae7d6a1689972f3c492b149ee4e164b12fdfd9f64b50888215/types_pyyaml-6.0.12.20260518-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1c/bc/b139710a3b6018f7fb2b9508b35c8af564e61bf2bf4fa619d088f3e16f85/types_requests-2.33.0.20260518-py3-none-any.whl
       - pypi: .
@@ -8055,7 +8064,7 @@ packages:
 - pypi: .
   name: manfredonia-map
   version: 0.0.1
-  sha256: 485bc8c14747cbe010abe5e5bd771c517eb3b8f5931cbc619fd2e736cd1d2923
+  sha256: 29cbb24c762f84e0f489954ea0ef494402471c7415236b620dce243460b99c34
   requires_dist:
   - geopandas>=0.14
   - pyogrio>=0.7
@@ -8243,6 +8252,15 @@ packages:
   - pkg:pypi/matplotlib?source=hash-mapping
   size: 8191891
   timestamp: 1777001043842
+- pypi: https://files.pythonhosted.org/packages/b2/d6/de0cc74f8d36976aeca0dd2e9cbf711882ff8e177495115fd82459afdc4d/mercantile-1.2.1-py3-none-any.whl
+  name: mercantile
+  version: 1.2.1
+  sha256: 30f457a73ee88261aab787b7069d85961a5703bb09dc57a170190bc042cd023f
+  requires_dist:
+  - click>=3.0
+  - check-manifest ; extra == 'dev'
+  - hypothesis ; extra == 'test'
+  - pytest ; extra == 'test'
 - conda: https://conda.anaconda.org/conda-forge/linux-64/minizip-4.2.1-hb71707f_0.conda
   sha256: 41558b95a387ce2374260aa034a99c3a88cbb98e1a56510f4fa6839063de867b
   md5: fe7b4ff5792fee512aad843294ea809a
@@ -10440,6 +10458,37 @@ packages:
   - pkg:pypi/rio-cogeo?source=hash-mapping
   size: 25612
   timestamp: 1774605718958
+- pypi: https://files.pythonhosted.org/packages/8a/ba/e9a23efc6a8ffe6b2340c9f1040cd26a730754c75a58061c9302c66156fa/rio_mucho-1.0.0-py3-none-any.whl
+  name: rio-mucho
+  version: 1.0.0
+  sha256: 4677aca0613b35b1eb6dcdf314eafc23b707c42e54e9af89a87c86df5ae1ba6c
+  requires_dist:
+  - numpy
+  - rasterio~=1.0
+  - pytest ; extra == 'test'
+  - pytest-cov ; extra == 'test'
+  - coveralls ; extra == 'test'
+- pypi: https://files.pythonhosted.org/packages/99/5b/53107a991279957763ff877d3228ac9268d3e301a2572114424403016a1f/rio_rgbify-0.4.0-py3-none-any.whl
+  name: rio-rgbify
+  version: 0.4.0
+  sha256: d8316188fe377b75a7c1fbfbc46937735a3d72d8bfb1a0e0e338d6ce874bf657
+  requires_dist:
+  - click
+  - rasterio~=1.0
+  - rio-mucho
+  - pillow
+  - mercantile
+  - pytest ; extra == 'dev'
+  - pytest-cov ; extra == 'dev'
+  - codecov ; extra == 'dev'
+  - hypothesis ; extra == 'dev'
+  - raster-tester ; extra == 'dev'
+  - pre-commit ; extra == 'dev'
+  - pytest ; extra == 'test'
+  - pytest-cov ; extra == 'test'
+  - codecov ; extra == 'test'
+  - hypothesis ; extra == 'test'
+  - raster-tester ; extra == 'test'
 - conda: https://conda.anaconda.org/conda-forge/noarch/rio-vrt-0.3.1-pyhd8ed1ab_1.conda
   sha256: 921d562e4f1103907cba0320db2905803c9c398532be2ff80e9e65658c9327f8
   md5: d2bf9b603975ac8c81ae049392852468

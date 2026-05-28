@@ -1,23 +1,54 @@
 # Basemap options surfaced in the web app's basemap switcher.
-# See SPECIFICATIONS.md §14.
+# See SPECIFICATIONS.md §14 and plans/10_3d_basemap.md.
+#
+# `pitch`                - applied via `map.setPitch()` when this basemap is selected.
+# `terrain`              - turn on Mapbox's built-in global DEM terrain.
+# `terrain_url`          - custom raster-dem tileset (e.g. our LIDAR-derived one);
+#                          takes precedence over `terrain`.
+# `terrain_exaggeration` - vertical scale for `setTerrain`. Defaults to 1.3.
 
 version: 1
 
 basemaps:
 
-  - id: dark
-    name_it: "Scuro"
-    style_url: "mapbox://styles/mapbox/dark-v11"
+  - id: standard_3d
+    name_it: "Standard 3D"
+    style_url: "mapbox://styles/mapbox/standard"
+    pitch: 65
+    # Mapbox global Terrain-DEM v1 (30 m). We tried a custom 10 m LIDAR
+    # DEM (marconasuto.manfredonia-terrain-rgb-v3) but a tiny AOI-clipped
+    # raster-dem tileset fights Mapbox's global tile pyramid (404s + 0-m
+    # reads). The global DEM renders the Gargano relief reliably; 30 vs
+    # 10 m is imperceptible at city-scale 3D. See plans/10_3d_basemap.md.
+    terrain: true
+    terrain_exaggeration: 1.6
     default: true
 
-  - id: light
-    name_it: "Chiaro"
-    style_url: "mapbox://styles/mapbox/light-v11"
+  - id: satellite_3d
+    name_it: "Satellite 3D"
+    style_url: "mapbox://styles/mapbox/satellite-streets-v12"
+    pitch: 65
+    terrain: true
+    terrain_exaggeration: 1.6
 
   - id: outdoors
     name_it: "Outdoor (rilievo)"
     style_url: "mapbox://styles/mapbox/outdoors-v12"
+    pitch: 45
+    terrain: true
+    terrain_exaggeration: 2.0
 
-  - id: satellite
-    name_it: "Satellite"
+  - id: satellite_flat
+    name_it: "Satellite (piatto)"
     style_url: "mapbox://styles/mapbox/satellite-v9"
+    pitch: 0
+
+  - id: dark
+    name_it: "Scuro"
+    style_url: "mapbox://styles/mapbox/dark-v11"
+    pitch: 0
+
+  - id: light
+    name_it: "Chiaro"
+    style_url: "mapbox://styles/mapbox/light-v11"
+    pitch: 0

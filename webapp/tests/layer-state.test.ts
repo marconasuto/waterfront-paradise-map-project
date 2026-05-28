@@ -70,11 +70,11 @@ describe("extractManfredoniaLayerIds", () => {
 });
 
 describe("defaultLayerState + reconcileLayerState", () => {
-  it("defaults to visible + opacity 1", () => {
+  it("defaults to visible + opacity 0.5", () => {
     const s = defaultLayerState(["a", "b"]);
     expect(s).toEqual([
-      { layerId: "a", visible: true, opacity: 1 },
-      { layerId: "b", visible: true, opacity: 1 },
+      { layerId: "a", visible: true, opacity: 0.5 },
+      { layerId: "b", visible: true, opacity: 0.5 },
     ]);
   });
 
@@ -86,7 +86,7 @@ describe("defaultLayerState + reconcileLayerState", () => {
     const next = reconcileLayerState(["a", "b"], stored);
     expect(next).toEqual([
       { layerId: "a", visible: false, opacity: 0.5 },
-      { layerId: "b", visible: true, opacity: 1 },
+      { layerId: "b", visible: true, opacity: 0.5 },
     ]);
   });
 
@@ -100,7 +100,7 @@ describe("defaultLayerState + reconcileLayerState", () => {
 
   it("falls back to defaults when stored is null", () => {
     expect(reconcileLayerState(["a"], null)).toEqual([
-      { layerId: "a", visible: true, opacity: 1 },
+      { layerId: "a", visible: true, opacity: 0.5 },
     ]);
   });
 });
@@ -122,13 +122,13 @@ describe("save / loadLayerState", () => {
   });
 
   it("returns null on malformed JSON", () => {
-    storage.setItem("manfredonia-map:layer-state:v1", "{not-json");
+    storage.setItem("manfredonia-map:layer-state:v2", "{not-json");
     expect(loadLayerState(storage)).toBeNull();
   });
 
   it("ignores entries with the wrong shape", () => {
     storage.setItem(
-      "manfredonia-map:layer-state:v1",
+      "manfredonia-map:layer-state:v2",
       JSON.stringify([
         { layerId: "ok", visible: true, opacity: 0.5 },
         { layerId: 42 }, // wrong shape
@@ -199,6 +199,35 @@ describe("applyLayerOrder", () => {
       "manfredonia-a",
       "manfredonia-b",
     ]);
+  });
+
+  it("skips moveLayer for slotted layers (Standard 3D contract)", () => {
+    // Standard's slots own positioning. Calling moveLayer on a slotted
+    // layer either no-ops or kicks the layer out of its slot — both of
+    // which silently break later visibility toggles. So we never call it.
+    const moveLayer = vi.fn();
+    const map = {
+      getLayer: (id: string) => ({ id, slot: "middle" }),
+      moveLayer,
+    } as never;
+    applyLayerOrder(map, [
+      { layerId: "manfredonia-a", visible: true, opacity: 1 },
+      { layerId: "manfredonia-b", visible: true, opacity: 1 },
+    ]);
+    expect(moveLayer).not.toHaveBeenCalled();
+  });
+
+  it("still moves non-slotted layers (legacy basemaps without slots)", () => {
+    const moveLayer = vi.fn();
+    const map = {
+      getLayer: (id: string) => ({ id }),
+      moveLayer,
+    } as never;
+    applyLayerOrder(map, [
+      { layerId: "manfredonia-a", visible: true, opacity: 1 },
+      { layerId: "manfredonia-b", visible: true, opacity: 1 },
+    ]);
+    expect(moveLayer).toHaveBeenCalledTimes(2);
   });
 
   it("swallows moveLayer errors so style.load races don't crash", () => {

@@ -280,6 +280,9 @@ process = "mfd-map process all"
 publish = "mfd-map publish all"
 all = { depends-on = ["lint", "typecheck", "test-cov"] }
 
+[dependency-groups]
+dev = ["rio-rgbify>=0.4.0,<0.5"]
+
 # --- web (Phase 6) ---
 # Frontend tasks live under the `web` env so they don't pollute the
 # default Python env. Run with `pixi run -e web <task>` or use the

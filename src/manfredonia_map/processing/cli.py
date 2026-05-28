@@ -8,7 +8,7 @@ from pathlib import Path
 import click
 
 from manfredonia_map.paths import CONFIG_DIR, DATA_INTERIM, DATA_PROCESSED
-from manfredonia_map.processing import base, hillshade, mandatory, normalize, raster
+from manfredonia_map.processing import base, hillshade, mandatory, normalize, raster, terrain_rgb
 
 logger = logging.getLogger(__name__)
 
@@ -287,3 +287,59 @@ def process_hillshade_cmd(
         z_factor=z_factor,
     )
     click.echo(f"Wrote {out}  (8-bit hillshade COG)")
+
+
+@process.command(name="terrain-rgb")
+@click.option(
+    "--aoi",
+    "aoi_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=CONFIG_DIR / "aoi.geojson",
+    show_default=True,
+    help="AOI polygon to clip against (default = ``aoi.geojson`` alias).",
+)
+@click.option(
+    "--out",
+    "out_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help="Output COG path (default = data/processed/terrain_rgb.tif).",
+)
+@click.option(
+    "--exaggeration",
+    type=float,
+    default=1.0,
+    show_default=True,
+    help="Vertical exaggeration baked into the encoded DEM.",
+)
+def process_terrain_rgb_cmd(
+    aoi_path: Path,
+    out_path: Path | None,
+    exaggeration: float,
+) -> None:
+    """Build a Mapbox Terrain-RGB COG from the LIDAR DTM + EMODnet bathymetry.
+
+    Upload the resulting file via ``mfd-map publish raster-tileset`` and
+    wire it into the webapp via ``map.setTerrain()`` — see
+    ``plans/10_3d_basemap.md`` for the runtime snippet.
+    """
+    spec = terrain_rgb.DEFAULT_SPEC
+    if out_path is not None:
+        spec = terrain_rgb.TerrainRgbSpec(
+            dtm_zip=spec.dtm_zip,
+            dtm_inner_filename=spec.dtm_inner_filename,
+            bathy_dir=spec.bathy_dir,
+            out_path=out_path,
+            exaggeration=exaggeration,
+        )
+    elif exaggeration != 1.0:
+        spec = terrain_rgb.TerrainRgbSpec(
+            dtm_zip=spec.dtm_zip,
+            dtm_inner_filename=spec.dtm_inner_filename,
+            bathy_dir=spec.bathy_dir,
+            out_path=spec.out_path,
+            exaggeration=exaggeration,
+        )
+    aoi = base.read_aoi_polygon(aoi_path)
+    out = terrain_rgb.build_terrain_rgb(spec, aoi=aoi)
+    click.echo(f"Wrote {out}  (Mapbox Terrain-RGB COG)")
