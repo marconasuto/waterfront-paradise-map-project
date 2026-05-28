@@ -17,7 +17,9 @@ import type { HighlightsConfig } from "../src/types";
  * Adriatic again.
  */
 
-const CONFIG_PATH = resolve(process.cwd(), "public/highlights.yaml");
+// Read the canonical source (config/), not the gitignored public/ copy
+// that's only generated at dev/build time — CI runs tests before the build.
+const CONFIG_PATH = resolve(process.cwd(), "../config/highlights.yaml");
 
 const CFG = parseYaml(readFileSync(CONFIG_PATH, "utf-8")) as HighlightsConfig;
 

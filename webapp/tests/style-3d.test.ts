@@ -19,8 +19,10 @@ import type { BasemapsConfig, MapboxStyle } from "../src/types";
  * without throwing — a UI-only failure that's easy to miss.
  */
 
-const BASEMAPS_PATH = resolve(process.cwd(), "public/basemaps.yaml");
-const STYLE_PATH = resolve(process.cwd(), "public/style.json");
+// Canonical sources (tracked in git), not the gitignored public/ copies
+// that are only generated at dev/build time — CI runs tests pre-build.
+const BASEMAPS_PATH = resolve(process.cwd(), "../config/basemaps.yaml");
+const STYLE_PATH = resolve(process.cwd(), "../data/processed/style.json");
 
 const BASEMAPS = parseYaml(readFileSync(BASEMAPS_PATH, "utf-8")) as BasemapsConfig;
 const STYLE = JSON.parse(readFileSync(STYLE_PATH, "utf-8")) as MapboxStyle;
