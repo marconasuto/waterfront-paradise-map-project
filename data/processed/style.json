@@ -14,34 +14,38 @@
     },
     {
       "id": "manfredonia-emodnet_bathymetry",
+      "slot": "middle",
       "paint": {
-        "raster-opacity": 0.7
+        "raster-opacity": 0.5
       },
       "source": "manfredonia-emodnet_bathymetry",
       "type": "raster"
     },
     {
       "id": "manfredonia-tinitaly_dtm",
+      "slot": "middle",
       "paint": {
-        "raster-opacity": 0.6
+        "raster-opacity": 0.5
       },
       "source": "manfredonia-tinitaly_dtm",
       "type": "raster"
     },
     {
       "id": "manfredonia-tinitaly_dtm_hillshade",
+      "slot": "middle",
       "paint": {
-        "raster-opacity": 0.4
+        "raster-opacity": 0.5
       },
       "source": "manfredonia-tinitaly_dtm_hillshade",
       "type": "raster"
     },
     {
       "id": "manfredonia-natura2000",
+      "slot": "middle",
       "paint": {
-        "fill-color": "#b9ee5e",
-        "fill-opacity": 0.25,
-        "fill-outline-color": "#b4e642"
+        "fill-color": "#dbeaca",
+        "fill-opacity": 1,
+        "fill-outline-color": "#c2ff89"
       },
       "source": "manfredonia-natura2000",
       "source-layer": "natura2000",
@@ -49,9 +53,10 @@
     },
     {
       "id": "manfredonia-wetlands",
+      "slot": "middle",
       "paint": {
-        "fill-color": "#679098",
-        "fill-opacity": 0.5,
+        "fill-color": "#6c9894",
+        "fill-opacity": 1,
         "fill-outline-color": "#719f91"
       },
       "source": "manfredonia-wetlands",
@@ -60,9 +65,10 @@
     },
     {
       "id": "manfredonia-industrial_areas",
+      "slot": "middle",
       "paint": {
         "fill-color": "#987892",
-        "fill-opacity": 0.4,
+        "fill-opacity": 1,
         "fill-outline-color": "#a87f93"
       },
       "source": "manfredonia-industrial_areas",
@@ -71,9 +77,10 @@
     },
     {
       "id": "manfredonia-sin_manfredonia",
+      "slot": "middle",
       "paint": {
         "fill-color": "#f43605",
-        "fill-opacity": 0.45,
+        "fill-opacity": 1,
         "fill-outline-color": "#e32d2a"
       },
       "source": "manfredonia-sin_manfredonia",
@@ -82,9 +89,10 @@
     },
     {
       "id": "manfredonia-harbours",
+      "slot": "middle",
       "paint": {
         "fill-color": "#887191",
-        "fill-opacity": 0.5,
+        "fill-opacity": 1,
         "fill-outline-color": "#c88d94"
       },
       "source": "manfredonia-harbours",
@@ -93,9 +101,10 @@
     },
     {
       "id": "manfredonia-beaches",
+      "slot": "middle",
       "paint": {
-        "fill-color": "#fffd8d",
-        "fill-opacity": 0.6,
+        "fill-color": "#fffee0",
+        "fill-opacity": 1,
         "fill-outline-color": "#fdfa72"
       },
       "source": "manfredonia-beaches",
@@ -104,9 +113,11 @@
     },
     {
       "id": "manfredonia-admin_boundaries",
+      "slot": "middle",
       "paint": {
         "line-color": "#c88d94",
-        "line-width": 1.2
+        "line-width": 1.2,
+        "line-opacity": 1
       },
       "source": "manfredonia-admin_boundaries",
       "source-layer": "admin_boundaries",
@@ -114,9 +125,11 @@
     },
     {
       "id": "manfredonia-hydrography_surface",
+      "slot": "middle",
       "paint": {
         "line-color": "#00aeff",
-        "line-width": 1.0
+        "line-width": 1.0,
+        "line-opacity": 1
       },
       "source": "manfredonia-hydrography_surface",
       "source-layer": "hydrography_surface",
@@ -124,19 +137,47 @@
     },
     {
       "id": "manfredonia-roads",
+      "slot": "middle",
       "paint": {
-        "line-color": "#fffdaf",
-        "line-width": 0.8
+        "line-color": "#fffee0",
+        "line-width": 0.8,
+        "line-opacity": 1
       },
       "source": "manfredonia-roads",
       "source-layer": "roads",
       "type": "line"
     },
     {
-      "id": "manfredonia-coastline",
+      "id": "manfredonia-coastline_buffer",
+      "slot": "middle",
       "paint": {
-        "line-color": "#00aeff",
-        "line-width": 1.6
+        "line-color": "#000f5c",
+        "line-opacity": 0.5,
+        "line-blur": 1.5,
+        "line-width": [
+          "interpolate",
+          ["exponential", 2],
+          ["zoom"],
+          8, 0.22,
+          10, 0.88,
+          12, 3.5,
+          14, 14,
+          16, 56,
+          18, 224,
+          20, 896
+        ]
+      },
+      "source": "manfredonia-coastline",
+      "source-layer": "coastline",
+      "type": "line"
+    },
+    {
+      "id": "manfredonia-coastline",
+      "slot": "middle",
+      "paint": {
+        "line-color": "#c2ff89",
+        "line-width": 1.8,
+        "line-opacity": 1
       },
       "source": "manfredonia-coastline",
       "source-layer": "coastline",
@@ -144,11 +185,14 @@
     },
     {
       "id": "manfredonia-archeological_areas",
+      "slot": "middle",
       "paint": {
         "circle-color": "#b0054b",
         "circle-radius": 5,
         "circle-stroke-color": "#d12339",
-        "circle-stroke-width": 1.5
+        "circle-stroke-width": 1.5,
+        "circle-opacity": 1,
+        "circle-stroke-opacity": 1
       },
       "source": "manfredonia-archeological_areas",
       "source-layer": "archeological_areas",

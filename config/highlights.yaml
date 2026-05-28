@@ -1,49 +1,55 @@
 # Editable list of highlighted locations.
-# Coordinates are EPSG:4326 [lon, lat]. Refined as Phase 3 acquisition
-# resolves authoritative perimeters. See SPECIFICATIONS.md §11 + §13.
+# Coordinates are EPSG:4326 [lon, lat]. Refined 2026-05-27 from authoritative
+# OSM / regional GeoJSON centroids — see SPECIFICATIONS.md §11 + §13.
 
 version: 1
 
 highlights:
 
+  # Grotta Scaloria — feature centroid from osm_archaeology / archeological_areas.geojson
   - id: grotta_scaloria
     name_it: "Grotta Scaloria"
     category: archeological
-    coord: [15.907, 41.648]   # near Palazzetto dello Sport (Contrada Scaloria)
+    coord: [15.9059, 41.6403]
     style_token: archeological
     content_ref: locations/grotta_scaloria.md
 
+  # Sorgente Acqua di Cristo — rocky beach on Viale Miramare, north of the harbour
   - id: acqua_di_cristo
     name_it: "Acqua di Cristo"
     category: beach
-    coord: [15.9238, 41.6307]
+    coord: [15.9140, 41.6380]
     style_token: beach
     content_ref: locations/acqua_di_cristo.md
 
+  # Lago Salso — centroid of main wetland polygon (Q949581)
   - id: lago_salso
     name_it: "Lago Salso"
     category: wetland
-    coord: [15.920, 41.610]
+    coord: [15.8714, 41.5550]
     style_token: wetland
     content_ref: locations/lago_salso.md
 
+  # Oasi Laguna del Re — Palude Frattarolo centroid (same wetland complex)
   - id: oasi_laguna_del_re
     name_it: "Oasi Laguna del Re"
     category: wetland
-    coord: [15.960, 41.590]   # approximate; refine after Phase 3
+    coord: [15.8623, 41.5682]
     style_token: wetland
     content_ref: locations/oasi_laguna_del_re.md
 
+  # SIN Manfredonia (ex Enichem) — centroid of southern industrial polygon (Macchia)
   - id: sin_manfredonia
     name_it: "SIN Manfredonia (ex Enichem)"
     category: industrial
-    coord: [15.940, 41.590]
+    coord: [15.8738, 41.6008]
     style_token: sin
     content_ref: locations/sin_manfredonia.md
 
+  # Porto di Manfredonia — centroid of the main harbour cluster
   - id: porto_manfredonia
     name_it: "Porto di Manfredonia"
     category: harbour
-    coord: [15.920, 41.628]
+    coord: [15.9220, 41.6280]
     style_token: harbour
     content_ref: locations/porto_manfredonia.md

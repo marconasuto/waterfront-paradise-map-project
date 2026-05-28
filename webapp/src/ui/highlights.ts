@@ -3,6 +3,8 @@ import mapboxgl, { Map as MapboxMap, Marker, Popup } from "mapbox-gl";
 import { loadContent } from "../content/loader";
 import type { HighlightEntry, Palette } from "../types";
 
+import { MARKER_ICON_PATHS, iconForCategory } from "./icons/marker-icons";
+
 export interface HighlightOptions {
   highlights: HighlightEntry[];
   palette: Palette;
@@ -13,18 +15,19 @@ export interface HighlightOptions {
 const PLACEHOLDER_HTML = "<p><em>Contenuto in arrivo.</em></p>";
 
 /**
- * Drop an `mapboxgl.Marker` for each highlight, colored from the
- * palette via `style_token`. Clicks open a popup with the title, a
- * category badge, and an asynchronously-loaded markdown body.
+ * Drop a custom `mapboxgl.Marker` for each highlight. Each marker is a
+ * tinted Phosphor icon picked by `category` (cf. `iconForCategory`).
+ * Clicks open a popup with the title, a category badge, and an
+ * asynchronously-loaded markdown body.
  */
 export function attachHighlights(map: MapboxMap, opts: HighlightOptions): Marker[] {
   const markers: Marker[] = [];
   for (const h of opts.highlights) {
-    const color = opts.palette[h.style_token]?.fill ?? "#f8d030";
-    const popup = new mapboxgl.Popup({ offset: 24, maxWidth: "320px" }).setHTML(
+    const popup = new mapboxgl.Popup({ offset: 30, maxWidth: "320px" }).setHTML(
       placeholderPopup(h),
     );
-    const marker = new mapboxgl.Marker({ color, anchor: "bottom" })
+    const element = renderMarkerElement(h);
+    const marker = new mapboxgl.Marker({ element, anchor: "bottom" })
       .setLngLat(h.coord)
       .setPopup(popup)
       .addTo(map);
@@ -32,6 +35,45 @@ export function attachHighlights(map: MapboxMap, opts: HighlightOptions): Marker
     markers.push(marker);
   }
   return markers;
+}
+
+/**
+ * Build the DOM node Mapbox mounts as a marker. A button so it's
+ * keyboard-focusable; the actual click → popup wiring is owned by
+ * Mapbox via `setPopup()`.
+ */
+export function renderMarkerElement(h: HighlightEntry): HTMLElement {
+  const root = document.createElement("button");
+  root.type = "button";
+  root.className = "highlight-marker";
+  root.dataset["category"] = h.category;
+  root.dataset["styleToken"] = h.style_token;
+  root.setAttribute("aria-label", `${h.name_it} (${h.category})`);
+  root.innerHTML = renderMarkerSvg(h.category);
+  return root;
+}
+
+/**
+ * Inline SVG for a marker. Glyph stroke uses `currentColor` so CSS can
+ * recolor it. The marker pin (bottom point) is part of the SVG so the
+ * `anchor: "bottom"` Mapbox option lines up with the geographic point.
+ */
+export function renderMarkerSvg(category: string): string {
+  const iconName = iconForCategory(category);
+  const innerPath = MARKER_ICON_PATHS[iconName];
+  return (
+    '<svg class="highlight-marker__svg" viewBox="0 0 256 320" width="44" height="55" ' +
+    'aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">' +
+    // Backdrop: tear-drop pin shape, filled with the brand cyan at 50% alpha.
+    '<path class="highlight-marker__backdrop" d="M128 8c66.3 0 120 53.7 120 120 0 90-120 184-120 184S8 218 8 128C8 61.7 61.7 8 128 8z" />' +
+    // Inner translucent disc for legibility on busy basemaps.
+    '<circle class="highlight-marker__inner" cx="128" cy="128" r="92" />' +
+    // Glyph: nested SVG keeps the icon's 0-256 viewBox intact.
+    '<svg x="64" y="64" width="128" height="128" viewBox="0 0 256 256" class="highlight-marker__glyph">' +
+    innerPath +
+    "</svg>" +
+    "</svg>"
+  );
 }
 
 /**
